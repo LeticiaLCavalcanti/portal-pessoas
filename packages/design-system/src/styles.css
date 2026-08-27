@@ -1,0 +1,239 @@
+/* ============================================================================
+ * Camada de estilo do Design System do portal (L1 + L2).
+ *
+ * Ela consome EXCLUSIVAMENTE os aliases de @portal/tokens, que por sua vez são
+ * repasses do Itaú Design System. Nenhum valor de cor, raio ou tipografia
+ * nasce neste arquivo — se algo faltar, a resposta certa é abrir RFC no IDS,
+ * não criar uma exceção local.
+ *
+ * Sem regras de elemento global (nada de `button { }`): o portal convive com
+ * iframes de legado e CSS de terceiros, e vazamento global é proibido.
+ * ========================================================================= */
+@import '@portal/tokens/tokens.css';
+
+.ds-btn {
+  font: var(--ts-label-bold);
+  /* Rótulo de botão não quebra linha: "Registrar ponto" partido em duas
+     linhas parece defeito, e o botão vira um alvo de toque de formato
+     imprevisível. Quem se ajusta é o layout em volta. */
+  white-space: nowrap;
+  border-radius: var(--radius-button);
+  border: var(--ids_size_border_small) solid transparent;
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  transition: background-color var(--motion-fast) var(--motion-ease),
+              border-color var(--motion-fast) var(--motion-ease);
+}
+.ds-btn:focus-visible { outline: var(--ids_size_border_medium) solid var(--c-accent-text); outline-offset: 2px; }
+.ds-btn:disabled { background: var(--c-disabled-bg); color: var(--c-disabled-fg); cursor: not-allowed; border-color: transparent; }
+.ds-btn--primary { background: var(--c-accent-bg); color: var(--c-accent-fg); }
+.ds-btn--primary:hover:not(:disabled) { background: var(--c-accent-bg-hover); }
+.ds-btn--secondary { background: transparent; color: var(--c-accent-text); border-color: var(--c-accent-text); }
+.ds-btn--secondary:hover:not(:disabled) { background: var(--c-accent-subtle); }
+/* Ghost muda o PREENCHIMENTO, não a caixa.
+   Ele redefinia `padding` e `border-radius`, então um ghost ao lado de um
+   primary ficava mais estreito (8px contra 8px/16px) e menos arredondado
+   (8px contra 12px) — dava para ver a diferença na barra de abas, em que os
+   botões mudavam de largura e de canto ao trocar de aba. Variante é fill,
+   nunca geometria: caixa igual, ênfase diferente. */
+.ds-btn--ghost { background: transparent; color: var(--c-fg-muted); }
+.ds-btn--ghost:hover:not(:disabled) { background: var(--c-bg-sunken); color: var(--c-fg-default); }
+
+/* Selo dentro de botão (o contador em "Avisos") não pode esticar a linha:
+   sem isto o botão de avisos ficava 2px mais alto que o de tema, ao lado. */
+.ds-btn .ds-badge { line-height: 1; padding-block: 2px; }
+
+/* ---------------------------------------------------------------------------
+ * Abas — L2.
+ *
+ * Existem porque aba NÃO é botão de ação. A jornada de ponto usava
+ * `<Button variant="primary">` na aba ativa, o que colocava dois elementos
+ * laranja sólidos idênticos na mesma tela — "Justificar ausência" (uma aba,
+ * que troca de conteúdo) e "Enviar justificativa" (a ação, que grava algo).
+ * Mesma aparência, consequências completamente diferentes.
+ *
+ * O padrão aqui é o mesmo do item ativo do menu lateral: sublinhado e cor de
+ * acento, sem preenchimento. Fica claro que a aba navega, e o único elemento
+ * sólido da tela volta a ser a ação principal.
+ * ------------------------------------------------------------------------- */
+.ds-tabs {
+  display: flex; flex-wrap: wrap; gap: var(--space-1);
+  border-bottom: var(--ids_size_border_small) solid var(--c-border-default);
+}
+.ds-tab {
+  font: var(--ts-body-sm); color: var(--c-fg-muted);
+  background: none; border: 0; cursor: pointer; white-space: nowrap;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 3px solid transparent;
+  margin-bottom: calc(var(--ids_size_border_small) * -1);
+  transition: color var(--motion-fast) var(--motion-ease),
+              border-color var(--motion-fast) var(--motion-ease);
+}
+.ds-tab:hover { color: var(--c-fg-default); }
+.ds-tab.is-active {
+  color: var(--c-accent-text); font: var(--ts-body-sm-bold);
+  border-bottom-color: var(--c-accent-bg);
+}
+.ds-tab:focus-visible {
+  outline: var(--ids_size_border_medium) solid var(--c-accent-text);
+  outline-offset: -2px; border-radius: var(--radius-sm);
+}
+
+.ds-card {
+  background: var(--c-bg-surface);
+  border: var(--ids_size_border_small) solid var(--c-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-card);
+  /* Coluna flex para o rodapé poder ser empurrado até a base. Numa grade o
+     card já recebe a altura da fileira (`align-items: stretch` é o padrão do
+     grid), então é essa altura que o `margin-top: auto` abaixo consome. */
+  display: flex; flex-direction: column;
+}
+
+/* `margin-top: auto` come todo o espaço sobrando acima: a ação encosta na base
+   do card por mais curto que seja o texto. O `padding-top` garante respiro
+   quando o conteúdo é longo e não sobra espaço nenhum. */
+.ds-card__footer {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center;
+}
+.ds-card__title { font: var(--ts-section-bold); color: var(--c-fg-default); margin: 0 0 var(--space-1); }
+.ds-card__hint { font: var(--ts-body-sm); color: var(--c-fg-muted); margin: 0 0 var(--space-4); }
+
+.ds-stack { display: flex; flex-direction: column; }
+.ds-row { display: flex; align-items: center; }
+
+.ds-text { font: var(--ts-body); color: var(--c-fg-default); margin: 0; }
+.ds-text--muted { color: var(--c-fg-muted); }
+.ds-text--subtle { color: var(--c-fg-subtle); }
+.ds-text--xs { font: var(--ts-caption); }
+.ds-text--sm { font: var(--ts-body-sm); }
+.ds-text--md { font: var(--ts-body); }
+.ds-text--lg { font: var(--ts-section); }
+.ds-text--xl { font: var(--ts-title); }
+.ds-text--xxl { font: var(--ts-display); }
+.ds-text--mono { font-family: var(--font-mono); }
+
+.ds-badge {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  font: var(--ts-caption-bold); line-height: 1;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--c-bg-sunken); color: var(--c-fg-muted);
+}
+.ds-badge--accent { background: var(--c-accent-subtle); color: var(--c-accent-text); }
+.ds-badge--warn { background: var(--c-warn-bg); color: var(--c-warn-text); }
+.ds-badge--danger { background: var(--c-danger-bg); color: var(--c-danger-text); }
+.ds-badge--success { background: var(--c-success-bg); color: var(--c-success-text); }
+
+.ds-field { display: flex; flex-direction: column; gap: var(--space-1); }
+.ds-field__label { font: var(--ts-body-sm); color: var(--c-fg-muted); }
+.ds-input {
+  font: var(--ts-body); color: var(--c-fg-default);
+  background: var(--c-bg-surface);
+  border: var(--ids_size_border_small) solid var(--c-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3); width: 100%;
+}
+.ds-input::placeholder { color: var(--c-fg-subtle); }
+.ds-input:focus-visible { outline: var(--ids_size_border_medium) solid var(--c-accent-bg); outline-offset: 1px; border-color: transparent; }
+
+.ds-skeleton {
+  background: linear-gradient(90deg, var(--c-bg-sunken) 25%, var(--c-border-default) 50%, var(--c-bg-sunken) 75%);
+  background-size: 200% 100%;
+  animation: ds-shimmer 1.2s infinite linear;
+  border-radius: var(--radius-md);
+}
+@keyframes ds-shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .ds-skeleton { animation: none; } }
+
+.ds-empty { text-align: center; padding: var(--space-7) var(--space-4); }
+.ds-empty__mark { font-family: var(--font-mono); color: var(--c-fg-subtle); font-size: 1.5rem; }
+
+.ds-list { list-style: none; margin: 0; padding: 0; }
+.ds-list__item {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: var(--ids_size_border_small) solid var(--c-border-default);
+}
+.ds-list__item:last-child { border-bottom: none; }
+
+/* ---------------------------------------------------------------------------
+ * Layout de grade e tabela -- L2.
+ *
+ * Estao no DS, e nao no shell, porque as JORNADAS precisam deles. Enquanto
+ * `.pp-grid` morava so em apps/shell/src/styles.css, uma jornada que o usasse
+ * ficava dependendo de uma classe do host: funcionava dentro do portal e
+ * quebrava no harness isolado da squad. Prefixo `ds-` = contrato publico.
+ * ------------------------------------------------------------------------- */
+.ds-grid {
+  display: grid; gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* `overflow-x` no proprio bloco: tabela larga rola dentro do card e nao
+   empurra o layout do portal inteiro para o lado no celular. */
+.ds-table-wrap { overflow-x: auto; }
+.ds-table { width: 100%; border-collapse: collapse; font: var(--ts-body-sm); }
+.ds-table th, .ds-table td {
+  text-align: left; padding: var(--space-2) var(--space-3);
+  border-bottom: var(--ids_size_border_small) solid var(--c-border-default);
+  white-space: nowrap;
+}
+.ds-table th { color: var(--c-fg-muted); font: var(--ts-caption-bold); }
+.ds-table tbody tr:last-child td { border-bottom: none; }
+
+/* ---------------------------------------------------------------------------
+ * Iconografia — L1.
+ *
+ * `currentColor` no traço é o que faz o ícone acompanhar tema, estado ativo e
+ * a barra azul de marca sem uma regra por contexto. `flex: none` evita que o
+ * ícone seja esmagado quando o rótulo ao lado é longo.
+ * ------------------------------------------------------------------------- */
+.ds-icon { flex: none; display: block; }
+
+/* Fallback de ícone desconhecido: a marca crua do manifesto, em mono, para
+   ficar evidente que aquele item precisa de correção no registro. */
+.ds-icon--raw {
+  display: inline-grid; place-items: center;
+  font-family: var(--font-mono); font-size: .68rem;
+  color: var(--c-fg-subtle);
+}
+
+/* ---------------------------------------------------------------------------
+ * Assinatura de marca — L2. Ver Brand.tsx sobre o ativo oficial.
+ * ------------------------------------------------------------------------- */
+.ds-brand {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  background: none; border: 0; padding: 0; color: inherit;
+  font: inherit; text-align: left;
+  /* `flex: none` é obrigatório: a marca divide a linha com a busca global, que
+     é `flex: 1`. Sem isto o flexbox encolhe a marca para caber o campo e o
+     nome do produto some sob a caixa de busca. */
+  flex: none;
+}
+button.ds-brand { cursor: pointer; }
+button.ds-brand:focus-visible {
+  outline: var(--ids_size_border_medium) solid var(--c-accent-bg);
+  outline-offset: 3px; border-radius: var(--radius-sm);
+}
+
+.ds-brand__symbol { flex: none; }
+.ds-brand__square { fill: var(--ids_color_bg_brand_secondary); }
+/* O nome da marca é tipografia, não imagem: dentro da rede ele assume a face
+   oficial do IDS sem que o layout mude, porque as métricas vêm dos tokens. */
+.ds-brand__word {
+  font: var(--ts-section-bold);
+  letter-spacing: -.01em;
+}
+
+/* Régua separando marca e produto — a hierarquia padrão de co-branding
+   interno: a marca é do banco, o produto é do time. */
+.ds-brand__rule {
+  width: var(--ids_size_border_small); height: 18px;
+  background: currentColor; opacity: .32; flex: none;
+}
+.ds-brand__product { font: var(--ts-body-sm); opacity: .92; white-space: nowrap; }

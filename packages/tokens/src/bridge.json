@@ -1,0 +1,116 @@
+{
+  "_comment": "PONTE ENTRE O IDS E O PORTAL. Cada token semântico do portal aponta para um token do IDS. `css` é o que vira custom property no web; `value` é o literal usado pelo React Native e pela sincronização com o Figma, porque RN não entende var(). Trocar o IDS de versão, ou rodar o portal sob outra marca (Personnalite, iti), é editar ESTE arquivo — nenhum componente muda.",
+
+  "spacing": {
+    "0": { "css": "0", "value": 0 },
+    "1": { "css": "var(--ids_spacing_1x)", "value": 4 },
+    "2": { "css": "var(--ids_spacing_2x)", "value": 8 },
+    "3": { "css": "var(--ids_spacing_3x)", "value": 12 },
+    "4": { "css": "var(--ids_spacing_4x)", "value": 16 },
+    "5": { "css": "var(--ids_spacing_6x)", "value": 24 },
+    "6": { "css": "var(--ids_spacing_8x)", "value": 32 },
+    "7": { "css": "var(--ids_spacing_12x)", "value": 48 },
+    "8": { "css": "var(--ids_size_general_64x)", "value": 64 }
+  },
+
+  "radius": {
+    "sm": { "css": "var(--ids_size_cornerRadius_tags_01)", "value": 4 },
+    "md": { "css": "var(--ids_size_cornerRadius_smallButton)", "value": 8 },
+    "button": { "css": "var(--ids_size_cornerRadius_button)", "value": 12 },
+    "lg": { "css": "var(--ids_size_cornerRadius_card_01)", "value": 16 },
+    "pill": { "css": "999px", "value": 999 }
+  },
+
+  "text": {
+    "xs": { "css": "var(--ids_textStyle_caption_regular)", "value": { "size": 12, "line": 18, "weight": "400" } },
+    "xs-bold": { "css": "var(--ids_textStyle_caption_bold)", "value": { "size": 12, "line": 18, "weight": "700" } },
+    "sm": { "css": "var(--ids_textStyle_body_02_regular)", "value": { "size": 14, "line": 20, "weight": "400" } },
+    "sm-bold": { "css": "var(--ids_textStyle_body_02_bold)", "value": { "size": 14, "line": 20, "weight": "700" } },
+    "md": { "css": "var(--ids_textStyle_body_01_regular)", "value": { "size": 16, "line": 24, "weight": "400" } },
+    "md-bold": { "css": "var(--ids_textStyle_body_01_bold)", "value": { "size": 16, "line": 24, "weight": "700" } },
+    "lg": { "css": "var(--ids_textStyle_label_large_regular)", "value": { "size": 20, "line": 26, "weight": "400" } },
+    "xl": { "css": "var(--ids_textStyle_title_01_base)", "value": { "size": 24, "line": 32, "weight": "700" } },
+    "xxl": { "css": "var(--ids_textStyle_f01_s32_h48_wbd)", "value": { "size": 32, "line": 48, "weight": "700" } },
+    "section": { "css": "var(--ids_textStyle_section_02)", "value": { "size": 16, "line": 24, "weight": "700" } }
+  },
+
+  "motion": {
+    "fast": { "css": "var(--ids_motion_time_fast_02)", "value": 150 },
+    "standard": { "css": "var(--ids_motion_time_moderate_01)", "value": 250 },
+    "easing": { "css": "var(--ids_motion_easing_effective_standard)", "value": "cubic-bezier(0.4, 0, 0.6, 1)" }
+  },
+
+  "color": {
+    "light": {
+      "bg-canvas": { "css": "var(--ids_color_bg_variant_01)", "value": "#F1F2F4" },
+      "bg-surface": { "css": "var(--ids_color_bg_base)", "value": "#FFFFFF" },
+      "bg-sunken": { "css": "var(--ids_color_bg_variant_02)", "value": "#E3E5E8" },
+      "bg-brand": { "css": "var(--ids_color_bg_brand_primary)", "value": "#000D3C" },
+      "fg-default": { "css": "var(--ids_color_text_body_01)", "value": "#000000" },
+      "fg-heading": { "css": "var(--ids_color_text_heading_01)", "value": "#000000" },
+      "fg-muted": { "css": "var(--ids_color_text_body_02)", "value": "#4C4C4C" },
+      "fg-subtle": { "css": "var(--ids_color_action_disabled_variant)", "value": "#999999" },
+      "fg-inverse": { "css": "var(--ids_color_contrast_onDark)", "value": "#FFFFFF" },
+      "fg-onbrand": { "css": "var(--ids_color_contrast_onBrand_primary)", "value": "#FFFFFF" },
+      "border-default": { "css": "var(--ids_color_border_soft)", "value": "#CFD1D3" },
+      "border-strong": { "css": "var(--ids_color_border_strong)", "value": "#5D636F" },
+      "accent-bg": { "css": "var(--ids_color_action_primary_base)", "value": "#FF6200" },
+      "accent-bg-hover": { "css": "var(--ids_color_action_primary_variant)", "value": "#E55800" },
+      "accent-fg": { "css": "var(--ids_color_action_primary_contrast)", "value": "#FFFFFF" },
+      "accent-subtle": { "css": "var(--ids_color_action_primary_base_soft)", "value": "rgba(255,98,0,0.1)" },
+      "accent-text": { "css": "var(--ids_color_text_link_variant)", "value": "#000D3C" },
+      "secondary-bg": { "css": "var(--ids_color_action_secondary_base)", "value": "#000D3C" },
+      "secondary-fg": { "css": "var(--ids_color_action_secondary_contrast)", "value": "#FFFFFF" },
+      "link": { "css": "var(--ids_color_text_link_base)", "value": "#000066" },
+      "warn-bg": { "css": "var(--ids_color_feedback_alert_soft)", "value": "rgba(255,204,0,0.1)" },
+      "warn-text": { "css": "var(--ids_color_feedback_alert_contrast)", "value": "#000000" },
+      "danger-bg": { "css": "var(--ids_color_feedback_error_soft)", "value": "rgba(204,0,0,0.1)" },
+      "danger-text": { "css": "var(--ids_color_feedback_error)", "value": "#CC0000" },
+      "success-bg": { "css": "var(--ids_color_feedback_success_soft)", "value": "rgba(11,91,56,0.1)" },
+      "success-text": { "css": "var(--ids_color_feedback_success)", "value": "#0B5B38" },
+      "info-bg": { "css": "var(--ids_color_feedback_information_soft)", "value": "rgba(0,31,189,0.1)" },
+      "info-text": { "css": "var(--ids_color_feedback_information)", "value": "#001FBD" },
+      "disabled-bg": { "css": "var(--ids_color_action_disabled_base)", "value": "#CFD1D3" },
+      "disabled-fg": { "css": "var(--ids_color_action_disabled_variant)", "value": "#999999" },
+      "shadow-card": { "css": "0 1px 2px var(--ids_color_contrast_onLight_soft)", "value": "0 1px 2px rgba(0,0,0,0.1)" },
+      "shimmer": { "css": "var(--ids_color_bg_shimmer_gradient)", "value": "#E3E5E8" }
+    },
+
+    "_dark_comment": "O bundle do IDS recebido não traz tema escuro. Este tema é uma EXTENSÃO do portal, montada só com tokens que já existem no IDS (azul de marca, onPrimary, contrast_onDark, primary_base). Está isolado aqui de propósito: no dia em que o IDS publicar um tema escuro oficial, apaga-se este bloco e aponta-se para ele. Nenhum componente muda. É também um item para levar ao time de design — portal interno usado 8h por dia é um caso legítimo de tema escuro.",
+
+    "dark": {
+      "bg-canvas": { "css": "var(--ids_color_bg_brand_primary)", "value": "#000D3C" },
+      "bg-surface": { "css": "var(--ids_color_action_neutral_onPrimary_base)", "value": "#001E4F" },
+      "bg-sunken": { "css": "var(--ids_color_action_secondary_variant)", "value": "#000000" },
+      "bg-brand": { "css": "var(--ids_color_action_secondary_variant)", "value": "#000000" },
+      "fg-default": { "css": "var(--ids_color_contrast_onDark)", "value": "#FFFFFF" },
+      "fg-heading": { "css": "var(--ids_color_contrast_onDark)", "value": "#FFFFFF" },
+      "fg-muted": { "css": "var(--ids_color_contrast_onDark_strong)", "value": "rgba(255,255,255,0.8)" },
+      "fg-subtle": { "css": "var(--ids_color_contrast_onDark_medium)", "value": "rgba(255,255,255,0.5)" },
+      "fg-inverse": { "css": "var(--ids_color_contrast_onLight)", "value": "#000000" },
+      "fg-onbrand": { "css": "var(--ids_color_contrast_onBrand_primary)", "value": "#FFFFFF" },
+      "border-default": { "css": "var(--ids_color_contrast_onDark_soft)", "value": "rgba(255,255,255,0.1)" },
+      "border-strong": { "css": "var(--ids_color_contrast_onDark_medium)", "value": "rgba(255,255,255,0.5)" },
+      "accent-bg": { "css": "var(--ids_color_action_primary_base)", "value": "#FF6200" },
+      "accent-bg-hover": { "css": "var(--ids_color_action_primary_base_strong)", "value": "rgba(255,98,0,0.8)" },
+      "accent-fg": { "css": "var(--ids_color_action_primary_contrast)", "value": "#FFFFFF" },
+      "accent-subtle": { "css": "var(--ids_color_action_primary_base_soft)", "value": "rgba(255,98,0,0.1)" },
+      "accent-text": { "css": "var(--ids_color_action_primary_base)", "value": "#FF6200" },
+      "secondary-bg": { "css": "var(--ids_color_contrast_onDark_soft)", "value": "rgba(255,255,255,0.1)" },
+      "secondary-fg": { "css": "var(--ids_color_contrast_onDark)", "value": "#FFFFFF" },
+      "link": { "css": "var(--ids_color_action_primary_base)", "value": "#FF6200" },
+      "warn-bg": { "css": "var(--ids_color_feedback_alert_soft)", "value": "rgba(255,204,0,0.1)" },
+      "warn-text": { "css": "var(--ids_color_feedback_alert)", "value": "#FFCC00" },
+      "danger-bg": { "css": "var(--ids_color_feedback_error_soft)", "value": "rgba(204,0,0,0.1)" },
+      "danger-text": { "css": "var(--ids_color_feedback_error_medium)", "value": "rgba(204,0,0,0.5)" },
+      "success-bg": { "css": "var(--ids_color_feedback_success_soft)", "value": "rgba(11,91,56,0.1)" },
+      "success-text": { "css": "var(--ids_color_chart_08)", "value": "#008717" },
+      "info-bg": { "css": "var(--ids_color_feedback_information_soft)", "value": "rgba(0,31,189,0.1)" },
+      "info-text": { "css": "var(--ids_color_chart_04)", "value": "#0131FF" },
+      "disabled-bg": { "css": "var(--ids_color_contrast_onDark_soft)", "value": "rgba(255,255,255,0.1)" },
+      "disabled-fg": { "css": "var(--ids_color_contrast_onDark_medium)", "value": "rgba(255,255,255,0.5)" },
+      "shadow-card": { "css": "0 1px 2px var(--ids_color_action_secondary_variant_medium)", "value": "0 1px 2px rgba(0,0,0,0.5)" },
+      "shimmer": { "css": "var(--ids_color_bg_shimmer_gradient_onDark)", "value": "#001E4F" }
+    }
+  }
+}

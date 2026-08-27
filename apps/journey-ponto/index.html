@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jornada ponto (modo isolado)</title>
+  </head>
+  <body>
+    <!--
+      HARNESS DE DESENVOLVIMENTO ISOLADO.
+
+      A squad roda a propria jornada sem subir shell, BFF ou as outras 9
+      jornadas. Isso e o que torna "10+ squads em paralelo" viavel na pratica:
+      o tempo de feedback do time nao depende do resto da organizacao.
+    -->
+    <div id="root"></div>
+    <script type="module" src="/src/standalone.tsx"></script>
+  </body>
+</html>

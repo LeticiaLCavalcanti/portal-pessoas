@@ -1,0 +1,122 @@
+/* ============================================================================
+ * Itaú Design System (IDS) — recorte de tokens
+ * ============================================================================
+ *
+ * PROVENIÊNCIA: estes são os tokens públicos do IDS, extraídos da folha de
+ * estilo do próprio Itaú. Aqui está apenas o SUBCONJUNTO efetivamente usado
+ * pelo portal, para que o case rode offline.
+ *
+ * EM PRODUÇÃO este arquivo não existe: o consumo seria via pacote oficial
+ * (`@itau/design-system` ou equivalente interno), garantindo atualização
+ * automática quando o time de DS publicar uma versão nova. Vendorizar tokens
+ * é dívida — está aqui só porque o case precisa ser executável isoladamente.
+ *
+ * FONTES: "Itau Display", "Itau Text" e "Itau Icon" são proprietárias e NÃO
+ * acompanham este repositório. As famílias são declaradas com fallback de
+ * sistema; ao rodar dentro da rede Itaú, o @import oficial resolve as fontes
+ * reais e o layout não muda (as métricas de tamanho/linha já vêm dos tokens).
+ * ========================================================================= */
+
+:root {
+  /* --- ação --------------------------------------------------------------- */
+  --ids_color_action_primary_base: #FF6200;
+  --ids_color_action_primary_base_soft: rgba(255, 98, 0, 0.1);
+  --ids_color_action_primary_variant: #E55800;
+  --ids_color_action_primary_contrast: #FFFFFF;
+  --ids_color_action_secondary_base: #000D3C;
+  --ids_color_action_secondary_variant: #000000;
+  --ids_color_action_secondary_contrast: #FFFFFF;
+  --ids_color_action_disabled_base: #CFD1D3;
+  --ids_color_action_disabled_variant: #999999;
+
+  /* --- texto -------------------------------------------------------------- */
+  --ids_color_text_heading_01: #000000;
+  --ids_color_text_body_01: #000000;
+  --ids_color_text_body_02: #4C4C4C;
+  --ids_color_text_body_02_medium: rgba(76, 76, 76, 0.5);
+  --ids_color_text_highlight: #FF6200;
+  --ids_color_text_link_base: #000066;
+
+  /* --- superfície --------------------------------------------------------- */
+  --ids_color_bg_base: #FFFFFF;
+  --ids_color_bg_variant_01: #F1F2F4;
+  --ids_color_bg_variant_02: #E3E5E8;
+  --ids_color_bg_brand_primary: #000D3C;
+  --ids_color_bg_brand_secondary: #FF6200;
+  --ids_color_bg_brand_gradient: linear-gradient(-225deg, rgb(24, 46, 78) 0%, rgb(0, 13, 60) 100%);
+
+  /* --- borda e contraste -------------------------------------------------- */
+  --ids_color_border_soft: #CFD1D3;
+  --ids_color_border_medium: #ADB8B3;
+  --ids_color_border_strong: #5D636F;
+  --ids_color_contrast_onDark: #FFFFFF;
+  --ids_color_contrast_onLight: #000000;
+  --ids_color_contrast_onBrand_primary: #FFFFFF;
+  --ids_color_contrast_onBrand_secondary: #FFFFFF;
+
+  /* --- feedback ----------------------------------------------------------- */
+  --ids_color_feedback_information: #001FBD;
+  --ids_color_feedback_information_soft: rgba(0, 31, 189, 0.1);
+  --ids_color_feedback_success: #0B5B38;
+  --ids_color_feedback_success_soft: rgba(11, 91, 56, 0.1);
+  --ids_color_feedback_error: #CC0000;
+  --ids_color_feedback_error_soft: rgba(204, 0, 0, 0.1);
+  --ids_color_feedback_alert: #FFCC00;
+  --ids_color_feedback_alert_soft: rgba(255, 204, 0, 0.1);
+  --ids_color_feedback_alert_contrast: #000000;
+  --ids_color_feedback_neutral: #4C4C4C;
+
+  /* --- gráficos ------------------------------------------------------------ */
+  --ids_color_chart_01: #FF6200;
+  --ids_color_chart_02: #002766;
+  --ids_color_chart_03: #6E6E6E;
+  --ids_color_chart_04: #0131FF;
+  --ids_color_chart_05: #FFBA00;
+  --ids_color_chart_08: #008717;
+
+  /* --- movimento ---------------------------------------------------------- */
+  --ids_motion_time_fast_02: 150ms;
+  --ids_motion_time_moderate_01: 250ms;
+  --ids_motion_easing_effective_standard: cubic-bezier(0.4, 0, 0.6, 1);
+  --ids_motion_easing_vivid_standard: cubic-bezier(0.6, 0, 0.2, 1);
+
+  /* --- dimensão ----------------------------------------------------------- */
+  --ids_size_cornerRadius_button: 0.75rem;
+  --ids_size_cornerRadius_smallButton: 0.5rem;
+  --ids_size_cornerRadius_tags_01: 0.25rem;
+  --ids_size_cornerRadius_tags_02: 0.5rem;
+  --ids_size_cornerRadius_card_01: 1rem;
+  --ids_size_cornerRadius_card_02: 0.75rem;
+  --ids_size_border_small: 0.0625rem;
+  --ids_size_border_medium: 0.125rem;
+  --ids_size_border_large: 0.25rem;
+
+  /* --- espaçamento -------------------------------------------------------- */
+  --ids_spacing_1x: 0.25rem;
+  --ids_spacing_2x: 0.5rem;
+  --ids_spacing_3x: 0.75rem;
+  --ids_spacing_4x: 1rem;
+  --ids_spacing_6x: 1.5rem;
+  --ids_spacing_8x: 2rem;
+  --ids_spacing_12x: 3rem;
+  --ids_spacing_14x: 3.5rem;
+
+  /* --- tipografia --------------------------------------------------------- */
+  --ids_textStyle_title_01_base: 700 1.5rem/2rem "Itau Display";
+  --ids_textStyle_f01_s32_h48_wbd: 700 2rem/3rem "Itau Display";
+  --ids_textStyle_section_01: 400 1.25rem/1.625rem "Itau Display";
+  --ids_textStyle_section_02: 700 1rem/1.5rem "Itau Display";
+  --ids_textStyle_body_01_regular: 400 1rem/1.5rem "Itau Text";
+  --ids_textStyle_body_01_bold: 700 1rem/1.5rem "Itau Text";
+  --ids_textStyle_body_02_regular: 400 0.875rem/1.25rem "Itau Text";
+  --ids_textStyle_body_02_bold: 700 0.875rem/1.25rem "Itau Text";
+  --ids_textStyle_caption_regular: 400 0.75rem/1.125rem "Itau Text";
+  --ids_textStyle_caption_bold: 700 0.75rem/1.125rem "Itau Text";
+  --ids_textStyle_label_medium_bold: 700 1rem/1.5rem "Itau Text";
+  --ids_textStyle_label_small_bold: 700 0.875rem/1.25rem "Itau Text";
+}
+
+/* Fallback de fontes: sem as famílias licenciadas, o portal continua legível e
+   com as MESMAS métricas de tamanho e entrelinha. */
+@font-face { font-family: "Itau Display"; src: local("Itau Display"), local("Inter"), local("Segoe UI"), local("Helvetica Neue"); }
+@font-face { font-family: "Itau Text";    src: local("Itau Text"), local("Inter"), local("Segoe UI"), local("Helvetica Neue"); }

@@ -1,0 +1,37 @@
+/**
+ * Fallback das famílias do IDS.
+ *
+ * As fontes Itau Display / Itau Text / Itau Icon são proprietárias e vêm do
+ * pacote de fontes do IDS (`../fonts/itaudisplay.css` etc. no ambiente do banco).
+ * Fora da rede corporativa elas não resolvem — e como os text styles do IDS usam
+ * o shorthand `font:` sem família de fallback, o navegador cairia em Times.
+ *
+ * Estes @font-face resolvem isso sem inventar tipografia: apontam para fontes
+ * locais com métricas próximas. Em produção este arquivo é REMOVIDO e os
+ * @font-face oficiais do IDS entram no lugar.
+ */
+@font-face {
+  font-family: 'Itau Display';
+  font-weight: 400;
+  src: local('Söhne'), local('Segoe UI'), local('Helvetica Neue'), local('Arial');
+}
+@font-face {
+  font-family: 'Itau Display';
+  font-weight: 700;
+  src: local('Söhne Kräftig'), local('Segoe UI Semibold'), local('Helvetica Neue Bold'), local('Arial Bold');
+}
+@font-face {
+  font-family: 'Itau Text';
+  font-weight: 400;
+  src: local('Söhne'), local('Segoe UI'), local('Helvetica Neue'), local('Arial');
+}
+@font-face {
+  font-family: 'Itau Text';
+  font-weight: 700;
+  src: local('Söhne Kräftig'), local('Segoe UI Semibold'), local('Helvetica Neue Bold'), local('Arial Bold');
+}
+@font-face {
+  font-family: 'Itau Text';
+  font-weight: 900;
+  src: local('Söhne Dreiviertelfett'), local('Segoe UI Bold'), local('Arial Black');
+}

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gestão de Pessoas - Férias</title>
+<!--
+  SIMULACAO DE PLATAFORMA LEGADA.
+
+  Este arquivo representa o sistema antigo: HTML server-rendered, CSS global,
+  visual de outra epoca. Ele foi mantido feio de proposito -- o objetivo do case
+  e mostrar CONVIVENCIA, e um legado que parece moderno esconde o problema real.
+
+  O unico codigo novo aqui e o bloco `portal-bridge`: cerca de 40 linhas que a
+  equipe de plataforma injeta no template do legado. E o custo total de trazer
+  um sistema antigo para dentro do portal, sem reescrever nada.
+-->
+<style>
+  /* Visual deliberadamente datado: intranet de RH de ~2011. O objetivo do case
+     é mostrar CONVIVÊNCIA, e um legado que já parece moderno esconde o problema.
+     Note que ele NÃO usa o IDS — usa o próprio CSS antigo, com azul e laranja
+     "quase" certos. É exatamente esse "quase" que a migração vai corrigir. */
+  body { font-family: Verdana, Geneva, sans-serif; font-size: 12px; margin: 0; background: #eef1f4; color: #1f2933; }
+  .legacy-wrap { padding: 16px; }
+  .legacy-head { background: #002a5c; color: #fff; padding: 10px 16px; font-weight: bold; border-bottom: 3px solid #f47b20; }
+  .legacy-head small { font-weight: normal; opacity: .8; display: block; }
+  table { border-collapse: collapse; width: 100%; background: #fff; margin-top: 12px; }
+  th, td { border: 1px solid #c3cbd3; padding: 6px 8px; text-align: left; }
+  th { background: #dde3e9; }
+  a { color: #003a7a; }
+  .legacy-btn { background: #f47b20; color: #fff; border: 1px solid #d2660f; padding: 6px 12px; cursor: pointer; font-family: inherit; }
+  .legacy-btn + .legacy-btn { background: #6b7683; border-color: #56606b; }
+  .legacy-note { background: #fff8dc; border: 1px solid #e0d6a8; padding: 8px; margin-top: 12px; }
+  body[data-host-theme='dark'] { background: #00081f; color: #d8dee6; }
+  body[data-host-theme='dark'] table { background: #0a1a4d; }
+  body[data-host-theme='dark'] th { background: #12245c; }
+  body[data-host-theme='dark'] th, body[data-host-theme='dark'] td { border-color: #1d2b57; }
+  body[data-host-theme='dark'] a { color: #7fa8ff; }
+  body[data-host-theme='dark'] .legacy-note { background: #2a2717; border-color: #4a442a; }
+
+  /* Calendário de férias. Tabela mesmo — em 2011 calendário era <table>, e
+     manter a linguagem visual do legado é o ponto do case: o portal moderno
+     em volta é que faz a diferença aparecer. */
+  .legacy-cal-wrap { margin-top: 16px; }
+  .legacy-cal-titulo { font-weight: bold; margin: 0 0 6px; }
+  table.legacy-cal { width: auto; min-width: 260px; }
+  table.legacy-cal th, table.legacy-cal td { text-align: center; padding: 5px 7px; width: 32px; }
+  table.legacy-cal td.vazio { background: #f4f6f8; border-color: #dde3e9; }
+  table.legacy-cal td.ferias { background: #f47b20; color: #fff; font-weight: bold; }
+  table.legacy-cal td.hoje { outline: 2px solid #002a5c; outline-offset: -2px; }
+  .legacy-cal-legenda { margin-top: 6px; }
+  .legacy-cal-legenda i {
+    display: inline-block; width: 10px; height: 10px; background: #f47b20;
+    border: 1px solid #d2660f; vertical-align: middle; margin-right: 4px;
+  }
+  body[data-host-theme='dark'] table.legacy-cal td.vazio { background: #071233; border-color: #1d2b57; }
+  body[data-host-theme='dark'] table.legacy-cal td.hoje { outline-color: #7fa8ff; }
+</style>
+</head>
+<body>
+  <div class="legacy-head">
+    Gestão de Pessoas <small id="modulo">Módulo de férias</small>
+  </div>
+  <div class="legacy-wrap">
+    <p id="saudacao">Carregando dados do colaborador…</p>
+
+    <table id="tabela">
+      <thead><tr><th>Período aquisitivo</th><th>Dias</th><th>Situação</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+
+    <p style="margin-top:12px">
+      <button class="legacy-btn" id="btn-solicitar">Solicitar férias</button>
+      <button class="legacy-btn" id="btn-moderno">Ir para Registro de ponto</button>
+    </p>
+
+    <div class="legacy-cal-wrap" id="calendario" hidden>
+      <p class="legacy-cal-titulo" id="calendario-titulo"></p>
+      <table class="legacy-cal">
+        <thead><tr><th>D</th><th>S</th><th>T</th><th>Q</th><th>Q</th><th>S</th><th>S</th></tr></thead>
+        <tbody id="calendario-corpo"></tbody>
+      </table>
+      <p class="legacy-cal-legenda"><i></i> <span id="calendario-legenda"></span></p>
+    </div>
+
+    <div class="legacy-note" id="detalhe" hidden></div>
+
+    <div class="legacy-note">
+      Sistema legado embarcado no Portal Pessoas. Sessão, tema, navegação e
+      telemetria vêm do portal via ponte <code>postMessage</code>.
+    </div>
+  </div>
+
+<script>
+/* ========================= portal-bridge (novo) ========================= */
+(function () {
+  var PORTAL_ORIGIN = '*'; // em producao: origem exata do shell, nunca '*'
+  var jornada = new URLSearchParams(location.search).get('jornada') || 'ferias';
+
+  function send(msg) { parent.postMessage(msg, PORTAL_ORIGIN); }
+
+  /* 1. Altura: o iframe nao sabe seu proprio tamanho. Reportamos a cada mudanca. */
+  function reportarAltura() {
+    send({ type: 'portal:legacy:resize', height: document.body.scrollHeight + 24 });
+  }
+  new ResizeObserver(reportarAltura).observe(document.body);
+
+  /* 2. Handshake: pedimos identidade e tema ao portal. */
+  window.addEventListener('message', function (ev) {
+    var m = ev.data || {};
+    if (m.type === 'portal:host:init') {
+      document.getElementById('saudacao').textContent =
+        'Colaborador ' + m.user.firstName + ' - matrícula ' + m.user.registration;
+      document.body.dataset.hostTheme = m.theme;
+      reportarAltura();
+    }
+    if (m.type === 'portal:host:theme') document.body.dataset.hostTheme = m.theme;
+  });
+
+  /* 3. Telemetria: os eventos do legado sobem pelo MESMO coletor do portal.
+        Sem isso nao da para comparar conversao entre legado e moderno, e a
+        metrica de avanco da migracao vira achismo. */
+  function track(nome, props) { send({ type: 'portal:legacy:telemetry', name: nome, props: props }); }
+
+  /* 4. Navegacao: link interno do legado vira rota do portal. */
+  document.getElementById('btn-moderno').onclick = function () {
+    track('legado.saiu_para_moderno', { destino: '/ponto' });
+    send({ type: 'portal:legacy:navigate', route: '/ponto' });
+  };
+
+  document.getElementById('btn-solicitar').onclick = function () {
+    track('legado.solicitacao_iniciada', { jornada: jornada });
+    send({ type: 'portal:legacy:notify', message: 'Solicitação registrada.', kind: 'success' });
+  };
+
+  /* Conteudo depende de qual jornada legada foi montada. */
+  var linhas = jornada === 'holerite'
+    ? [['08/2026', 'R$ 9.412,55', 'Disponível'], ['07/2026', 'R$ 9.380,10', 'Disponível'], ['13º - 2025', 'R$ 4.690,00', 'Pago']]
+    : [['2024/2025', '18 dias', 'Disponível'], ['2023/2024', '0 dias', 'Usufruído'], ['2025/2026', '12 dias', 'Em aquisição']];
+
+  if (jornada === 'holerite') {
+    document.getElementById('modulo').textContent = 'Módulo de holerite';
+    document.querySelector('thead').innerHTML =
+      '<tr><th>Competência</th><th>Líquido</th><th>Situação</th><th></th></tr>';
+    document.getElementById('btn-solicitar').textContent = 'Baixar demonstrativo';
+  }
+
+  document.querySelector('#tabela tbody').innerHTML = linhas
+    .map(function (l, i) {
+      return '<tr><td>' + l[0] + '</td><td>' + l[1] + '</td><td>' + l[2] +
+             '</td><td><a href="#" class="legacy-detalhar" data-linha="' + i + '">detalhar</a></td></tr>';
+    })
+    .join('');
+
+  /* 6. Detalhe de linha.
+        O link ficava com `onclick="return false"` -- um link que existe e nao
+        faz nada. Dentro de um iframe isso e pior do que parece: o colaborador
+        nao tem como distinguir "nao implementado" de "o portal travou".
+        Aqui ele exibe o detalhe no proprio legado e reporta pelo mesmo coletor
+        de telemetria do portal, entao o clique passa a ser MEDIDO -- que e o
+        que permite decidir a ordem da migracao por uso real, e nao por palpite. */
+  document.querySelector('#tabela tbody').addEventListener('click', function (ev) {
+    var alvo = ev.target.closest('.legacy-detalhar');
+    if (!alvo) return;
+    ev.preventDefault();
+    var l = linhas[Number(alvo.dataset.linha)];
+    var texto = jornada === 'holerite'
+      ? 'Competência ' + l[0] + ' - líquido ' + l[1] + ' (' + l[2] + ').'
+      : 'Período ' + l[0] + ' - ' + l[1] + ' (' + l[2] + ').';
+    document.getElementById('detalhe').textContent = texto;
+    document.getElementById('detalhe').hidden = false;
+    track('legado.linha_detalhada', { jornada: jornada, linha: l[0] });
+    reportarAltura();
+  });
+
+  /* 6. Calendario de ferias programadas.
+        So no modulo de ferias: no de holerite ele nao faz sentido nenhum. */
+  function montarCalendario() {
+    if (jornada !== 'ferias') return;
+
+    /* Período já aprovado pelo gestor. Em produção viria do mesmo endpoint que
+       preenche a tabela acima; aqui e fixo para o case. */
+    /* 12 a 29 = 18 dias, que e exatamente o saldo do periodo 2024/2025 na
+       tabela acima. Numero solto que nao fecha com a tabela ao lado e o tipo
+       de detalhe que faz quem avalia desconfiar do resto. */
+    var periodo = { ano: 2027, mes: 0, primeiroDia: 12, ultimoDia: 29 }; // janeiro/2027
+    var MESES = ['janeiro','fevereiro','março','abril','maio','junho',
+                 'julho','agosto','setembro','outubro','novembro','dezembro'];
+
+    var primeiroDaSemana = new Date(periodo.ano, periodo.mes, 1).getDay();
+    var diasNoMes = new Date(periodo.ano, periodo.mes + 1, 0).getDate();
+    var hoje = new Date();
+    var ehMesAtual = hoje.getFullYear() === periodo.ano && hoje.getMonth() === periodo.mes;
+
+    var celulas = [];
+    for (var v = 0; v < primeiroDaSemana; v++) celulas.push('<td class="vazio"></td>');
+    for (var d = 1; d <= diasNoMes; d++) {
+      var classes = [];
+      if (d >= periodo.primeiroDia && d <= periodo.ultimoDia) classes.push('ferias');
+      if (ehMesAtual && d === hoje.getDate()) classes.push('hoje');
+      celulas.push('<td class="' + classes.join(' ') + '">' + d + '</td>');
+    }
+    while (celulas.length % 7 !== 0) celulas.push('<td class="vazio"></td>');
+
+    var linhas = '';
+    for (var i = 0; i < celulas.length; i += 7) {
+      linhas += '<tr>' + celulas.slice(i, i + 7).join('') + '</tr>';
+    }
+
+    document.getElementById('calendario-corpo').innerHTML = linhas;
+    document.getElementById('calendario-titulo').textContent =
+      'Férias programadas — ' + MESES[periodo.mes] + ' de ' + periodo.ano;
+    document.getElementById('calendario-legenda').textContent =
+      'Período de ' + periodo.primeiroDia + ' a ' + periodo.ultimoDia + ' de ' +
+      MESES[periodo.mes] + ' (' + (periodo.ultimoDia - periodo.primeiroDia + 1) + ' dias)';
+    document.getElementById('calendario').hidden = false;
+    track('legado.calendario_exibido', { jornada: jornada });
+  }
+  montarCalendario();
+
+  /* 5. Avisa o portal que esta pronto. So depois disso recebemos o token. */
+  send({ type: 'portal:legacy:ready', journeyId: jornada });
+  track('legado.tela_aberta', { jornada: jornada });
+  reportarAltura();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+/* Layout do shell. Todo valor vem dos aliases do IDS — nenhum hex ou px cru. */
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--c-bg-canvas);
+  color: var(--c-fg-default);
+  font: var(--ts-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Altura da barra superior. Existe como token do shell porque DOIS lugares
+   dependem dela: a própria barra e o deslocamento do menu lateral fixo. Antes
+   o menu usava `64px` cravado enquanto a barra media 66px, e o fim do menu
+   acabava 2px abaixo da dobra — cortado, em toda tela. */
+:root { --pp-topbar-h: 64px; }
+
+.pp-app { display: flex; flex-direction: column; min-height: 100%; }
+.pp-boot { display: grid; place-items: center; min-height: 100vh; }
+
+/* Barra superior no azul de marca do Itaú — é o que faz jornada moderna e
+   legado parecerem o mesmo produto. */
+.pp-topbar {
+  display: flex; align-items: center; gap: var(--space-4);
+  height: var(--pp-topbar-h); padding: 0 var(--space-5);
+  background: var(--c-bg-brand-gradient);
+  color: var(--ids_color_contrast_onBrand_primary);
+  position: sticky; top: 0; z-index: 20;
+}
+.pp-topbar .ds-btn--ghost { color: rgba(255, 255, 255, .85); }
+.pp-topbar .ds-btn--ghost:hover { background: rgba(255, 255, 255, .12); color: #fff; }
+.pp-topbar .ds-input {
+  background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .28); color: #fff;
+}
+.pp-topbar .ds-input::placeholder { color: rgba(255, 255, 255, .65); }
+.pp-topbar .ds-input:focus-visible { outline-color: var(--c-accent-bg); }
+
+.pp-topbar .ds-brand:focus-visible { outline-color: #fff; }
+/* Ícones da barra de marca herdam o branco por `currentColor` — nenhuma regra
+   por ícone é necessária. */
+.pp-topbar .ds-icon { opacity: .9; }
+
+/* Contador de avisos.
+   O `.ds-badge--accent` padrão é laranja a 10% com texto `--c-accent-text`.
+   Isso funciona sobre superfície clara, mas a barra superior é azul de marca:
+   o fundo de 10% praticamente some e o texto (#000D3C no tema claro) fica
+   escuro sobre escuro — contraste ~1,2:1, ilegível.
+   Aqui o par é sólido e vem dos tokens de MARCA (`--ids_color_bg_brand_*`), e
+   não dos aliases `--c-*`: a barra é azul nos DOIS temas, então usar um alias
+   que inverte no tema escuro traria de volta laranja sobre laranja.
+   Laranja #FF6200 com numeral #000D3C dá 6,2:1 — passa em AA para texto
+   pequeno, que é exatamente o caso de um contador de dois dígitos. */
+.pp-topbar .ds-badge--accent {
+  background: var(--ids_color_bg_brand_secondary);
+  color: var(--ids_color_bg_brand_primary);
+  font: var(--ts-caption-bold);
+}
+.pp-topbar .ds-btn--ghost:hover .ds-icon { opacity: 1; }
+
+/* `margin-right: auto` empurra as ações (avisos, tema, avatar) para a borda
+   direita sem precisar de `justify-content: space-between` no header — que
+   deixaria de funcionar assim que a barra passasse a quebrar linha. */
+.pp-search {
+  position: relative; flex: 1; max-width: 420px; margin-right: auto;
+  display: flex; align-items: center;
+}
+/* Lupa dentro do campo: posicionada por token, e o padding do input abre
+   espaço para ela — nada de `text-indent`, que quebra com o placeholder. */
+.pp-search__icon {
+  position: absolute; left: var(--space-3); pointer-events: none; opacity: .7;
+}
+.pp-search__input { padding-left: calc(var(--space-3) * 2 + 17px); }
+.pp-search__results {
+  position: absolute; top: calc(100% + var(--space-2)); left: 0; right: 0; z-index: 30;
+  background: var(--c-bg-surface); border: var(--ids_size_border_small) solid var(--c-border-default);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-card); overflow: hidden;
+}
+.pp-search__hit {
+  display: block; width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
+  padding: var(--space-3);
+  border-bottom: var(--ids_size_border_small) solid var(--c-border-default);
+}
+.pp-search__hit:last-child { border-bottom: none; }
+.pp-search__hit:hover, .pp-search__hit:focus-visible { background: var(--c-accent-subtle); }
+
+.pp-notif { position: relative; }
+.pp-notif__panel {
+  position: absolute; right: 0; top: calc(100% + var(--space-2)); width: 320px; z-index: 30;
+  background: var(--c-bg-surface); border: var(--ids_size_border_small) solid var(--c-border-default);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: var(--space-3);
+  color: var(--c-fg-default);
+}
+.pp-notif__item {
+  display: block; width: 100%; text-align: left; background: none; border: 0;
+  cursor: pointer; padding: var(--space-2); border-radius: var(--radius-md);
+}
+.pp-notif__item:hover { background: var(--c-bg-sunken); }
+
+.pp-user {
+  width: 32px; height: 32px; border-radius: var(--radius-pill);
+  background: var(--c-accent-bg); color: var(--c-accent-fg);
+  display: grid; place-items: center; font: var(--ts-caption-bold);
+}
+
+.pp-body { display: flex; flex: 1; align-items: flex-start; }
+
+.pp-side {
+  width: 252px; flex: 0 0 252px; padding: var(--space-5) var(--space-3);
+  background: var(--c-bg-surface);
+  border-right: var(--ids_size_border_small) solid var(--c-border-default);
+  position: sticky; top: var(--pp-topbar-h);
+  display: flex; flex-direction: column; gap: var(--space-1);
+  /* Altura presa à viewport, e não ao conteúdo da página: com `align-self:
+     stretch` o menu esticava junto com a jornada e o fim da lista ia parar
+     muito abaixo da dobra.
+     `dvh` em vez de `vh` porque no celular a barra do navegador entra e sai da
+     conta — com `vh` o fim da lista fica escondido atrás dela. */
+  height: calc(100vh - var(--pp-topbar-h));
+  height: calc(100dvh - var(--pp-topbar-h));
+  overflow-y: auto;
+}
+.pp-side__group { margin-top: var(--space-5); display: flex; flex-direction: column; gap: var(--space-1); }
+.pp-side__title { text-transform: uppercase; letter-spacing: .08em; padding: 0 var(--space-3) var(--space-1); }
+.pp-side__link {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);
+  color: var(--c-fg-muted); text-decoration: none; font: var(--ts-body-sm);
+  border-left: 3px solid transparent;
+  transition: background-color var(--motion-fast) var(--motion-ease);
+}
+.pp-side__link:hover { background: var(--c-bg-sunken); color: var(--c-fg-default); }
+.pp-side__link.is-active {
+  background: var(--c-accent-subtle); color: var(--c-accent-text);
+  font: var(--ts-body-sm-bold); border-left-color: var(--c-accent-bg);
+}
+/* O ícone do menu segue a cor do link (`currentColor`), então ele acende
+   junto com o item ativo sem uma regra dedicada. */
+.pp-side__link .ds-icon { opacity: .75; }
+.pp-side__link:hover .ds-icon,
+.pp-side__link.is-active .ds-icon { opacity: 1; }
+/* O rótulo ocupa o espaço restante e empurra os badges (legado, %) para a
+   direita, alinhados entre si em todos os itens. */
+.pp-side__label { flex: 1; min-width: 0; }
+
+.pp-main { flex: 1; min-width: 0; padding: var(--space-6) var(--space-6) var(--space-8); }
+/* Grade da home. O mesmo desenho de `.ds-grid` do DS, mantido aqui apenas
+   porque e o shell quem desenha a home -- as jornadas usam `.ds-grid`. */
+.pp-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+/* Resultado da busca sob o cursor OU sob a navegacao por setas: os dois
+   precisam do mesmo destaque, senao navegar pelo teclado fica invisivel. */
+.pp-search__hit.is-active { background: var(--c-accent-subtle); }
+
+/* Aviso ja lido continua clicavel, mas para de competir por atencao. */
+.pp-notif__item.is-read { opacity: .62; }
+
+.pp-toasts {
+  position: fixed; right: var(--space-5); bottom: var(--space-7); z-index: 60;
+  display: flex; flex-direction: column; gap: var(--space-2);
+}
+.pp-toast {
+  background: var(--c-bg-surface);
+  border: var(--ids_size_border_small) solid var(--c-border-default);
+  border-left: var(--ids_size_border_large) solid var(--c-accent-bg);
+  border-radius: var(--radius-md); padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-card); font: var(--ts-body-sm); max-width: 320px;
+}
+.pp-toast--success { border-left-color: var(--c-success-text); }
+.pp-toast--danger { border-left-color: var(--c-danger-text); }
+
+.pp-telemetry {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  background: var(--c-bg-surface);
+  border-top: var(--ids_size_border_small) solid var(--c-border-default);
+  font-family: var(--font-mono); font-size: .6875rem;
+}
+.pp-telemetry__toggle {
+  width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
+  padding: var(--space-2) var(--space-5); color: var(--c-fg-subtle); font: inherit;
+}
+.pp-telemetry__body { max-height: 220px; overflow: auto; padding: 0 var(--space-5) var(--space-4); }
+.pp-telemetry__row {
+  display: grid; grid-template-columns: 56px 180px 220px 1fr; gap: var(--space-3);
+  padding: var(--space-1) 0;
+  border-top: var(--ids_size_border_small) solid var(--c-border-default);
+  color: var(--c-fg-muted);
+}
+.pp-telemetry__type.is-error { color: var(--c-danger-text); }
+.pp-telemetry__type.is-timing { color: var(--c-info-text); }
+.pp-telemetry__props { color: var(--c-fg-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* O portal roda dentro de uma WebView de 360px no app.
+   O layout precisa colapsar de verdade, não "funcionar mais ou menos". */
+@media (max-width: 860px) {
+  .pp-body { flex-direction: column; }
+  .pp-side {
+    width: 100%; flex: none; position: static; flex-direction: row; overflow-x: auto;
+    border-right: 0; border-bottom: var(--ids_size_border_small) solid var(--c-border-default);
+    padding: var(--space-3);
+    height: auto; overflow-y: visible;
+  }
+  .pp-side__group { margin-top: 0; flex-direction: row; }
+  .pp-side__title { display: none; }
+  .pp-side__link { white-space: nowrap; border-left: 0; border-bottom: 3px solid transparent; }
+  .pp-side__link.is-active { border-left: 0; border-bottom-color: var(--c-accent-bg); }
+  .pp-main { padding: var(--space-5) var(--space-4) var(--space-8); }
+  .ds-brand__rule, .ds-brand__product { display: none; }
+
+  /* Barra superior em duas linhas: marca e ações em cima, busca ocupando a
+     largura inteira embaixo. Na WebView de 390px a busca disputava espaço com
+     três botões e sobrava com largura zero — o campo sumia e só a lupa ficava,
+     sobreposta ao botão de avisos. */
+  .pp-topbar {
+    height: auto; flex-wrap: wrap;
+    padding: var(--space-2) var(--space-3);
+    row-gap: var(--space-2);
+  }
+  .pp-search { order: 3; flex-basis: 100%; max-width: none; margin-right: 0; }
+}

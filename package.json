@@ -1,0 +1,38 @@
+{
+  "name": "portal-pessoas",
+  "private": true,
+  "version": "0.2.0",
+  "workspaces": [
+    "packages/*",
+    "apps/shell",
+    "apps/bff",
+    "apps/journey-ponto",
+    "apps/journey-beneficios",
+    "apps/journey-holerite"
+  ],
+  "scripts": {
+    "tokens": "node packages/tokens/scripts/generate.mjs",
+    "predev": "node scripts/checar-portas.mjs",
+    "stop": "node scripts/parar.mjs",
+    "typecheck": "tsc -p apps/shell --noEmit && tsc -p apps/journey-ponto --noEmit && tsc -p apps/journey-beneficios --noEmit && tsc -p apps/journey-holerite --noEmit",
+    "build:remotes": "npm run build -w @portal/journey-ponto && npm run build -w @portal/journey-beneficios && npm run build -w @portal/journey-holerite",
+    "build": "npm run build:remotes && npm run build -w @portal/shell",
+    "serve:legacy": "serve --cors --no-port-switching -l 5003 apps/legacy-ferias",
+    "dev": "concurrently -n bff,legado,ponto,benef,holer,shell -c blue,gray,green,magenta,yellow,cyan \"npm run start -w @portal/bff\" \"npm run serve:legacy\" \"npm run dev -w @portal/journey-ponto\" \"npm run dev -w @portal/journey-beneficios\" \"npm run dev -w @portal/journey-holerite\" \"npm run dev -w @portal/shell\"",
+    "start": "npm run dev",
+    "preview": "npm run build && concurrently -n bff,legado,ponto,benef,holer,shell -c blue,gray,green,magenta,yellow,cyan \"npm run start -w @portal/bff\" \"npm run serve:legacy\" \"serve --cors --no-port-switching -l 5001 apps/journey-ponto/dist\" \"serve --cors --no-port-switching -l 5002 apps/journey-beneficios/dist\" \"serve --cors --no-port-switching -l 5004 apps/journey-holerite/dist\" \"serve -s --no-port-switching -l 5173 apps/shell/dist\""
+  },
+  "devDependencies": {
+    "@module-federation/enhanced": "^2.9.0",
+    "@rspack/cli": "^2.2.0",
+    "@rspack/core": "^2.2.0",
+    "@rspack/dev-server": "^2.2.1",
+    "@rspack/plugin-react-refresh": "^2.0.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "concurrently": "^9.1.0",
+    "react-refresh": "^0.14.2",
+    "serve": "^14.2.4",
+    "typescript": "^5.6.3"
+  }
+}

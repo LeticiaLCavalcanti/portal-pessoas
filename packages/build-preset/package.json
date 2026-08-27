@@ -1,0 +1,19 @@
+{
+  "name": "@portal/build-preset",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.mjs",
+  "exports": {
+    ".": "./src/index.mjs",
+    "./container-name": {
+      "types": "./src/container-name.d.ts",
+      "default": "./src/container-name.mjs"
+    }
+  },
+  "peerDependencies": {
+    "@module-federation/enhanced": "^2.9.0",
+    "@rspack/core": "^2.2.0",
+    "@rspack/plugin-react-refresh": "^2.0.2"
+  }
+}

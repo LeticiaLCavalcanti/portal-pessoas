@@ -1,0 +1,139 @@
+{
+  "_comment": "REGISTRO DE JORNADAS. Esta e a peca que faz 'adicionar jornada sem mexer no core' ser verdade: o shell nunca importa uma jornada em build time, ele le este registro em runtime. Em producao isto e uma tabela/config service com API propria; a squad publica seu bundle no CDN e faz PATCH no seu proprio registro (o PR nao toca em codigo de outro time). O campo `id` e tambem o nome do container de Module Federation -- ver packages/build-preset/src/container-name.mjs, que faz a traducao dos dois lados.",
+  "journeys": [
+    {
+      "id": "ponto",
+      "name": "Registro de ponto",
+      "description": "Bata o ponto e acompanhe seu banco de horas.",
+      "icon": "clock",
+      "domain": "Jornada de trabalho",
+      "squad": "squad-jornada-trabalho",
+      "kind": "remote",
+      "version": "2.4.1",
+      "route": "/ponto",
+      "entry": "http://localhost:5001/remoteEntry.js",
+      "exposedModule": "./journey",
+      "requiredRoles": [],
+      "capabilities": [
+        "search",
+        "home-widget"
+      ],
+      "rollout": {
+        "enabled": true,
+        "percentage": 100,
+        "allowlist": [
+          "piloto"
+        ]
+      },
+      "budget": {
+        "loadTimeoutMs": 8000
+      }
+    },
+    {
+      "id": "beneficios",
+      "name": "Benefícios",
+      "description": "Vale, plano de saúde, parcerias e reembolsos.",
+      "icon": "gift",
+      "domain": "Benefícios",
+      "squad": "squad-beneficios",
+      "kind": "remote",
+      "version": "1.9.0",
+      "route": "/beneficios",
+      "entry": "http://localhost:5002/remoteEntry.js",
+      "exposedModule": "./journey",
+      "requiredRoles": [],
+      "capabilities": [
+        "search",
+        "home-widget",
+        "notifications"
+      ],
+      "rollout": {
+        "enabled": true,
+        "percentage": 100,
+        "allowlist": [
+          "piloto"
+        ]
+      },
+      "budget": {
+        "loadTimeoutMs": 8000
+      }
+    },
+    {
+      "id": "ferias-legado",
+      "name": "Férias",
+      "description": "Programação e solicitação de férias (plataforma legada).",
+      "icon": "calendar",
+      "domain": "Jornada de trabalho",
+      "squad": "squad-legado-rh",
+      "kind": "legacy",
+      "version": "0.0.0",
+      "route": "/ferias",
+      "entry": "http://localhost:5003/?jornada=ferias",
+      "exposedModule": "./journey",
+      "requiredRoles": [],
+      "capabilities": [],
+      "rollout": {
+        "enabled": true,
+        "percentage": 100,
+        "allowlist": []
+      },
+      "budget": {
+        "loadTimeoutMs": 12000
+      }
+    },
+    {
+      "id": "holerite",
+      "name": "Holerite",
+      "description": "Demonstrativos de pagamento e informe de rendimentos.",
+      "icon": "receipt",
+      "domain": "Remuneração",
+      "squad": "squad-remuneracao",
+      "kind": "remote",
+      "version": "1.0.0",
+      "route": "/holerite",
+      "entry": "http://localhost:5004/remoteEntry.js",
+      "exposedModule": "./journey",
+      "requiredRoles": [],
+      "capabilities": [
+        "search",
+        "home-widget",
+        "notifications"
+      ],
+      "rollout": {
+        "enabled": true,
+        "percentage": 100,
+        "allowlist": [
+          "piloto"
+        ],
+        "fallbackJourneyId": "holerite-legado"
+      },
+      "budget": {
+        "loadTimeoutMs": 8000
+      }
+    },
+    {
+      "id": "holerite-legado",
+      "name": "Holerite (legado)",
+      "description": "Versão anterior do holerite, mantida durante a migração.",
+      "icon": "archive",
+      "domain": "Remuneração",
+      "squad": "squad-legado-rh",
+      "kind": "legacy",
+      "version": "0.0.0",
+      "route": "/holerite-legado",
+      "entry": "http://localhost:5003/?jornada=holerite",
+      "exposedModule": "./journey",
+      "showInCatalog": false,
+      "requiredRoles": [],
+      "capabilities": [],
+      "rollout": {
+        "enabled": true,
+        "percentage": 100,
+        "allowlist": []
+      },
+      "budget": {
+        "loadTimeoutMs": 12000
+      }
+    }
+  ]
+}

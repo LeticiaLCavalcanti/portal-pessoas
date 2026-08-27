@@ -1,0 +1,93 @@
+/* GERADO POR scripts/generate.mjs — NÃO EDITAR A MÃO.
+   Fonte: src/tokens.json (mapa) + src/ids-tokens.css (Itaú Design System). */
+@import './ids-tokens.css';
+
+:root {
+  --space-1: var(--ids_spacing_1x);
+  --space-2: var(--ids_spacing_2x);
+  --space-3: var(--ids_spacing_3x);
+  --space-4: var(--ids_spacing_4x);
+  --space-5: var(--ids_spacing_6x);
+  --space-6: var(--ids_spacing_8x);
+  --space-7: var(--ids_spacing_12x);
+  --space-8: var(--ids_spacing_14x);
+  --radius-sm: var(--ids_size_cornerRadius_tags_01);
+  --radius-md: var(--ids_size_cornerRadius_tags_02);
+  --radius-lg: var(--ids_size_cornerRadius_card_02);
+  --radius-xl: var(--ids_size_cornerRadius_card_01);
+  --radius-button: var(--ids_size_cornerRadius_button);
+  --ts-display: var(--ids_textStyle_f01_s32_h48_wbd);
+  --ts-title: var(--ids_textStyle_title_01_base);
+  --ts-section: var(--ids_textStyle_section_01);
+  --ts-section-bold: var(--ids_textStyle_section_02);
+  --ts-body: var(--ids_textStyle_body_01_regular);
+  --ts-body-bold: var(--ids_textStyle_body_01_bold);
+  --ts-body-sm: var(--ids_textStyle_body_02_regular);
+  --ts-body-sm-bold: var(--ids_textStyle_body_02_bold);
+  --ts-caption: var(--ids_textStyle_caption_regular);
+  --ts-caption-bold: var(--ids_textStyle_caption_bold);
+  --ts-label-bold: var(--ids_textStyle_label_medium_bold);
+  --motion-fast: var(--ids_motion_time_fast_02);
+  --motion-moderate: var(--ids_motion_time_moderate_01);
+  --motion-ease: var(--ids_motion_easing_effective_standard);
+  --motion-ease-vivid: var(--ids_motion_easing_vivid_standard);
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 2px rgba(0, 13, 60, .08), 0 4px 16px rgba(0, 13, 60, .06);
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Tema claro: puro repasse do IDS. Nenhum valor de cor nasce aqui. */
+:root,
+[data-theme='light'] {
+  --c-bg-canvas: var(--ids_color_bg_variant_01);
+  --c-bg-surface: var(--ids_color_bg_base);
+  --c-bg-sunken: var(--ids_color_bg_variant_02);
+  --c-bg-brand: var(--ids_color_bg_brand_primary);
+  --c-bg-brand-gradient: var(--ids_color_bg_brand_gradient);
+  --c-fg-default: var(--ids_color_text_body_01);
+  --c-fg-muted: var(--ids_color_text_body_02);
+  --c-fg-subtle: var(--ids_color_text_body_02_medium);
+  --c-fg-inverse: var(--ids_color_contrast_onDark);
+  --c-border-default: var(--ids_color_border_soft);
+  --c-border-strong: var(--ids_color_border_strong);
+  --c-accent-bg: var(--ids_color_action_primary_base);
+  --c-accent-bg-hover: var(--ids_color_action_primary_variant);
+  --c-accent-fg: var(--ids_color_action_primary_contrast);
+  --c-accent-subtle: var(--ids_color_action_primary_base_soft);
+  --c-accent-text: var(--ids_color_action_secondary_base);
+  --c-neutral-bg: var(--ids_color_action_secondary_base);
+  --c-neutral-fg: var(--ids_color_action_secondary_contrast);
+  --c-disabled-bg: var(--ids_color_action_disabled_base);
+  --c-disabled-fg: var(--ids_color_action_disabled_variant);
+  --c-warn-bg: var(--ids_color_feedback_alert_soft);
+  --c-warn-text: var(--ids_color_feedback_alert_contrast);
+  --c-danger-bg: var(--ids_color_feedback_error_soft);
+  --c-danger-text: var(--ids_color_feedback_error);
+  --c-success-bg: var(--ids_color_feedback_success_soft);
+  --c-success-text: var(--ids_color_feedback_success);
+  --c-info-bg: var(--ids_color_feedback_information_soft);
+  --c-info-text: var(--ids_color_feedback_information);
+}
+
+/* Tema escuro: aproximação enquanto o tema oficial do IDS não é consumido.
+   Ver darkOverrides._doc em tokens.json. */
+[data-theme='dark'] {
+  --c-bg-canvas: #00081F;
+  --c-bg-surface: #000D3C;
+  --c-bg-sunken: #0A1A4D;
+  --c-fg-default: #FFFFFF;
+  --c-fg-muted: #C3C9D6;
+  --c-fg-subtle: rgba(255, 255, 255, 0.5);
+  --c-fg-inverse: #000D3C;
+  --c-border-default: #1D2B57;
+  --c-border-strong: #5D636F;
+  --c-accent-text: #FF8A3D;
+  --c-accent-subtle: rgba(255, 98, 0, 0.16);
+  --c-warn-bg: rgba(255, 204, 0, 0.16);
+  --c-warn-text: #FFCC00;
+  --c-danger-bg: rgba(204, 0, 0, 0.2);
+  --c-danger-text: #FF8A80;
+  --c-success-bg: rgba(11, 91, 56, 0.28);
+  --c-success-text: #6FD39B;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, .5), 0 8px 24px rgba(0, 0, 0, .35);
+}

@@ -1,0 +1,49 @@
+/* ============================================================================
+ * Estilo da jornada de ponto — dono: squad-jornada-trabalho
+ * ============================================================================
+ *
+ * Por que esta folha existe e por que ela NÃO está no Design System:
+ * o relógio é um componente de NEGÓCIO ("bater ponto"), e a regra de camadas
+ * do DS é explícita — L3 não mora lá. Se ele fosse para o DS, o time de
+ * plataforma viraria revisor obrigatório de uma tela que não é dele.
+ *
+ * Ela também prova uma propriedade da arquitetura: a jornada publica o próprio
+ * CSS junto do seu bundle federado. O shell não sabe que este arquivo existe e
+ * não precisa de deploy para ele mudar.
+ *
+ * O que a squad NÃO pode fazer aqui: inventar cor, raio ou tipografia. Tudo
+ * abaixo é `var(--…)` dos tokens. Prefixo `ponto-` para não colidir com o
+ * `ds-` do DS nem com o `pp-` do shell.
+ * ========================================================================= */
+
+/* `inline-flex`: o bloco abraça o conteúdo em vez de esticar pela largura do
+   card, que deixava um retângulo cinza vazio à direita do horário. */
+.ponto-relogio {
+  display: inline-flex; align-items: center; gap: var(--space-3);
+  align-self: flex-start;
+  padding: var(--space-4);
+  background: var(--c-bg-sunken);
+  border-radius: var(--radius-lg);
+  color: var(--c-fg-default);
+}
+
+.ponto-relogio__hora {
+  display: block;
+  font: var(--ts-display);
+  font-family: var(--font-mono);
+  /* Sem largura tabular o relógio "pula" a cada segundo, porque 1 e 7 são mais
+     estreitos que 0 e 8 — e o botão ao lado se mexe junto. */
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+/* `toLocaleDateString` devolve "quinta-feira, 27 de agosto" em minúsculas.
+   Só a PRIMEIRA letra sobe: `text-transform: capitalize` capitaliza cada
+   palavra e produzia "Quinta-Feira, 27 De Agosto · Horário Do Seu
+   Dispositivo" — errado em português, que não capitaliza mês, preposição nem
+   a segunda metade de "quinta-feira". */
+.ponto-relogio__data::first-letter { text-transform: uppercase; }
+
+@media (max-width: 520px) {
+  .ponto-relogio__hora { font: var(--ts-title); font-family: var(--font-mono); }
+}
