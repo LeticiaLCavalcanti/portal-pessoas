@@ -32,5 +32,10 @@ tipografia e paridade entre web e mobile.
 **Pendências assumidas**
 - As fontes proprietárias não acompanham o repositório; há fallback de sistema com as
   mesmas métricas, então o layout não muda ao adicionar o `@import` oficial.
+- **O lockup de marca** (`patterns/Brand.tsx`) usa um ativo substituto: o logotipo oficial
+  é proprietário, pela mesma razão das fontes. As medidas ao redor vêm de tokens, então
+  trocar pelo ativo do pipeline do IDS não desloca o lockup.
+- **A fonte *Itaú Icon*** tem a mesma pendência, e a consequência dela é uma decisão à
+  parte — ver [ADR 0008](0008-iconografia-por-nome-semantico.md).
 - O tema escuro é aproximação derivada do azul de marca, isolada em `darkOverrides`, até
   consumirmos o tema oficial distribuído por classe `ids-theme-*`.

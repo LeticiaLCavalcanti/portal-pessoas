@@ -84,8 +84,12 @@ jornada de dentro do cleanup de um efeito, ou seja, com o React **dele** no meio
 commit. Desmontar outra raiz de forma síncrona ali gera
 *"Attempted to synchronously unmount a root while React was already rendering"* e tem risco
 real de race. Por isso o `unmount` de cada jornada adia o desmonte um microtask
-(`queueMicrotask`). É custo estrutural do contrato agnóstico, e está comentado nas três
-jornadas.
+(`queueMicrotask`).
+
+É custo estrutural do contrato agnóstico: o preço de `mount(HTMLElement)` em vez de
+"devolva um componente React", pago em troca da liberdade de a squad trocar de framework
+([ADR 0002](0002-contrato-agnostico-de-framework.md)). As três jornadas trazem uma nota
+curta no `unmount` apontando para cá.
 
 ## Alternativas descartadas
 

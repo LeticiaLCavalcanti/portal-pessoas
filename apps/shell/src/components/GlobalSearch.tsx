@@ -1,18 +1,9 @@
 /**
- * Busca global.
+ * Busca global do shell, alimentada pelo indice agregado do BFF -- decisao e
+ * alternativas em docs/adr/0009.
  *
- * Decisao: a busca e do SHELL, alimentada por um indice agregado no BFF, e nao
- * uma busca por jornada. Motivo de produto: o colaborador nao sabe (nem deveria
- * saber) em qual squad mora "informe de rendimentos". Motivo tecnico: manter a
- * busca no shell evita carregar 10 microfrontends so para procurar algo.
- *
- * Cada jornada contribui com seu indice (capability `search`) -- o shell nao
- * mantem uma lista chumbada de resultados.
- *
- * O resultado navega para uma rota INTERNA da jornada (`/ponto/espelho`). O
- * shell so garante a rota; quem precisa reconhece-la e a jornada dona, por
- * `ctx.path`. Quando ela nao reconhece, o clique nao tem efeito visivel -- foi
- * exatamente esse o bug corrigido em ponto e beneficios.
+ * O resultado navega para uma rota INTERNA da jornada (`/ponto/espelho`): o
+ * shell garante a rota, reconhece-la e da jornada dona, via `ctx.path`.
  */
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';

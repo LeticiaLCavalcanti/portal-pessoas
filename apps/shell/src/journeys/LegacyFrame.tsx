@@ -1,19 +1,9 @@
 /**
- * Adaptador de jornada LEGADA.
+ * Adaptador de jornada LEGADA: iframe com ponte postMessage.
  *
- * Por que iframe e nao Module Federation para o legado:
- *  - O legado tem CSS global, jQuery e provavelmente um `body { }` agressivo.
- *    Federar isso contamina o portal inteiro.
- *  - O iframe da isolamento de CSS, JS e erro de graca, sem tocar no codigo antigo.
- *    E o unico jeito de "conviver com o legado" sem refatorar o legado primeiro.
+ * Decisao, preco assumido e notas de seguranca: docs/adr/0003.
  *
- * O preco do iframe (e como pagamos):
- *  - altura        -> a pagina legada reporta o tamanho por postMessage.
- *  - navegacao     -> ponte traduz navegacao interna em rota do portal.
- *  - sessao        -> o shell injeta o token no handshake (nunca na URL).
- *  - telemetria    -> eventos do legado sobem pelo mesmo coletor do portal,
- *                     entao a metrica de migracao compara maca com maca.
- *  - acessibilidade e foco -> exigem cuidado manual (limitacao real, assumida).
+ * Mensagens da ponte, nos dois sentidos, no tipo `BridgeMessage` abaixo.
  */
 import * as React from 'react';
 import type { JourneyContext, JourneyManifest } from '@portal/journey-contract';
@@ -32,16 +22,9 @@ export function LegacyFrame({ manifest, ctx }: { manifest: JourneyManifest; ctx:
   const origin = React.useMemo(() => new URL(manifest.entry).origin, [manifest.entry]);
 
   /**
-   * O tema tem de vir por ASSINATURA (`ctx.onThemeChange`), nunca da leitura de
-   * `ctx.theme`.
-   *
-   * `ctx` e memoizado de proposito -- trocar de tema nao pode remontar a
-   * jornada e jogar fora o estado da squad. O efeito colateral e que a
-   * propriedade `ctx.theme` guarda o valor do momento da montagem e nunca mais
-   * muda. O efeito abaixo dependia dela, entao nunca redisparava: o legado
-   * recebia o tema uma vez no handshake e ficava branco dentro de um portal
-   * escuro pelo resto da sessao. As jornadas modernas nao tinham o problema
-   * porque ja assinavam `onThemeChange`; o legado era o unico lendo o campo.
+   * Tema por ASSINATURA, nunca lendo `ctx.theme`: `ctx` e memoizado, entao
+   * `ctx.theme` congela no valor da montagem. Depender dele deixava o legado
+   * branco dentro de um portal escuro pelo resto da sessao.
    */
   const [tema, setTema] = React.useState(ctx.theme);
   React.useEffect(() => ctx.onThemeChange(setTema), [ctx]);

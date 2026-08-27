@@ -70,14 +70,8 @@ export function Field({ label, ...rest }: React.InputHTMLAttributes<HTMLInputEle
 }
 
 /**
- * Isolamento de falha de render -- primitivo, porque TODA arvore React do
- * portal precisa dele: a do shell e a de cada jornada.
- *
- * Ele vive no DS (e nao no shell) por um motivo concreto de arquitetura: a
- * jornada monta a propria raiz React dentro do container cedido pelo shell, e
- * um error boundary NAO atravessa fronteira de raiz. Se este componente
- * morasse so no shell, cada squad reimplementaria o seu -- e a primeira que
- * esquecesse deixaria um retangulo vazio na tela do colaborador.
+ * Isolamento de falha de render. Vive no DS porque TODA arvore React do portal
+ * precisa dele -- a do shell e a de cada jornada. Ver docs/adr/0007.
  *
  * `resetKey`: mudou a chave (outra jornada, outra tentativa), o boundary volta
  * a tentar renderizar. Sem isto, "tentar de novo" nao tem efeito nenhum.

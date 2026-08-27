@@ -3,15 +3,12 @@
  *  Jornada: Holerite  |  dona: squad-remuneracao
  * ============================================================================
  *
- * Terceira jornada moderna do portal, e a prova mais direta do requisito
- * "incluir jornada nova sem alterar o core": para ela existir, NENHUM arquivo
- * de `apps/shell` foi tocado. O que mudou foi uma linha em
- * `apps/bff/src/registry.json` -- que em producao e um PR no repositorio da
- * propria squad, sem revisor do time de plataforma.
+ * Prova do requisito "incluir jornada sem alterar o core": nenhum arquivo de
+ * `apps/shell` foi tocado para ela existir -- so uma linha em
+ * `apps/bff/src/registry.json` (docs/adr/0004).
  *
- * Ela tambem carrega o `fallbackJourneyId` no manifesto: se este bundle cair,
- * o colaborador nao fica sem holerite -- o shell oferece a versao legada, que
- * continua no ar durante a migracao.
+ * Declara `fallbackJourneyId`: se este bundle cair, o shell oferece a versao
+ * legada (docs/adr/0010).
  */
 import * as React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -222,17 +219,9 @@ const journey: JourneyModule = {
     /**
      * Desmonte obrigatorio: sem ele o portal vaza uma arvore a cada navegacao.
      *
-     * O `queueMicrotask` nao e firula. O shell chama esta funcao de dentro do
-     * cleanup de um efeito -- ou seja, com o React DELE no meio de um commit.
-     * Chamar `root.unmount()` ali desmonta uma segunda raiz de forma sincrona
-     * durante um render e o React avisa em dev ("Attempted to synchronously
-     * unmount a root while React was already rendering"), com risco real de
-     * race em producao. Adiar um microtask tira o desmonte do commit sem
-     * atrasar nada de perceptivel.
-     *
-     * E um custo estrutural de duas raizes React na mesma pagina -- o preco de
-     * o contrato ser `mount(HTMLElement)` e nao "devolva um componente React".
-     * Pagamos por isso a liberdade de a squad trocar de framework.
+     * O `queueMicrotask` tira o desmonte do commit do React do shell -- sem
+     * ele, "Attempted to synchronously unmount a root while React was already
+     * rendering", com risco de race. Ver docs/adr/0007, "Nota relacionada".
      */
     return () => {
       const atual = root;

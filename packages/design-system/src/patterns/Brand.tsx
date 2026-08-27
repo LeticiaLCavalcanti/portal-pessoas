@@ -3,30 +3,10 @@
  *  CAMADA 2 do DS: assinatura de marca
  * ============================================================================
  *
- * O lockup de marca mora no DS, e nao no shell, pelo mesmo motivo que os
- * tokens: e a peca que precisa ser IDENTICA em todo produto interno. Se cada
- * portal desenhar o proprio cabecalho, em dois anos a empresa tem cinco
- * versoes da marca com espacamentos diferentes -- o erro classico que a
- * ADR 0005 tenta evitar.
+ * O lockup mora no DS, não no shell — docs/adr/0005.
  *
- * ---------------------------------------------------------------------------
- * SOBRE O ATIVO OFICIAL -- leia antes de achar que esta pronto
- *
- * O simbolo abaixo e desenhado com os tokens de marca do IDS
- * (`--ids_color_bg_brand_secondary`, o laranja Itau) na geometria correta do
- * quadrado de contencao. Ele NAO e o arquivo oficial da marca: o SVG do
- * logotipo Itau e ativo proprietario e nao acompanha este repositorio, pela
- * mesma razao que as fontes "Itau Display" e "Itau Text" nao acompanham.
- *
- * Dentro da rede, a substituicao e de uma linha: troque o <svg> por
- *   <img src={...} alt="Itau" />  apontando para o ativo do pipeline do IDS,
- * ou importe o componente oficial. As medidas ao redor vem de tokens, entao o
- * lockup nao se desloca quando o ativo real entra.
- *
- * A palavra "Itau" e renderizada com a familia tipografica do IDS: dentro da
- * rede ela aparece na face oficial da marca; fora dela, no fallback de
- * sistema, com as mesmas metricas.
- * ---------------------------------------------------------------------------
+ * O PNG abaixo é um ativo substituto; o logotipo oficial é proprietário e não
+ * acompanha o repositório. Trocar o <img> basta: as medidas vêm de tokens.
  */
 import * as React from 'react';
 import logoItau from '../assets/logo_itau_varejo_92x92.png';

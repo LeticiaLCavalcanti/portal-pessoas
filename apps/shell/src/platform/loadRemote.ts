@@ -1,27 +1,13 @@
 /**
- * ============================================================================
- *  Carregamento de microfrontends em RUNTIME
- * ============================================================================
+ * Carregamento de microfrontends em runtime -- o unico arquivo do shell que
+ * conhece Module Federation.
  *
- * O shell nunca importa uma jornada em tempo de build. Ele recebe a URL do
- * `remoteEntry` do registro do BFF e registra o remote aqui, ja com a pagina
- * no ar. Publicar uma jornada nova nao gera commit, build nem deploy do shell.
+ * Decisoes: docs/adr/0001 (remotes em runtime) e docs/adr/0006 (Rspack).
  *
- * Isto usa o runtime OFICIAL do Module Federation (`@module-federation/enhanced
- * /runtime`), que e a mesma implementacao que o `ModuleFederationPlugin` do
- * Rspack injeta no bundle -- ou seja, `registerRemotes` e `loadRemote` falam
- * com o mesmo registro de shared/singletons que o build montou.
- *
- * Antes disto o projeto dependia do modulo virtual `__federation__` do
- * `@originjs/vite-plugin-federation`, uma API nao documentada de um plugin de
- * terceiros. Ver docs/adr/0006-rspack-como-bundler.md.
- *
- * Cuidados que costumam faltar em POCs de Module Federation e que estao aqui:
- *  - TIMEOUT: um remote fora do ar nao pode deixar a jornada carregando pra
- *    sempre. `loadRemote` sozinho nao tem orcamento de tempo.
- *  - CACHE POR VERSAO: a chave e `id@versao`, entao subir uma versao nova
- *    invalida o cache sozinha, sem hard refresh no colaborador.
- *  - FALHA NAO FICA EM CACHE: "tentar de novo" precisa ir na rede.
+ * Invariantes desta implementacao:
+ *  - a chave de cache e `id@versao`, entao subir versao invalida o cache;
+ *  - falha nao fica em cache -- "tentar de novo" vai na rede;
+ *  - `loadRemote` nao tem orcamento de tempo proprio, dai o `withTimeout`.
  */
 import { loadRemote, registerRemotes } from '@module-federation/enhanced/runtime';
 import { containerNameOf } from '@portal/build-preset/container-name';
@@ -30,16 +16,8 @@ import type { JourneyModule } from '@portal/journey-contract';
 const cache = new Map<string, Promise<JourneyModule>>();
 
 /**
- * Traducao de falha tecnica para frase de colaborador.
- *
- * O runtime do Module Federation devolve coisas como
- * `[Federation Runtime]: Failed to load script resources. #RUNTIME-008 args:
- * {...} View the docs to see how to solve: https://module-federation.io/...`.
- *
- * Isso e texto para quem mantem o portal, e estava indo direto para a tela de
- * quarenta mil pessoas -- com um link para a documentacao de um bundler. A
- * mensagem tecnica continua existindo: ela vai INTEIRA para a telemetria, com
- * jornada, squad, versao e correlation-id. O que muda e quem le cada uma.
+ * Traducao de falha tecnica para frase de colaborador -- ver docs/adr/0001,
+ * "Consequencias". A mensagem original vai inteira para a telemetria.
  */
 function mensagemParaColaborador(erro: unknown, jornada: string): string {
   const bruta = erro instanceof Error ? erro.message : String(erro);
@@ -93,31 +71,14 @@ export function loadJourneyModule(opts: {
 
   const promise = withTimeout(
     (async () => {
-      /**
-       * `force: true` permite re-registrar o MESMO container apontando para
-       * outra URL. E o que torna rollback instantaneo: a squad muda a versao no
-       * registro, o colaborador recarrega e passa a baixar outro bundle, sem
-       * deploy do shell.
-       */
+      // `force: true` re-registra o mesmo container em outra URL: e o que
+      // torna o rollback instantaneo (docs/adr/0001).
       registerRemotes(
         [{
           name: container,
           entry: opts.entry,
-          /**
-           * `global`: o remoteEntry e um container classico (`var ponto = ...`)
-           * carregado por tag <script>, que e o formato que o
-           * ModuleFederationPlugin do Rspack emite por padrao.
-           *
-           * Nao e detalhe cosmetico: com `module` o runtime tentaria um
-           * `import()` do arquivo e falharia com RUNTIME-002 ("does not
-           * contain init") -- um erro que se parece com "a jornada esta fora
-           * do ar" e manda a squad errada investigar.
-           *
-           * Alternativa considerada: registrar pelo `mf-manifest.json` em vez
-           * do remoteEntry. Da preload de shared e dispensa este campo, mas
-           * acrescenta um segundo artefato ao contrato de publicacao das 10
-           * squads. Fica para quando o custo de carregamento justificar.
-           */
+          // NAO trocar para 'module': falha com RUNTIME-002, que parece
+          // "jornada fora do ar". Ver docs/adr/0006, "Negativas".
           type: 'global'
         }],
         { force: true }

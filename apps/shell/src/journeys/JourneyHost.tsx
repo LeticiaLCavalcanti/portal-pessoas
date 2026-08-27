@@ -1,19 +1,9 @@
 /**
- * ============================================================================
- *  JourneyHost -- a peca central da arquitetura
- * ============================================================================
+ * JourneyHost -- resolve rollout, monta a jornada conforme o `kind`, injeta o
+ * JourneyContext, degrada em falha e instrumenta tudo por jornada/squad/versao.
  *
- * Responsabilidades, nesta ordem:
- *   1. Resolver rollout (esse colaborador ve a versao moderna ou a legada?).
- *   2. Montar a jornada conforme o `kind` (remote | legacy | native).
- *   3. Injetar o JourneyContext -- unica porta entre shell e squad.
- *   4. Degradar com elegancia: timeout, erro de rede, contrato incompativel,
- *      e falha de render DENTRO da jornada (via `ctx.fail`).
- *   5. Instrumentar tudo, marcado por jornada/squad/versao.
- *
- * O shell nao sabe NADA sobre ponto, beneficios ou holerite. Ele so sabe montar
- * e desmontar coisas que respeitam o contrato. E isso que impede o shell de
- * virar o gargalo de todos os times.
+ * O shell nao conhece ponto, beneficios nem holerite: so monta e desmonta o que
+ * respeita o contrato (docs/adr/0002).
  */
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -99,11 +89,10 @@ function JourneySurface({
   const themeRef = React.useRef(portal.theme);
 
   /**
-   * Canal de falha irrecuperavel vindo de DENTRO da jornada (contrato v1.1).
+   * Canal de falha vindo de DENTRO da jornada (docs/adr/0007).
    *
-   * Fica atras de um ref porque `ctx` e memoizado de proposito: se `fail`
-   * entrasse nas dependencias do memo, cada re-render do shell criaria um `ctx`
-   * novo e REMONTARIA a jornada -- perdendo o estado da squad a cada toast.
+   * Atras de um ref porque `ctx` e memoizado: com `fail` nas dependencias, cada
+   * re-render do shell criaria um `ctx` novo e REMONTARIA a jornada.
    */
   const failRef = React.useRef<(e: unknown) => void>(() => undefined);
   failRef.current = (e: unknown) => {
@@ -119,8 +108,7 @@ function JourneySurface({
     });
     return {
       user: portal.user!,
-      // Cliente HTTP proprio da jornada: o header x-journey-id permite ao BFF
-      // atribuir latencia e erro ao time certo, e nao a um "frontend" generico.
+      // x-journey-id permite ao BFF atribuir latencia e erro ao time certo.
       http: createHttpClient({
         baseUrl: 'http://localhost:4000',
         getToken: () => 'token-simulado',
@@ -221,10 +209,9 @@ function JourneySurface({
   }
 
   /**
-   * Rota da versao anterior. Vale tanto para o fallback declarado por ESTA
-   * jornada quanto para o declarado pela jornada originalmente pedida na URL --
-   * o segundo caso cobre a degradacao em cascata (moderna falhou, o shell ja
-   * tinha caido no fallback de rollout, e o fallback tambem falhou).
+   * Rota da versao anterior. O `origin` cobre a degradacao em cascata: a
+   * moderna falhou, o shell ja tinha caido no fallback de rollout, e o
+   * fallback tambem falhou.
    */
   const fallbackId = manifest.rollout.fallbackJourneyId ?? origin.rollout.fallbackJourneyId;
   const fallbackRoute = fallbackId ? portal.journeyById(fallbackId)?.route : undefined;

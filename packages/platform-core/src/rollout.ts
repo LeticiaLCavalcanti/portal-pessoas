@@ -14,8 +14,7 @@ function bucketOf(userId: string, journeyId: string): number {
 /**
  * Decide se ESTE colaborador ve a jornada moderna.
  *
- * Rodar isto no cliente (e nao so no BFF) e proposital: o mesmo calculo serve
- * de "kill switch" local quando o remote falha em runtime.
+ * Roda no cliente alem do BFF, de proposito -- ver docs/adr/0010.
  */
 export function resolveRollout(m: JourneyManifest, user: { id: string; roles: string[] }) {
   if (!m.rollout.enabled) return { active: false, reason: 'desligada' as const };

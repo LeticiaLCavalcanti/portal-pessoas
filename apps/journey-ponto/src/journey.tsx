@@ -3,15 +3,11 @@
  *  Jornada: Registro de ponto  |  dona: squad-jornada-trabalho
  * ============================================================================
  *
- * A squad controla tudo daqui pra dentro: stack, estado, rotas internas,
- * cadencia de deploy. O unico compromisso com o portal e este arquivo --
- * exportar um objeto que cumpre `JourneyModule`.
+ * A squad controla stack, estado, rotas internas e cadencia de deploy. O unico
+ * compromisso com o portal e exportar um `JourneyModule` (docs/adr/0002).
  *
- * A jornada e DONA de tudo abaixo de /ponto. O shell entrega `ctx.path` (a
- * rota relativa) e avisa por `ctx.onPathChange` quando ela muda -- inclusive
- * quando a mudanca veio do "voltar" do navegador ou de um resultado da busca
- * global. Sem tratar isso, um deep link para /ponto/espelho abriria a tela
- * inicial da jornada e o clique do colaborador nao teria efeito visivel.
+ * `ctx.path` + `ctx.onPathChange` cobrem deep link e "voltar" do navegador --
+ * inclusive quando a rota veio da busca global (docs/adr/0009).
  */
 import * as React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -338,17 +334,9 @@ const journey: JourneyModule = {
     /**
      * Desmonte obrigatorio: sem ele o portal vaza uma arvore a cada navegacao.
      *
-     * O `queueMicrotask` nao e firula. O shell chama esta funcao de dentro do
-     * cleanup de um efeito -- ou seja, com o React DELE no meio de um commit.
-     * Chamar `root.unmount()` ali desmonta uma segunda raiz de forma sincrona
-     * durante um render e o React avisa em dev ("Attempted to synchronously
-     * unmount a root while React was already rendering"), com risco real de
-     * race em producao. Adiar um microtask tira o desmonte do commit sem
-     * atrasar nada de perceptivel.
-     *
-     * E um custo estrutural de duas raizes React na mesma pagina -- o preco de
-     * o contrato ser `mount(HTMLElement)` e nao "devolva um componente React".
-     * Pagamos por isso a liberdade de a squad trocar de framework.
+     * O `queueMicrotask` tira o desmonte do commit do React do shell -- sem
+     * ele, "Attempted to synchronously unmount a root while React was already
+     * rendering", com risco de race. Ver docs/adr/0007, "Nota relacionada".
      */
     return () => {
       const atual = root;

@@ -17,16 +17,8 @@ export function Card({
   /** Conteudo do canto superior direito. Selo de estado, normalmente. */
   actions?: React.ReactNode;
   /**
-   * Acao do card, ANCORADA NA BASE.
-   *
-   * Existe porque numa grade os cards tem alturas de conteudo diferentes
-   * ("Voce ainda nao bateu o ponto hoje" ocupa duas linhas, "Holerite de
-   * agosto disponivel" ocupa uma). Com o botao no fim do texto, ele para numa
-   * altura distinta em cada card e a fileira fica desalinhada -- o olho lê
-   * isso como desleixo antes de ler o conteudo.
-   *
-   * Passando por `footer`, ele cola na base independentemente do texto acima,
-   * e a fileira de acoes fica numa linha so.
+   * Acao do card, ancorada na BASE. Numa grade os cards tem alturas de texto
+   * diferentes; com o botao no fim do conteudo, a fileira sai desalinhada.
    */
   footer?: React.ReactNode;
 }) {

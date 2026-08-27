@@ -1,16 +1,10 @@
 /**
  * @portal/tokens — camada de ALIAS sobre o Itaú Design System.
  *
- * Decisão de arquitetura: o portal NÃO tem um design system próprio de cores e
- * tipografia. O Itaú já tem o IDS, e reconstruí-lo seria criar uma segunda
- * fonte de verdade de marca — o erro clássico de portal interno.
+ * Traduz tokens de MARCA do IDS (`ids_color_bg_base`) em nomes de PRODUTO
+ * (`c-bg-surface`). O portal não define cor nem tipografia própria.
  *
- * O que este pacote faz é traduzir os tokens de MARCA do IDS
- * (`ids_color_bg_base`) em nomes de PRODUTO (`c-bg-surface`). Três ganhos:
- *   1. Os componentes do portal ficam legíveis para quem não decorou o IDS.
- *   2. Uma major do IDS é absorvida mudando um mapa, não 200 arquivos.
- *   3. Fica explícito, em `extras`, o que o portal precisou e o IDS não cobre —
- *      cada item ali é candidato a RFC para o time de Design System.
+ * Decisão, ganhos e o papel do bloco `extras`: docs/adr/0005.
  */
 import raw from './tokens.json';
 

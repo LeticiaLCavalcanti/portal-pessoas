@@ -75,7 +75,7 @@ Concretamente:
 - **`type: 'global'` no registro de remote.** O `remoteEntry` do Rspack é um container
   clássico carregado por `<script>`, não um ES module. Registrar como `module` falha com
   `RUNTIME-002` — um erro que *parece* "jornada fora do ar" e manda a squad errada
-  investigar. Está comentado no código exatamente por isso.
+  investigar. O campo tem uma nota curta em `loadRemote.ts` apontando para esta ADR.
 - **Perdemos o dev server do Vite**, que é mais rápido em cold start para app pequeno. Para
   um portal com 4+ builds simultâneos, a conta inverte.
 
@@ -87,6 +87,7 @@ Concretamente:
 | **Vite + `@module-federation/vite`** | Existe e é oficial, mas o suporte a remotes dinâmicos e a `shared` continua atrás do webpack/Rspack, e o modo `dev` ainda tem ressalvas. Escolher a implementação de referência remove uma variável |
 | **webpack 5** | É a implementação de referência histórica e funcionaria. Rspack é compatível com a mesma API e roda em Rust — mesma semântica, build mais rápido. Se o Rspack se mostrar imaturo em algum ponto, a saída é `webpack` com a mesma config, e não uma reescrita |
 | **Import maps + ESM nativo** | Resolve carregamento, não resolve compartilhamento com negociação de versão. Voltaríamos a escrever à mão o que o Module Federation já faz |
+| **Registrar pelo `mf-manifest.json`** em vez do `remoteEntry` | Daria preload de `shared` e dispensaria o campo `type`, mas acrescenta um segundo artefato ao contrato de publicação das 10 squads. Fica para quando o custo de carregamento justificar |
 
 ## Nota sobre reversibilidade
 

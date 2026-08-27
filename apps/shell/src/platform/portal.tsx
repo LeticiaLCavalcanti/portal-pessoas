@@ -1,10 +1,9 @@
 /**
  * Nucleo do shell: sessao, catalogo, flags, tema, telemetria e avisos.
  *
- * Regra de projeto: TUDO que e transversal mora aqui e e entregue as jornadas
- * pelo `JourneyContext`. As squads nao instanciam auth, nao criam seu proprio
- * cliente HTTP e nao escolhem sua propria lib de telemetria. Sem isso, com 10+
- * times, o portal vira 10 portais dentro de uma casca comum.
+ * TUDO que e transversal mora aqui e e entregue as jornadas pelo
+ * `JourneyContext`: as squads nao instanciam auth, nao criam cliente HTTP e nao
+ * escolhem lib de telemetria. Ver docs/adr/0002.
  */
 import * as React from 'react';
 import {
@@ -83,7 +82,6 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
     [correlationId, sessionId]
   );
 
-  // Painel de observabilidade embutido: e o "console de arquitetura" do case.
   React.useEffect(
     () => {
       const off = telemetry.subscribe((r) => setTelemetryLog((prev) => [r, ...prev].slice(0, 60)));
@@ -107,12 +105,8 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
           http.get<Record<string, boolean>>('/v1/flags')
         ]);
 
-        /**
-         * GOVERNANCA EM RUNTIME: todo manifesto passa pelo schema antes de virar
-         * rota. Um manifesto malformado publicado por uma squad derruba a
-         * PROPRIA jornada -- nunca o portal inteiro. Sem esta validacao, um
-         * campo errado de um time quebra a navegacao de 40 mil pessoas.
-         */
+        // Todo manifesto passa pelo schema antes de virar rota: um manifesto
+        // malformado derruba a PROPRIA jornada, nunca o portal (docs/adr/0004).
         const ok: JourneyManifest[] = [];
         const bad: { id: string; problem: string }[] = [];
         for (const item of raw) {

@@ -3,19 +3,11 @@
  *  CONTRATO SHELL <-> JORNADA
  * ============================================================================
  *
- * Este e o unico ponto de acoplamento entre o core (shell) e as ~10 squads.
- * Regras de ouro:
- *   1. Ele e DELIBERADAMENTE PEQUENO. Cada campo novo aqui vira divida de
- *      coordenacao entre 10 times.
- *   2. Ele e FRAMEWORK-AGNOSTICO (mount/unmount sobre um HTMLElement).
- *      A squad pode usar React hoje e Svelte amanha sem tocar no shell.
- *   3. Ele e versionado por SemVer independente. Breaking change exige major
- *      + janela de suporte N-2 + codemod.
+ * Unico ponto de acoplamento entre o shell e as ~10 squads. Deliberadamente
+ * pequeno, agnostico de framework e versionado por SemVer independente.
  *
- * Trade-off assumido: perdemos a ergonomia de "jornada = componente React"
- * (props tipadas, context, suspense compartilhado). Ganhamos a capacidade de
- * substituir tecnologia com raio de impacto controlado, que e requisito
- * explicito do case ("substituicao futura de tecnologias com impacto controlado").
+ * Decisao e trade-offs: docs/adr/0002.
+ * Estado do contrato (1.0 -> 1.1): tabela ao final da docs/adr/0002.
  */
 import { z } from 'zod';
 
@@ -52,14 +44,7 @@ export const journeyManifestSchema = z.object({
    * NOME semantico do icone (`clock`, `gift`, `receipt`), resolvido pelo
    * Design System -- nunca um glifo, um caractere ou uma URL de imagem.
    *
-   * Fica como `string` livre, e nao como enum, de proposito: o registro e lido
-   * em RUNTIME e uma jornada pode ser publicada depois deste shell, pedindo um
-   * icone que ele ainda nao desenha. Enum aqui derrubaria o manifesto inteiro
-   * na validacao -- a jornada sumiria do menu por causa de um icone. O <Icon>
-   * do DS cai num fallback visivel e o item continua navegavel.
-   *
-   * A validacao existe, mas no lugar certo: `iconNames` do DS alimenta a
-   * checagem do registro no CI, onde o erro custa um build e nao um incidente.
+   * `string` livre e nao enum, de proposito -- ver docs/adr/0008.
    */
   icon: z.string().default('*'),
   /** Dominio de negocio. Define ownership e agrupamento no catalogo. */
@@ -136,31 +121,13 @@ export interface JourneyContext {
   /**
    * Reporta uma falha IRRECUPERAVEL da jornada (contrato v1.1).
    *
-   * Por que isto precisa existir e nao basta o error boundary do shell:
-   * a jornada cria a PROPRIA raiz React (`createRoot`) dentro do container que
-   * o shell cede. Um error boundary do shell nao atravessa fronteira de raiz --
-   * ele so ve a arvore dele. Sem este canal, um erro de render dentro da
-   * jornada desmontava a arvore da squad e deixava um retangulo vazio na tela:
-   * o portal continuava vivo, mas o colaborador ficava sem tela e sem saida.
-   *
-   * Com `fail`, a squad captura o erro na tecnologia dela (error boundary do
-   * React, `try/catch` do Svelte, o que for) e devolve o controle ao shell, que
-   * mostra a superficie degradada padrao -- com codigo de rastreio, "tentar de
-   * novo" e link para a versao anterior, iguais para todas as jornadas.
-   *
-   * Aditivo (minor): o shell PASSA a capacidade, a jornada nao e obrigada a
-   * usar. Jornadas que implementam v1.0 continuam montando sem alteracao.
+   * Necessario porque error boundary nao atravessa fronteira de raiz React --
+   * ver docs/adr/0007. Aditivo: jornadas v1.0 montam sem alteracao.
    */
   fail(error: unknown): void;
 }
 
-/**
- * Nota sobre BUSCA: nao ha `registerSearchProvider` aqui de proposito.
- * Registrar provedor em runtime obrigaria o shell a carregar as 10 jornadas so
- * para o colaborador digitar na busca. A indexacao acontece do lado servidor:
- * cada squad publica seu indice e o BFF faz o fan-out. O contrato de front
- * continua pequeno.
- */
+/** A ausencia de `registerSearchProvider` e deliberada -- ver docs/adr/0009. */
 
 /* -------------------------------------------------------------------------- */
 /* 3. O modulo que a jornada precisa exportar                                  */

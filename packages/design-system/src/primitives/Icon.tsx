@@ -3,27 +3,11 @@
  *  CAMADA 1 do DS: iconografia
  * ============================================================================
  *
- * Por que os icones sao SVG inline e nao uma fonte de icones:
+ * SVG inline, endereçado por nome semântico, com fallback tolerante a nome
+ * desconhecido. Decisão e alternativas: docs/adr/0008.
  *
- *  1. O IDS tem a fonte proprietaria "Itau Icon", que NAO acompanha este
- *     repositorio (mesma situacao de "Itau Display" e "Itau Text" -- ver
- *     apps/shell/index.html). Depender dela aqui deixaria o menu do portal
- *     como uma fileira de quadradinhos fora da rede corporativa.
- *  2. Fonte de icone falha feio: enquanto o arquivo carrega, o colaborador ve
- *     o caractere cru. SVG inline nasce com a pagina, sem FOUT e sem request.
- *  3. `stroke="currentColor"` faz o icone herdar a cor do contexto -- entao
- *     ele acompanha tema claro/escuro, estado ativo e a barra azul de marca
- *     sem uma linha de CSS por caso.
- *
- * Trocar por "Itau Icon" mais tarde e substituir ESTE arquivo. Nenhum ponto de
- * uso muda, porque todos falam por NOME (`clock`, `bell`), nunca por glifo.
- *
- * ---------------------------------------------------------------------------
- * O nome do icone vem do MANIFESTO da jornada, ou seja, de fora do shell.
- * Por isso um nome desconhecido nao pode quebrar o menu: ele cai no fallback e
- * a jornada continua navegavel. Governanca acontece no code review do registro,
- * nao com uma tela em branco em producao.
- * ---------------------------------------------------------------------------
+ * Adotar a fonte "Itaú Icon" é substituir ESTE arquivo — nenhum ponto de uso
+ * muda, porque todos falam por nome.
  */
 import * as React from 'react';
 
@@ -61,23 +45,15 @@ export function Icon({
   /** Nome semântico. Desconhecido = fallback textual, nunca erro. */
   name: string;
   size?: number;
-  /**
-   * Só quando o ícone é a ÚNICA informação. Ao lado de um rótulo de texto ele
-   * deve ficar mudo para o leitor de tela, senão o conteúdo é anunciado duas
-   * vezes ("sino Avisos").
-   */
+  /** Só quando o ícone é a ÚNICA informação — ao lado de texto, deve ficar mudo. */
   label?: string;
   className?: string;
 }) {
   const desenho = paths[name];
 
   if (!desenho) {
-    /**
-     * Fallback: a jornada declarou um ícone que este shell não conhece --
-     * porque foi publicada depois, ou porque houve erro de digitação no
-     * registro. Mostramos a marca crua do manifesto em vez de nada: o item
-     * continua clicável e o problema fica visível para quem mantém o registro.
-     */
+    // Nome desconhecido: mostra a marca crua do manifesto, para o item seguir
+    // clicavel e o erro de registro ficar visivel.
     return (
       <span
         className={`ds-icon ds-icon--raw ${className}`}

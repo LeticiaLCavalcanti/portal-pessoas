@@ -2,8 +2,8 @@
  * "Chrome" do portal: barra superior, catalogo lateral, notificacoes e avisos.
  *
  * Tudo aqui e do time de plataforma. As squads NAO podem injetar itens de menu
- * por codigo -- so declarando o manifesto. Isso e o que impede o shell de
- * acumular `if (jornada === 'x')` ate virar o gargalo de todo mundo.
+ * por codigo -- so declarando o manifesto, para o shell nao acumular
+ * `if (jornada === 'x')`.
  */
 import * as React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -30,8 +30,6 @@ export function TopBar() {
     portal.http.get<Notificacao[]>('/v1/notifications').then(setNotifs).catch(() => setNotifs([]));
   }, [portal.http]);
 
-  // Fechar clicando fora e com Esc: um painel que so fecha pelo mesmo botao
-  // fica preso por cima do conteudo e parece que a pagina travou.
   React.useEffect(() => {
     if (!notifOpen) return;
     const onDoc = (e: MouseEvent) => {
@@ -48,15 +46,7 @@ export function TopBar() {
 
   const naoLidas = notifs.filter((n) => !n.read).length;
 
-  /**
-   * Abrir a notificacao faz TRES coisas, e as tres importam:
-   *  1. marca como lida no BFF -- senao o contador nunca zera e o colaborador
-   *     aprende a ignorar o badge;
-   *  2. leva para a jornada dona;
-   *  3. se a jornada nao esta no catalogo deste colaborador (papel, rollout ou
-   *     jornada removida), avisa em vez de nao fazer nada. Clique sem resposta
-   *     e pior do que erro explicito.
-   */
+  /** Marca como lida de forma otimista; o POST que falhar reverte o estado. */
   const abrir = async (n: Notificacao) => {
     setNotifOpen(false);
     setNotifs((lista) => lista.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
@@ -71,13 +61,9 @@ export function TopBar() {
 
   return (
     <header className="pp-topbar">
-      {/*
-        Marca, busca e acoes sao TRES filhos diretos do header, e nao a busca
-        aninhada junto da marca. Isso e o que permite, no celular, a busca
-        descer para uma linha propria com 100% de largura usando so `order` e
-        `flex-basis` -- aninhada, ela ficava presa a largura sobrando ao lado
-        da marca e era espremida a zero na WebView de 390px.
-      */}
+      {/* Marca, busca e acoes precisam ser filhos DIRETOS do header: e o que
+          deixa a busca cair para uma linha propria via `order`/`flex-basis`.
+          Aninhada junto da marca, ela era espremida a zero em 390px. */}
       <Brand product="Portal Pessoas" onClick={() => navigate('/')} />
       {portal.flags['portal.busca-global'] && <GlobalSearch />}
 
@@ -115,9 +101,7 @@ export function TopBar() {
           )}
         </div>
 
-        {/* O icone mostra o tema para o qual o clique LEVA, nao o atual: um
-            sol quando ja esta claro faria o botao parecer um indicador de
-            estado, e o colaborador nao saberia o que vai acontecer. */}
+        {/* O icone mostra o tema de DESTINO, nao o atual. */}
         <Button
           variant="ghost"
           onClick={portal.toggleTheme}
@@ -127,9 +111,7 @@ export function TopBar() {
           {portal.theme === 'light' ? 'Escuro' : 'Claro'}
         </Button>
 
-        {/* Nao e botao de proposito: e um indicador de sessao. Um avatar
-            clicavel que nao abre nada e um dos jeitos mais faceis de fazer o
-            portal parecer quebrado. */}
+        {/* Indicador de sessao, nao botao: nao ha menu de usuario para abrir. */}
         <span className="pp-user" title={`${portal.user?.name} · matrícula ${portal.user?.registration}`}>
           {portal.user?.firstName?.slice(0, 2).toUpperCase()}
         </span>
@@ -140,7 +122,6 @@ export function TopBar() {
 
 export function Sidebar() {
   const portal = usePortal();
-  // Catalogo agrupado por dominio -- a mesma chave que define ownership.
   const porDominio = portal.journeys
     .filter((j) => j.showInCatalog)
     .reduce<Record<string, typeof portal.journeys>>((acc, j) => {
@@ -164,9 +145,6 @@ export function Sidebar() {
               to={j.route}
               className={({ isActive }) => `pp-side__link ${isActive ? 'is-active' : ''}`}
             >
-              {/* O nome do icone vem do MANIFESTO. Uma jornada publicada
-                  depois deste shell pode pedir um icone que ele nao conhece --
-                  o <Icon> cai no fallback e o item continua navegavel. */}
               <Icon name={j.icon} />
               <span className="pp-side__label">{j.name}</span>
               {j.kind === 'legacy' && <Badge>legado</Badge>}
