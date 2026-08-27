@@ -29,6 +29,7 @@
  * ---------------------------------------------------------------------------
  */
 import * as React from 'react';
+import logoItau from '../assets/logo_itau_varejo_92x92.png';
 
 export function Brand({
   product,
@@ -40,30 +41,19 @@ export function Brand({
 }) {
   const conteudo = (
     <>
-      <svg
+      <img
         className="ds-brand__symbol"
-        viewBox="0 0 32 32"
-        width="26"
-        height="26"
-        aria-hidden
-        focusable="false"
-      >
-        {/* Quadrado de contencao da marca, no laranja Itau. `rx` proporcional
-            ao lado, para o raio nao se deformar quando o simbolo muda de
-            tamanho. Sem glifo dentro: a marca do Itau E o logotipo "Itau" ao
-            lado -- repetir uma inicial dentro do quadrado seria dizer a mesma
-            coisa duas vezes, e nao corresponde ao ativo oficial. */}
-        <rect x="0" y="0" width="32" height="32" rx="8" className="ds-brand__square" />
-      </svg>
+        width="36"
+        height="36"
+        src={logoItau}
+        alt="Itaú"
+      />
 
-      <span className="ds-brand__word">Itaú</span>
       <span className="ds-brand__rule" aria-hidden />
       <span className="ds-brand__product">{product}</span>
     </>
   );
 
-  // Sem `onClick` a marca e so identidade visual -- e nao deve virar um botao
-  // que nao faz nada, que e o jeito mais barato de o portal parecer quebrado.
   return onClick ? (
     <button type="button" className="ds-brand" onClick={onClick} aria-label={`${product}, ir para o início`}>
       {conteudo}

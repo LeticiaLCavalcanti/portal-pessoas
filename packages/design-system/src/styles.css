@@ -221,8 +221,11 @@ button.ds-brand:focus-visible {
   outline-offset: 3px; border-radius: var(--radius-sm);
 }
 
-.ds-brand__symbol { flex: none; }
-.ds-brand__square { fill: var(--ids_color_bg_brand_secondary); }
+.ds-brand__symbol {
+  display: block;
+  flex: none;
+  object-fit: contain;
+}
 /* O nome da marca é tipografia, não imagem: dentro da rede ele assume a face
    oficial do IDS sem que o layout mude, porque as métricas vêm dos tokens. */
 .ds-brand__word {

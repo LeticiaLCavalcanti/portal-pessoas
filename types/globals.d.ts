@@ -6,3 +6,7 @@
  * em vez de puxar os tipos inteiros de um bundler.
  */
 declare module '*.css';
+declare module '*.png' {
+	const source: string;
+	export default source;
+}

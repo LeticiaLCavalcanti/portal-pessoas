@@ -30,9 +30,9 @@ body {
 .pp-topbar .ds-btn--ghost { color: rgba(255, 255, 255, .85); }
 .pp-topbar .ds-btn--ghost:hover { background: rgba(255, 255, 255, .12); color: #fff; }
 .pp-topbar .ds-input {
-  background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .28); color: #fff;
+  background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .22); color: #fff;
 }
-.pp-topbar .ds-input::placeholder { color: rgba(255, 255, 255, .65); }
+.pp-topbar .ds-input::placeholder { color: rgba(255, 255, 255, .56); }
 .pp-topbar .ds-input:focus-visible { outline-color: var(--c-accent-bg); }
 
 .pp-topbar .ds-brand:focus-visible { outline-color: #fff; }
@@ -61,7 +61,7 @@ body {
    direita sem precisar de `justify-content: space-between` no header — que
    deixaria de funcionar assim que a barra passasse a quebrar linha. */
 .pp-search {
-  position: relative; flex: 1; max-width: 420px; margin-right: auto;
+  position: relative; flex: 1; max-width: 360px; margin-right: auto;
   display: flex; align-items: center;
 }
 /* Lupa dentro do campo: posicionada por token, e o padding do input abre
@@ -69,7 +69,10 @@ body {
 .pp-search__icon {
   position: absolute; left: var(--space-3); pointer-events: none; opacity: .7;
 }
-.pp-search__input { padding-left: calc(var(--space-3) * 2 + 17px); }
+.pp-search__input {
+  padding: var(--space-1) var(--space-3) var(--space-1) calc(var(--space-3) * 2 + 17px);
+  font: var(--ts-body-sm);
+}
 .pp-search__results {
   position: absolute; top: calc(100% + var(--space-2)); left: 0; right: 0; z-index: 30;
   background: var(--c-bg-surface); border: var(--ids_size_border_small) solid var(--c-border-default);

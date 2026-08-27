@@ -105,7 +105,8 @@ const baseConfig = ({ dev, dir, entry, port, publicPath, htmlTemplate, htmlChunk
        * `ds-*` estaveis, propositalmente NAO hasheadas, porque as jornadas
        * (e o legado, e um dia outro framework) dependem desses nomes.
        */
-      { test: /\.css$/, type: 'css/auto' }
+      { test: /\.css$/, type: 'css/auto' },
+      { test: /\.(png|jpe?g|gif|svg)$/i, type: 'asset/resource' }
     ]
   },
   plugins: [
