@@ -23,10 +23,8 @@ interface Reembolso { id: string; descricao: string; valor: string; situacao: st
 function Tela({ ctx }: { ctx: JourneyContext }) {
   const [itens, setItens] = React.useState<Beneficio[] | null>(null);
   const [path, setPath] = React.useState(ctx.path);
-  const [tema, setTema] = React.useState(ctx.theme);
 
   React.useEffect(() => ctx.onPathChange(setPath), [ctx]);
-  React.useEffect(() => ctx.onThemeChange(setTema), [ctx]);
 
   React.useEffect(() => {
     ctx.telemetry.event('beneficios.tela_aberta');
@@ -56,7 +54,7 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
     );
   }
 
-  if (selecionado) return <Detalhe ctx={ctx} beneficio={selecionado} tema={tema} />;
+  if (selecionado) return <Detalhe ctx={ctx} beneficio={selecionado} />;
 
   return (
     <Stack gap={4}>
@@ -97,8 +95,8 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
 }
 
 function Detalhe({
-  ctx, beneficio, tema
-}: { ctx: JourneyContext; beneficio: Beneficio; tema: string }) {
+  ctx, beneficio
+}: { ctx: JourneyContext; beneficio: Beneficio }) {
   const [enviando, setEnviando] = React.useState(false);
   const [protocolo, setProtocolo] = React.useState<string | null>(null);
 
@@ -130,7 +128,6 @@ function Detalhe({
           items={[
             { label: 'Situação', value: <Badge tone="success">{beneficio.status}</Badge> },
             { label: 'Valor ou plano', value: beneficio.valor },
-            { label: 'Tema aplicado pelo shell', value: tema },
             ...(protocolo ? [{ label: 'Protocolo', value: protocolo }] : [])
           ]}
         />
