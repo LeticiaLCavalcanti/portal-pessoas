@@ -11,22 +11,22 @@
  * ========================================================================= */
 @import '@portal/tokens/tokens.css';
 
-/* A folha da v2 viaja junto com a da v1 -- de proposito.
+/* A folha da v2 viaja junto com a da v1 -- de propósito.
  *
- * Quem carrega o CSS do DS hoje sao o shell (`bootstrap.tsx`) e o harness
+ * Quem carrega o CSS do DS hoje são o shell (`bootstrap.tsx`) e o harness
  * `standalone` de cada squad. Se a v2 exigisse um import a mais, um componente
  * v2 dentro de uma jornada federada renderizaria SEM ESTILO no portal, porque
- * quem carrega a folha e o host, e o host nao sabe o que a jornada usa por
- * dentro. Uma jornada nao pode depender de um deploy do shell para trocar um
- * botao.
+ * quem carrega a folha e o host, e o host não sabe o que a jornada usa por
+ * dentro. Uma jornada não pode depender de um deploy do shell para trocar um
+ * botão.
  *
- * O custo e alguns kB de CSS nao usado enquanto a migracao nao termina. O
- * beneficio e que "migrar" e trocar uma linha de import, e nunca abrir o
- * repositorio do shell. Quando a v1 sair, este @import sobe para o topo da
- * folha da v2 e este arquivo inteiro e apagado.
+ * O custo é alguns kB de CSS não usado enquanto a migração não termina. O
+ * benefício é que "migrar" é trocar uma linha de import, e nunca abrir o
+ * repositório do shell. Quando a v1 sair, este @import sobe para o topo da
+ * folha da v2 e este arquivo inteiro é apagado.
  *
- * Os prefixos sao disjuntos (`ds-` x `ds2-`), entao a ordem entre as duas nao
- * altera nada: nenhum seletor de uma alcanca um no da outra.
+ * Os prefixos são disjuntos (`ds-` x `ds2-`), então a ordem entre as duas não
+ * altera nada: nenhum seletor de uma alcança um no da outra.
  */
 @import './v2/styles.css';
 
@@ -73,7 +73,7 @@
  * Mesma aparência, consequências completamente diferentes.
  *
  * O padrão aqui é o mesmo do item ativo do menu lateral: sublinhado e cor de
- * acento, sem preenchimento. Fica claro que a aba navega, e o único elemento
+ * acento, sem preenchimento. Fica claro que a aba navega, é o único elemento
  * sólido da tela volta a ser a ação principal.
  * ------------------------------------------------------------------------- */
 .ds-tabs {
@@ -171,8 +171,8 @@
 
 .ds-empty { text-align: center; padding: var(--space-7) var(--space-4); }
 .ds-empty__mark { font-family: var(--font-mono); color: var(--c-fg-subtle); font-size: 1.5rem; }
-/* Quando a marca e um icone, e nao a marca tipografica: centraliza e mata o
-   vao de baseline que um <svg> inline herda da linha de texto. */
+/* Quando a marca é um ícone, e não a marca tipográfica: centraliza e mata o
+   vão de baseline que um <svg> inline herda da linha de texto. */
 .ds-empty__mark > svg { display: block; margin: 0 auto; }
 
 .ds-list { list-style: none; margin: 0; padding: 0; }
@@ -186,17 +186,17 @@
 /* ---------------------------------------------------------------------------
  * Layout de grade e tabela -- L2.
  *
- * Estao no DS, e nao no shell, porque as JORNADAS precisam deles. Enquanto
- * `.pp-grid` morava so em apps/shell/src/styles.css, uma jornada que o usasse
+ * Estão no DS, e não no shell, porque as JORNADAS precisam deles. Enquanto
+ * `.pp-grid` morava só em apps/shell/src/styles.css, uma jornada que o usasse
  * ficava dependendo de uma classe do host: funcionava dentro do portal e
- * quebrava no harness isolado da squad. Prefixo `ds-` = contrato publico.
+ * quebrava no harness isolado da squad. Prefixo `ds-` = contrato público.
  * ------------------------------------------------------------------------- */
 .ds-grid {
   display: grid; gap: var(--space-4);
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-/* `overflow-x` no proprio bloco: tabela larga rola dentro do card e nao
+/* `overflow-x` no próprio bloco: tabela larga rola dentro do card e não
    empurra o layout do portal inteiro para o lado no celular. */
 .ds-table-wrap { overflow-x: auto; }
 .ds-table { width: 100%; border-collapse: collapse; font: var(--ts-body-sm); }

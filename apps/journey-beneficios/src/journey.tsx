@@ -1,14 +1,14 @@
 /**
  * ============================================================================
- *  Jornada: Beneficios  |  dona: squad-beneficios
+ *  Jornada: Benefícios  |  dona: squad-beneficios
  * ============================================================================
  *
- * Tres coisas que esta jornada exercita do contrato:
+ * Três coisas que esta jornada exercita do contrato:
  *  - ROTA INTERNA: `ctx.navigate` + `ctx.onPathChange` (voltar e deep link).
- *  - TEMA: nao le nem armazena tema; o DS repinta por custom property.
- *    `onThemeChange` so serve ao que depende de JS (canvas, por exemplo).
- *  - FLAG: `beneficios.reembolso-v2` chega pronta em `ctx.flags` -- a squad nao
- *    instancia SDK de feature flag (docs/adr/0002).
+ *  - TEMA: não lê nem armazena tema; o DS repinta por custom property.
+ *    `onThemeChange` só serve ao que depende de JS (canvas, por exemplo).
+ *  - FLAG: `beneficios.reembolso-v2` chega pronta em `ctx.flags` -- a squad não
+ *    instância SDK de feature flag (docs/adr/0002).
  */
 import * as React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -35,7 +35,7 @@ function Screen({ ctx }: { ctx: JourneyContext }) {
 
   const section = path.replace(/^\//, '').replace(/\/+$/, '');
 
-  // Rota propria da jornada, e nao um id de beneficio. Vem da busca global do
+  // Rota própria da jornada, e não um id de benefício. Vem da busca global do
   // portal ("Solicitar reembolso") e do card de detalhe.
   if (section === 'reembolso') return <Refunds ctx={ctx} />;
 
@@ -66,10 +66,10 @@ function Screen({ ctx }: { ctx: JourneyContext }) {
       <div className="ds-grid">
         {items.map((b) => (
           /*
-            A acao do card e `primary` e vai no `footer`, igual a da home. Antes
-            ela era `secondary` e ficava dentro do Stack -- entao esticava pela
-            largura do card e parava no fim do texto. Card em grade e sempre o
-            mesmo objeto, na home ou na jornada: mesma anatomia, mesma enfase.
+            A ação do card é `primary` e vai no `footer`, igual a da home. Antes
+            ela era `secondary` e ficava dentro do Stack -- então esticava pela
+            largura do card e parava no fim do texto. Card em grade é sempre o
+            mesmo objeto, na home ou na jornada: mesma anatomia, mesma ênfase.
           */
           <Card
             key={b.id}
@@ -103,8 +103,8 @@ function Detail({
   const request = async () => {
     setSubmitting(true);
     try {
-      // O botao chama o BFF de verdade e devolve protocolo. Um botao que so
-      // dispara um toast otimista e indistinguivel de um botao quebrado no dia
+      // O botão chama o BFF de verdade e devolve protocolo. Um botão que só
+      // dispara um toast otimista é indistinguível de um botão quebrado no dia
       // em que o backend cai.
       const r = await ctx.http.post<{ protocolo: string }>(
         `/v1/beneficios/${benefit.id}/solicitacoes`, { tipo: 'alteracao' }
@@ -151,9 +151,9 @@ function Refunds({ ctx }: { ctx: JourneyContext }) {
   const [submitting, setSubmitting] = React.useState(false);
 
   /**
-   * A flag nao esconde a tela -- ela troca o FLUXO. Com v2 desligada, o
-   * colaborador cai no formulario antigo em vez de ver um botao morto. Flag que
-   * apaga a saida sem oferecer alternativa e como nao ter a funcionalidade.
+   * A flag não esconde a tela -- ela troca o FLUXO. Com v2 desligada, o
+   * colaborador cai no formulário antigo em vez de ver um botão morto. Flag que
+   * apaga a saída sem oferecer alternativa é como não ter a funcionalidade.
    */
   const v2 = ctx.flags['beneficios.reembolso-v2'] === true;
 
@@ -250,7 +250,7 @@ const journey: JourneyModule = {
     );
 
     /**
-     * Desmonte obrigatorio: sem ele o portal vaza uma arvore a cada navegacao.
+     * Desmonte obrigatório: sem ele o portal vaza uma árvore a cada navegação.
      *
      * O `queueMicrotask` tira o desmonte do commit do React do shell -- sem
      * ele, "Attempted to synchronously unmount a root while React was already

@@ -1,9 +1,9 @@
 /**
- * Fronteira assincrona do Module Federation -- mesma razao que em
+ * Fronteira assíncrona do Module Federation -- mesma razão que em
  * apps/shell/src/main.tsx: os singletons compartilhados precisam ser
- * negociados antes de qualquer modulo que importe React ser avaliado.
+ * negociados antes de qualquer módulo que importe React ser avaliado.
  *
- * O modulo exposto (`./journey`) nao precisa disto: modulo exposto ja e
- * carregado de forma assincrona pelo runtime de federacao, por definicao.
+ * O módulo exposto (`./journey`) não precisa disto: módulo exposto já é
+ * carregado de forma assíncrona pelo runtime de federação, por definição.
  */
 import('./standalone-app');

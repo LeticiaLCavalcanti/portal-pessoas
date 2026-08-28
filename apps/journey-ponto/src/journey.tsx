@@ -3,15 +3,15 @@
  *  Jornada: Registro de ponto  |  dona: squad-jornada-trabalho
  * ============================================================================
  *
- * A squad controla stack, estado, rotas internas e cadencia de deploy. O unico
- * compromisso com o portal e exportar um `JourneyModule` (docs/adr/0002).
+ * A squad controla stack, estado, rotas internas e cadência de deploy. O único
+ * compromisso com o portal é exportar um `JourneyModule` (docs/adr/0002).
  *
  * `ctx.path` + `ctx.onPathChange` cobrem deep link e "voltar" do navegador --
  * inclusive quando a rota veio da busca global (docs/adr/0009).
  */
 import * as React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-// A folha da squad viaja junto do bundle federado -- o shell nao a conhece.
+// A folha da squad viaja junto do bundle federado -- o shell não a conhece.
 import './journey.css';
 import type { JourneyContext, JourneyModule } from '@portal/journey-contract';
 import {
@@ -29,7 +29,7 @@ interface TimeTracking {
   justificativas: { id: string; dia: string; motivo: string; situacao: string }[];
 }
 
-/** Rotas internas da jornada. O shell nao conhece nenhuma delas. */
+/** Rotas internas da jornada. O shell não conhece nenhuma delas. */
 const TABS = [
   { path: '/', label: 'Hoje' },
   { path: '/espelho', label: 'Espelho de ponto' },
@@ -38,20 +38,20 @@ const TABS = [
 ] as const;
 
 /**
- * Relogio da tela de bater ponto.
+ * Relógio da tela de bater ponto.
  *
- * Numa tela de registro de ponto o horario e a informacao mais importante:
- * antes de clicar, o colaborador quer conferir QUE HORAS vao ser gravadas.
- * Sem ele, so se descobre depois, no toast.
+ * Numa tela de registro de ponto o horário é a informação mais importante:
+ * antes de clicar, o colaborador quer conferir QUE HORAS vão ser gravadas.
+ * Sem ele, só se descobre depois, no toast.
  *
- * O fuso e fixado em Brasilia, nao no do dispositivo: a jornada contratual do
- * colaborador e em horario de Brasilia, entao um colaborador viajando (ou com
- * o relogio do sistema em outro fuso) precisa ver a MESMA hora que vai ser
+ * O fuso é fixado em Brasília, não no do dispositivo: a jornada contratual do
+ * colaborador é em horário de Brasília, então um colaborador viajando (ou com
+ * o relógio do sistema em outro fuso) precisa ver a MESMA hora que vai ser
  * gravada. O BFF carimba no mesmo fuso, pelo mesmo motivo.
  *
- * Continua valendo que a marcacao oficial e a do servidor, e nao esta: senao
- * daria para adiantar o ponto mexendo no relogio do computador. A diferenca e
- * que agora os dois nao divergem por fuso -- so por desvio de relogio.
+ * Continua valendo que a marcação oficial é a do servidor, e não esta: senão
+ * daria para adiantar o ponto mexendo no relógio do computador. A diferença é
+ * que agora os dois não divergem por fuso -- só por desvio de relógio.
  */
 const BRASILIA_TIME_ZONE = 'America/Sao_Paulo';
 
@@ -75,9 +75,9 @@ function Clock() {
       <Icon name="clock" size={22} />
       <div>
         {/*
-          `aria-hidden` no numero e um rotulo estatico ao lado: um leitor de
-          tela anunciando o relogio a cada segundo tornaria a tela inutilizavel.
-          Quem precisa do horario exato tem o <time dateTime> abaixo.
+          `aria-hidden` no número e um rótulo estático ao lado: um leitor de
+          tela anunciando o relógio a cada segundo tornaria a tela inutilizável.
+          Quem precisa do horário exato tem o <time dateTime> abaixo.
         */}
         <time className="ponto-relogio__hora" dateTime={now.toISOString()} aria-hidden>
           {time}
@@ -109,7 +109,7 @@ function Screen({ ctx }: { ctx: JourneyContext }) {
     ctx.http.get<TimeTracking>('/v1/ponto').then(setData).catch((e) => ctx.telemetry.error(e));
   }, [ctx]);
 
-  // Demonstracao proposital de isolamento de falha: o portal continua de pe.
+  // Demonstração proposital de isolamento de falha: o portal continua de pé.
   if (crash) throw new Error('Falha simulada dentro da jornada de ponto');
 
   const register = async () => {
@@ -323,13 +323,13 @@ const journey: JourneyModule = {
   contractVersion: '1.1',
   mount(container, ctx) {
     /**
-     * A jornada cria a PROPRIA raiz React. Como `react` e singleton
-     * compartilhado via Module Federation, nao ha segunda copia da lib na
-     * pagina -- so uma segunda arvore, isolada da arvore do shell.
+     * A jornada cria a PRÓPRIA raiz React. Como `react` é singleton
+     * compartilhado via Module Federation, não há segunda cópia da lib na
+     * página -- só uma segunda árvore, isolada da árvore do shell.
      *
-     * E porque a arvore e isolada que o error boundary tem de estar AQUI: o
-     * boundary do shell nao enxerga erros desta raiz. Ele captura, avisa o
-     * shell por `ctx.fail` e deixa o shell desenhar a tela degradada padrao.
+     * É porque a árvore é isolada que o error boundary tem de estar AQUI: o
+     * boundary do shell não enxerga erros desta raiz. Ele captura, avisa o
+     * shell por `ctx.fail` e deixa o shell desenhar a tela degradada padrão.
      */
     let root: Root | null = createRoot(container);
     root.render(
@@ -339,7 +339,7 @@ const journey: JourneyModule = {
     );
 
     /**
-     * Desmonte obrigatorio: sem ele o portal vaza uma arvore a cada navegacao.
+     * Desmonte obrigatório: sem ele o portal vaza uma árvore a cada navegação.
      *
      * O `queueMicrotask` tira o desmonte do commit do React do shell -- sem
      * ele, "Attempted to synchronously unmount a root while React was already

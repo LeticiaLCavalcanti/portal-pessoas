@@ -1,8 +1,8 @@
 /**
  * @portal/platform-core
  *
- * Capacidades transversais do portal: HTTP, telemetria, rollout, sessao.
- * Nao contem NADA de negocio e nada de UI -- por isso pode ser consumido
+ * Capacidades transversais do portal: HTTP, telemetria, rollout, sessão.
+ * Não contém NADA de negócio e nada de UI -- por isso pode ser consumido
  * tanto pelo shell web quanto pelo app React Native.
  */
 export * from './http';

@@ -20,12 +20,12 @@ import { Badge, Button } from './primitives';
 import { _clearWarnings } from './deprecations';
 
 /**
- * O aviso de depreciacao e comportamento ESPERADO na maioria destes testes.
+ * O aviso de depreciação é comportamento ESPERADO na maioria destes testes.
  * Sem silenciar, uma suite verde imprime cinco blocos de stderr -- e uma suite
- * que sempre suja o stderr treina o time a nao ler stderr.
+ * que sempre suja o stderr treina o time a não ler stderr.
  *
- * Silenciamos so `console.warn`: o React emite os avisos dele (aninhamento de
- * DOM invalido, chave faltando) por `console.error`, que segue visivel.
+ * Silenciamos só `console.warn`: o React emite os avisos dele (aninhamento de
+ * DOM inválido, chave faltando) por `console.error`, que segue visível.
  * `restoreMocks: true` na config devolve o original a cada teste, e os testes
  * que ASSERTAM sobre o aviso espiam por cima deste mock normalmente.
  */
@@ -35,7 +35,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
-  // O registro de "ja avisei" e modulo-level e sobrevive entre testes; sem
+  // O registro de "já avisei" é module-level e sobrevive entre testes; sem
   // limpar, o teste de "avisa uma vez por chave" passaria por acidente.
   _clearWarnings();
 });

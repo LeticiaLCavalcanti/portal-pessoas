@@ -18,9 +18,9 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-// Importado pelo SUBPATH do pacote, e nao por caminho relativo: e exatamente
+// Importado pelo SUBPATH do pacote, e não por caminho relativo: é exatamente
 // assim que `apps/shell/src/platform/loadRemote.ts` consome em runtime. Testar
-// pelo mesmo caminho do consumidor exercita tambem o mapa de `exports` do
+// pelo mesmo caminho do consumidor exercita também o mapa de `exports` do
 // pacote -- um subpath quebrado no package.json apareceria aqui.
 import { containerNameOf } from '@portal/build-preset/container-name';
 

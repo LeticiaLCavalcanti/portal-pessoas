@@ -1,8 +1,8 @@
 /**
  * JourneyHost -- resolve rollout, monta a jornada conforme o `kind`, injeta o
- * JourneyContext, degrada em falha e instrumenta tudo por jornada/squad/versao.
+ * JourneyContext, degrada em falha e instrumenta tudo por jornada/squad/versão.
  *
- * O shell nao conhece ponto, beneficios nem holerite: so monta e desmonta o que
+ * O shell não conhece ponto, benefícios nem holerite: só monta e desmonta o que
  * respeita o contrato (docs/adr/0002).
  */
 import * as React from 'react';
@@ -25,7 +25,7 @@ export function JourneyHost({ manifest, path }: { manifest: JourneyManifest; pat
   const navigate = useNavigate();
   const user = portal.user!;
 
-  /** Decisao de rollout: acontece ANTES de qualquer download de bundle. */
+  /** Decisão de rollout: acontece ANTES de qualquer download de bundle. */
   const rollout = React.useMemo(() => resolveRollout(manifest, user), [manifest, user]);
   const fallback = manifest.rollout.fallbackJourneyId
     ? portal.journeyById(manifest.rollout.fallbackJourneyId)
@@ -91,7 +91,7 @@ function JourneySurface({
   /**
    * Canal de falha vindo de DENTRO da jornada (docs/adr/0007).
    *
-   * Atras de um ref porque `ctx` e memoizado: com `fail` nas dependencias, cada
+   * Atrás de um ref porque `ctx` e memoizado: com `fail` nas dependências, cada
    * re-render do shell criaria um `ctx` novo e REMONTARIA a jornada.
    */
   const failRef = React.useRef<(e: unknown) => void>(() => undefined);
@@ -108,7 +108,7 @@ function JourneySurface({
     });
     return {
       user: portal.user!,
-      // x-journey-id permite ao BFF atribuir latencia e erro ao time certo.
+      // x-journey-id permite ao BFF atribuir latência e erro ao time certo.
       http: createHttpClient({
         baseUrl: 'http://localhost:4000',
         getToken: () => 'token-simulado',
@@ -126,10 +126,10 @@ function JourneySurface({
       fail: (e) => failRef.current(e)
     };
     /**
-     * Dependencias deliberadamente curtas. Cada uma delas REMONTA a jornada.
-     *  - `path` fica de fora: navegacao interna e notificada por onPathChange.
-     *  - `theme` fica de fora: e notificado por onThemeChange e, na pratica,
-     *    o repintar vem das custom properties do DS, sem codigo na squad.
+     * Dependências deliberadamente curtas. Cada uma delas REMONTA a jornada.
+     *  - `path` fica de fora: navegação interna é notificada por onPathChange.
+     *  - `theme` fica de fora: é notificado por onThemeChange e, na prática,
+     *    o repintar vem das custom properties do DS, sem código na squad.
      */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [manifest.id, manifest.version, manifest.route, portal.user, portal.flags]);
@@ -175,8 +175,8 @@ function JourneySurface({
           message: e instanceof Error ? e.message : String(e),
           step: 'load'
         });
-        // Na telemetria vai o erro TECNICO completo (`cause`), nao a frase
-        // amigavel: quem le isto e a squad dona, de madrugada, no alerta.
+        // Na telemetria vai o erro TÉCNICO completo (`cause`), não a frase
+        // amigável: quem lê isto é a squad dona, de madrugada, no alerta.
         ctx.telemetry.error((e as { cause?: unknown })?.cause ?? e, {
           step: 'load',
           entry: manifest.entry,
@@ -209,9 +209,9 @@ function JourneySurface({
   }
 
   /**
-   * Rota da versao anterior. O `origin` cobre a degradacao em cascata: a
-   * moderna falhou, o shell ja tinha caido no fallback de rollout, e o
-   * fallback tambem falhou.
+   * Rota da versão anterior. O `origin` cobre a degradação em cascata: a
+   * moderna falhou, o shell já tinha caído no fallback de rollout, e o
+   * fallback também falhou.
    */
   const fallbackId = manifest.rollout.fallbackJourneyId ?? origin.rollout.fallbackJourneyId;
   const fallbackRoute = fallbackId ? portal.journeyById(fallbackId)?.route : undefined;
@@ -252,7 +252,7 @@ function JourneySurface({
         </Card>
       )}
 
-      {/* O container fica sempre montado: e o "buraco" onde a squad desenha. */}
+      {/* O container fica sempre montado: é o "buraco" onde a squad desenha. */}
       <div ref={containerRef} hidden={phase.s !== 'mounted'} />
 
       {phase.s === 'mounted' && (

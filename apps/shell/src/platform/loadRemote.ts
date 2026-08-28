@@ -1,13 +1,13 @@
 /**
- * Carregamento de microfrontends em runtime -- o unico arquivo do shell que
+ * Carregamento de microfrontends em runtime -- o único arquivo do shell que
  * conhece Module Federation.
  *
- * Decisoes: docs/adr/0001 (remotes em runtime) e docs/adr/0006 (Rspack).
+ * Decisões: docs/adr/0001 (remotes em runtime) e docs/adr/0006 (Rspack).
  *
- * Invariantes desta implementacao:
- *  - a chave de cache e `id@versao`, entao subir versao invalida o cache;
- *  - falha nao fica em cache -- "tentar de novo" vai na rede;
- *  - `loadRemote` nao tem orcamento de tempo proprio, dai o `withTimeout`.
+ * Invariantes desta implementação:
+ *  - a chave de cache é `id@versao`, então subir versão inválida o cache;
+ *  - falha não fica em cache -- "tentar de novo" vai na rede;
+ *  - `loadRemote` não tem orçamento de tempo próprio, daí o `withTimeout`.
  */
 import { loadRemote, registerRemotes } from '@module-federation/enhanced/runtime';
 import { containerNameOf } from '@portal/build-preset/container-name';
@@ -16,8 +16,8 @@ import type { JourneyModule } from '@portal/journey-contract';
 const cache = new Map<string, Promise<JourneyModule>>();
 
 /**
- * Traducao de falha tecnica para frase de colaborador -- ver docs/adr/0001,
- * "Consequencias". A mensagem original vai inteira para a telemetria.
+ * Tradução de falha técnica para frase de colaborador -- ver docs/adr/0001,
+ * "Consequências". A mensagem original vai inteira para a telemetria.
  */
 function employeeFacingMessage(error: unknown, journeyName: string): string {
   const raw = error instanceof Error ? error.message : String(error);
@@ -31,11 +31,11 @@ function employeeFacingMessage(error: unknown, journeyName: string): string {
   if (raw.includes('não exporta mount'))
     return raw;
 
-  // Falha desconhecida: nao inventamos diagnostico, so evitamos despejar stack.
+  // Falha desconhecida: não inventamos diagnóstico, só evitamos despejar stack.
   return `Não foi possível abrir a jornada "${journeyName}".`;
 }
 
-/** Erro de jornada: frase curta na tela, detalhe tecnico preservado em `cause`. */
+/** Erro de jornada: frase curta na tela, detalhe técnico preservado em `cause`. */
 export class JourneyLoadError extends Error {
   constructor(readonly cause: unknown, journeyName: string) {
     super(employeeFacingMessage(cause, journeyName));
@@ -71,13 +71,13 @@ export function loadJourneyModule(opts: {
 
   const promise = withTimeout(
     (async () => {
-      // `force: true` re-registra o mesmo container em outra URL: e o que
-      // torna o rollback instantaneo (docs/adr/0001).
+      // `force: true` re-registra o mesmo container em outra URL: é o que
+      // torna o rollback instantâneo (docs/adr/0001).
       registerRemotes(
         [{
           name: container,
           entry: opts.entry,
-          // NAO trocar para 'module': falha com RUNTIME-002, que parece
+          // NÃO trocar para 'module': falha com RUNTIME-002, que parece
           // "jornada fora do ar". Ver docs/adr/0006, "Negativas".
           type: 'global'
         }],
@@ -101,7 +101,7 @@ export function loadJourneyModule(opts: {
     opts.timeoutMs,
     opts.id
   ).catch((error) => {
-    // O timeout dispara fora da promise interna, entao a traducao vem aqui.
+    // O timeout dispara fora da promise interna, então a tradução vem aqui.
     throw error instanceof JourneyLoadError ? error : new JourneyLoadError(error, opts.id);
   });
 

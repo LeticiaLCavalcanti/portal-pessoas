@@ -90,7 +90,7 @@
  * é detalhe: `--c-neutral-bg` seria a escolha "óbvia" para o tom neutro, e ele
  * é `#000D3C` -- exatamente a cor de `--c-bg-surface` no tema escuro. Um botão
  * neutro sólido ficaria invisível dentro do card, e só no escuro. Por isso o
- * neutro preenchido usa `--c-bg-sunken`, que é claro no claro e claro-sobre-
+ * neutro preenchido usa `--c-bg-sunken`, que é claro no claro é claro-sobre-
  * escuro no escuro.
  *
  * O par crítico funciona pelo motivo inverso: `--c-danger-text` e

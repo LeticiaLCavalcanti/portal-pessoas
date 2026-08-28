@@ -3,35 +3,35 @@
  *  Holerite / detalhe do demonstrativo  --  PRIMEIRA TELA NO DS v2
  * ============================================================================
  *
- * Este arquivo e a prova de que a migracao do Design System e gradual e por
+ * Este arquivo é a prova de que a migração do Design System é gradual e por
  * ARQUIVO. Repare no que ele tem de diferente do resto da jornada:
  *
- *   - Um unico import de DS, e ele aponta para `/v2`. Nao ha dois imports, nao
- *     ha alias, nao ha `ButtonV2`. `Stack`, `Row` e `Text` ainda sao os
- *     componentes da v1 -- a superficie `/v2` os reexporta sem alteracao,
- *     entao a squad nao precisa saber de cor o que ja migrou e o que nao.
+ *   - Um único import de DS, e ele aponta para `/v2`. Não há dois imports, não
+ *     há alias, não há `ButtonV2`. `Stack`, `Row` e `Text` ainda são os
+ *     componentes da v1 -- a superfície `/v2` os reexporta sem alteração,
+ *     então a squad não precisa saber de cor o que já migrou é o que não.
  *
- *   - `journey.tsx`, ao lado, segue 100% na v1, e `Screen` e `IncomeStatement` nao foram
- *     tocadas. As duas versoes do DS renderizam na mesma arvore React, sob o
+ *   - `journey.tsx`, ao lado, segue 100% na v1, e `Screen` e `IncomeStatement` não foram
+ *     tocadas. As duas versões do DS renderizam na mesma árvore React, sob o
  *     mesmo ErrorBoundary, dentro do mesmo shell -- e nenhuma das duas telas
- *     mudou de aparencia, porque as duas leem os mesmos tokens L0.
+ *     mudou de aparência, porque as duas leem os mesmos tokens L0.
  *
  * O que a v2 resolveu aqui, concretamente:
  *
- *   1. O botao de baixar. Na v1 o estado de "gerando" era feito trocando o
- *      ROTULO na mao (`baixando ? 'Gerando…' : 'Baixar demonstrativo'`). Isso
- *      nao anuncia nada para leitor de tela -- texto que muda dentro de um
- *      botao nao e regiao viva -- e ainda mudava a largura do botao no meio do
- *      clique. `loading` resolve os dois: rotulo estavel, `aria-busy` no no
+ *   1. O botão de baixar. Na v1 o estado de "gerando" era feito trocando o
+ *      RÓTULO na mão (`baixando ? 'Gerando…' : 'Baixar demonstrativo'`). Isso
+ *      não anuncia nada para leitor de tela -- texto que muda dentro de um
+ *      botão não é região viva -- e ainda mudava a largura do botão no meio do
+ *      clique. `loading` resolve os dois: rótulo estável, `aria-busy` no no
  *      certo, indicador visual.
  *
- *   2. O total liquido. Na v1 era `value={<Text size="lg">{d.liquido}</Text>}`:
+ *   2. O total líquido. Na v1 era `value={<Text size="lg">{d.liquido}</Text>}`:
  *      hierarquia montada no ponto de uso, ou seja, cada tela do portal
- *      inventava a sua. Na v2 e `emphasis: true`, e o DS decide como um total
+ *      inventava a sua. Na v2 é `emphasis: true`, e o DS decide como um total
  *      se parece.
  *
- *   3. `<dl>/<dt>/<dd>` no lugar de `<ul>/<li>`, entao o leitor de tela anuncia
- *      "Liquido a receber, R$ ..." como par, e nao duas cadeias soltas.
+ *   3. `<dl>/<dt>/<dd>` no lugar de `<ul>/<li>`, então o leitor de tela anuncia
+ *      "Líquido a receber, R$ ..." como par, e não duas cadeias soltas.
  *
  * Ver packages/design-system/MIGRATION.md e docs/adr/0011.
  */
@@ -44,11 +44,11 @@ export function Detail({ ctx, d }: { ctx: JourneyContext; d: Payslip }) {
   const [downloading, setDownloading] = React.useState(false);
 
   /**
-   * O "baixar" real: o BFF devolve o PDF ja assinado pelo sistema de folha, o
-   * front so materializa o download. Fazer isso no cliente a partir de um
-   * Blob evita expor a URL do sistema de origem e mantem o token fora da barra
-   * de endereco -- o mesmo motivo pelo qual o legado recebe token por
-   * postMessage e nao por querystring.
+   * O "baixar" real: o BFF devolve o PDF já assinado pelo sistema de folha, o
+   * front só materializa o download. Fazer isso no cliente a partir de um
+   * Blob evita expor a URL do sistema de origem e mantém o token fora da barra
+   * de endereço -- o mesmo motivo pelo qual o legado recebe token por
+   * postMessage e não por querystring.
    */
   const download = async () => {
     setDownloading(true);
@@ -94,15 +94,15 @@ export function Detail({ ctx, d }: { ctx: JourneyContext; d: Payslip }) {
             items={[
               { label: 'Total de proventos', value: d.bruto },
               { label: 'Total de descontos', value: d.descontos },
-              // Hierarquia do total decidida pelo DS, e nao por um <Text
-              // size="lg"> montado aqui. Ver o item 2 do cabecalho.
+              // Hierarquia do total decidida pelo DS, e não por um <Text
+              // size="lg"> montado aqui. Ver o item 2 do cabeçalho.
               { label: 'Líquido a receber', value: d.liquido, emphasis: true }
             ]}
           />
           <Row gap={3} style={{ flexWrap: 'wrap' }}>
             {/*
-              `loading` no lugar da troca de rotulo. O `Icon` vem da v1,
-              reexportado pela superficie /v2 -- primitivo v1 dentro de
+              `loading` no lugar da troca de rótulo. O `Icon` vem da v1,
+              reexportado pela superfície /v2 -- primitivo v1 dentro de
               primitivo v2, no mesmo no, sem adaptador.
             */}
             <Button loading={downloading} onClick={download} iconStart={<Icon name="receipt" size={18} />}>
@@ -114,9 +114,9 @@ export function Detail({ ctx, d }: { ctx: JourneyContext; d: Payslip }) {
 
       <div className="ds-grid">
         {/*
-          `ds-grid` e classe da v1 e continua valendo: a v2 nao redefiniu
-          utilitario de layout, entao nao ha o que migrar aqui. Major nao e
-          licenca para churn -- ver patterns.tsx.
+          `ds-grid` é classe da v1 e continua valendo: a v2 não redefiniu
+          utilitário de layout, então não há o que migrar aqui. Major não é
+          licença para churn -- ver patterns.tsx.
         */}
         <Card title="Proventos">
           <DataList items={earnings.map((l) => ({ label: l.descricao, value: l.valor }))} />

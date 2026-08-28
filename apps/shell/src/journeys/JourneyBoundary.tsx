@@ -1,8 +1,8 @@
 /**
- * Isolamento de falha do lado do SHELL: cobre a arvore que o shell desenha em
- * volta da jornada, NAO a arvore da squad.
+ * Isolamento de falha do lado do SHELL: cobre a árvore que o shell desenha em
+ * volta da jornada, NÃO a árvore da squad.
  *
- * O outro lado da fronteira e coberto por `ctx.fail`. Por que sao duas pecas:
+ * O outro lado da fronteira é coberto por `ctx.fail`. Por que são duas peças:
  * docs/adr/0007.
  */
 import * as React from 'react';

@@ -1,10 +1,10 @@
 /**
  * Home personalizada.
  *
- * Decisao: a home e composta pelo BFF, nao pelo shell.
- * O shell recebe uma lista de cards ja priorizada e apenas renderiza. Se a
- * personalizacao morasse no shell, toda regra nova de negocio ("mostrar aviso
- * de ferias vencendo") viraria deploy do core -- exatamente o acoplamento que
+ * Decisão: a home é composta pelo BFF, não pelo shell.
+ * O shell recebe uma lista de cards já priorizada e apenas renderiza. Se a
+ * personalização morasse no shell, toda regra nova de negócio ("mostrar aviso
+ * de férias vencendo") viraria deploy do core -- exatamente o acoplamento que
  * a arquitetura tenta evitar.
  */
 import * as React from 'react';

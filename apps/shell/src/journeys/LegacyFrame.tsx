@@ -1,7 +1,7 @@
 /**
  * Adaptador de jornada LEGADA: iframe com ponte postMessage.
  *
- * Decisao, preco assumido e notas de seguranca: docs/adr/0003.
+ * Decisão, preço assumido e notas de segurança: docs/adr/0003.
  *
  * Mensagens da ponte, nos dois sentidos, no tipo `BridgeMessage` abaixo.
  */
@@ -22,14 +22,14 @@ export function LegacyFrame({ manifest, ctx }: { manifest: JourneyManifest; ctx:
   const origin = React.useMemo(() => new URL(manifest.entry).origin, [manifest.entry]);
 
   /**
-   * Tema por ASSINATURA, nunca lendo `ctx.theme`: `ctx` e memoizado, entao
+   * Tema por ASSINATURA, nunca lendo `ctx.theme`: `ctx` é memoizado, então
    * `ctx.theme` congela no valor da montagem. Depender dele deixava o legado
-   * branco dentro de um portal escuro pelo resto da sessao.
+   * branco dentro de um portal escuro pelo resto da sessão.
    */
   const [theme, setTheme] = React.useState(ctx.theme);
   React.useEffect(() => ctx.onThemeChange(setTheme), [ctx]);
 
-  // O handshake acontece dentro de um listener de longa duracao, que enxerga o
+  // O handshake acontece dentro de um listener de longa duração, que enxerga o
   // `theme` do render em que foi criado -- por isso a leitura passa pelo ref.
   const themeRef = React.useRef(theme);
   themeRef.current = theme;
@@ -37,14 +37,14 @@ export function LegacyFrame({ manifest, ctx }: { manifest: JourneyManifest; ctx:
   React.useEffect(() => {
     const t0 = performance.now();
     const onMessage = (ev: MessageEvent<BridgeMessage>) => {
-      // Confianca por origem: sem isto qualquer aba poderia falar com o shell.
+      // Confiança por origem: sem isto qualquer aba poderia falar com o shell.
       if (ev.origin !== origin) return;
       const msg = ev.data;
       switch (msg?.type) {
         case 'portal:legacy:ready':
           setReady(true);
           ctx.telemetry.timing('legacy.tempo_ate_pronto', Math.round(performance.now() - t0));
-          // Handshake: so aqui o legado recebe identidade, tema e token.
+          // Handshake: só aqui o legado recebe identidade, tema e token.
           ref.current?.contentWindow?.postMessage(
             {
               type: 'portal:host:init',

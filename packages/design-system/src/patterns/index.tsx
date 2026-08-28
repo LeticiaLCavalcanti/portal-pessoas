@@ -1,7 +1,7 @@
 /**
- * CAMADA 2 do DS: composicoes.
- * Ainda agnosticas de dominio, mas ja opinativas sobre layout e hierarquia.
- * E aqui que garantimos que "card de jornada" da squad A e da squad B sao iguais.
+ * CAMADA 2 do DS: composições.
+ * Ainda agnósticas de domínio, mas já opinativas sobre layout e hierarquia.
+ * É aqui que garantimos que "card de jornada" da squad A e da squad B são iguais.
  */
 import * as React from 'react';
 import { Text, Row } from '../primitives';
@@ -14,11 +14,11 @@ export function Card({
 }: React.HTMLAttributes<HTMLDivElement> & {
   title?: string;
   hint?: string;
-  /** Conteudo do canto superior direito. Selo de estado, normalmente. */
+  /** Conteúdo do canto superior direito. Selo de estado, normalmente. */
   actions?: React.ReactNode;
   /**
-   * Acao do card, ancorada na BASE. Numa grade os cards tem alturas de texto
-   * diferentes; com o botao no fim do conteudo, a fileira sai desalinhada.
+   * Ação do card, ancorada na BASE. Numa grade os cards têm alturas de texto
+   * diferentes; com o botão no fim do conteúdo, a fileira sai desalinhada.
    */
   footer?: React.ReactNode;
 }) {
@@ -43,10 +43,10 @@ export function EmptyState({
   mark = '( )', title, description, action
 }: {
   /**
-   * Marca acima do titulo. `ReactNode` e nao `string` porque estado de falha
-   * pede icone e estado vazio pede a marca tipografica (`[ - ]`, `[ ? ]`) --
-   * restringir a string obrigaria o ponto de uso a desenhar o SVG na mao.
-   * Aditivo: todo `mark="[ x ]"` que ja existia continua valendo.
+   * Marca acima do título. `ReactNode` é não `string` porque estado de falha
+   * pede ícone e estado vazio pede a marca tipográfica (`[ - ]`, `[ ? ]`) --
+   * restringir a string obrigaria o ponto de uso a desenhar o SVG na mão.
+   * Aditivo: todo `mark="[ x ]"` que já existia continua valendo.
    */
   mark?: React.ReactNode;
   title: string;
@@ -70,12 +70,12 @@ export function DataList({ items }: { items: { label: string; value: React.React
         <li className="ds-list__item" key={it.label}>
           <Text size="sm" tone="muted" as="span">{it.label}</Text>
           {/*
-            `as="div"` e obrigatorio aqui, e nao preferencia de estilo: `value`
-            e ReactNode, entao a squad legitimamente passa um Badge, um botao ou
-            uma Row. Com o <p> que estava aqui, o navegador FECHAVA o paragrafo
-            ao encontrar o <div> e reordenava a arvore -- o React reclamava de
-            validateDOMNesting e, em casos com hidratacao, o no ficava fora de
-            lugar. Um primitivo do DS nao pode restringir o que ele mesmo
+            `as="div"` é obrigatório aqui, e não preferência de estilo: `value`
+            é ReactNode, então a squad legitimamente passa um Badge, um botão ou
+            uma Row. Com o <p> que estava aqui, o navegador FECHAVA o parágrafo
+            ao encontrar o <div> e reordenava a árvore -- o React reclamava de
+            validateDOMNesting e, em casos com hidratação, o nó ficava fora de
+            lugar. Um primitivo do DS não pode restringir o que ele mesmo
             aceita como ReactNode.
           */}
           <Text size="sm" as="div">{it.value}</Text>

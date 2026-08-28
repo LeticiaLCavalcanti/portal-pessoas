@@ -1,9 +1,9 @@
 /**
  * Formatos que a jornada recebe do BFF.
  *
- * Extraidos de `journey.tsx` quando `Detail` virou arquivo proprio na
- * migracao para o DS v2: dois arquivos precisam do mesmo tipo, e duplicar a
- * interface e o caminho mais curto para as duas copias divergirem.
+ * Extraidos de `journey.tsx` quando `Detail` virou arquivo próprio na
+ * migração para o DS v2: dois arquivos precisam do mesmo tipo, e duplicar a
+ * interface é o caminho mais curto para as duas cópias divergirem.
  */
 export interface Payslip {
   competencia: string;

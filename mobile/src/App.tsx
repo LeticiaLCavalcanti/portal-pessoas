@@ -8,7 +8,7 @@ import { JourneyWebView } from './JourneyWebView';
 
 export default function App() {
   const session = useBiometricSession();       // keychain + biometria
-  const theme = useSystemTheme();            // claro/escuro do SO
+  const theme = useSystemTheme();            // claro/escuro
   const initialRoute = useDeepLinkOrPush('/'); // push e deep link entram por aqui
   const t = nativeTheme(theme);                // MESMOS tokens do web
 

@@ -3,28 +3,28 @@
  *  @portal/build-preset -- o caminho pavimentado de build do portal
  * ============================================================================
  *
- * Por que um preset e nao tres rspack.config.js copiados:
+ * Por que um preset e não três rspack.config.js copiados:
  *
- *  1. A lista `shared` do Module Federation e o UNICO ponto onde 10 squads
+ *  1. A lista `shared` do Module Federation é o ÚNICO ponto onde 10 squads
  *     precisam concordar em tempo de build. Quando ela mora copiada em N
- *     configs, basta um time subir React 19 sozinho para colocar duas copias
- *     de React na mesma pagina e quebrar hooks em producao. Aqui ela mora em
+ *     configs, basta um time subir React 19 sozinho para colocar duas cópias
+ *     de React na mesma página e quebrar hooks em produção. Aqui ela mora em
  *     UM lugar, versionado, com dono (plataforma).
  *
  *  2. O nome do container federado precisa bater exatamente com o `id` do
- *     manifesto no registro do BFF -- senao o shell registra "ponto" e o bundle
- *     se anuncia como "app". O preset deriva um do outro, entao a classe
+ *     manifesto no registro do BFF -- senão o shell registra "ponto" e o bundle
+ *     se anuncia como "app". O preset deriva um do outro, então a classe
  *     inteira de erro deixa de existir.
  *
  *  3. Uma squad que precise divergir ainda pode: `journeyConfig()` devolve um
- *     objeto de configuracao comum do Rspack, que o time e livre para estender.
- *     O preset e caminho pavimentado, nao cerca.
+ *     objeto de configuração comum do Rspack, que o time é livre para estender.
+ *     O preset é caminho pavimentado, não cerca.
  *
- * Por que Rspack (e nao Vite) -- ver docs/adr/0006-rspack-como-bundler.md:
- * Module Federation e nativo do Rspack (mesma implementacao de referencia do
+ * Por que Rspack (e não Vite) -- ver docs/adr/0006-rspack-como-bundler.md:
+ * Module Federation é nativo do Rspack (mesma implementação de referência do
  * webpack, mantida pelo time do Module Federation), o que remove o plugin de
- * terceiros e faz federacao funcionar tambem em `dev` -- com Vite, os remotes
- * so federavam depois de `build`, e o compartilhamento de singleton nao valia
+ * terceiros e faz federação funcionar também em `dev` -- com Vite, os remotes
+ * só federavam depois de `build`, e o compartilhamento de singleton não valia
  * em desenvolvimento.
  */
 import { rspack } from '@rspack/core';
@@ -33,40 +33,40 @@ import { ReactRefreshRspackPlugin } from '@rspack/plugin-react-refresh';
 import { containerNameOf } from './container-name.mjs';
 
 /* -------------------------------------------------------------------------- */
-/* Governanca: os singletons do portal                                         */
+/* Governança: os singletons do portal                                         */
 /* -------------------------------------------------------------------------- */
 
 /**
- * Lista deliberadamente CURTA. Cada item aqui e um ponto de coordenacao entre
- * todas as squads; cada item que sai daqui e uma duplicacao de bytes no browser.
+ * Lista deliberadamente CURTA. Cada item aqui é um ponto de coordenação entre
+ * todas as squads; cada item que sai daqui é uma duplicação de bytes no browser.
  *
- * `singleton: true`  -> uma unica instancia na pagina (obrigatorio para React).
- * `strictVersion: false` -> divergencia de patch degrada com aviso no console,
- *                           em vez de derrubar a jornada em runtime. A correcao
- *                           e o PR do Renovate, nao a tela branca do colaborador.
+ * `singleton: true`  -> uma única instância na página (obrigatório para React).
+ * `strictVersion: false` -> divergência de patch degrada com aviso no console,
+ *                           em vez de derrubar a jornada em runtime. A correção
+ *                           e o PR do Renovate, não a tela branca do colaborador.
  */
 export const SHARED_SINGLETONS = {
   react: { singleton: true, strictVersion: false, requiredVersion: '^18.3.1' },
   'react-dom': { singleton: true, strictVersion: false, requiredVersion: '^18.3.1' },
   '@portal/design-system': { singleton: true, strictVersion: false, requiredVersion: '^1.0.0' },
   /**
-   * A barra no fim e SHARING POR PREFIXO, e ela existe por causa do DS v2.
+   * A barra no fim é SHARING POR PREFIXO, e ela existe por causa do DS v2.
    *
    * A chave sem barra compartilha exatamente `@portal/design-system`. Deep
-   * import (`@portal/design-system/v2`) e outro especificador de modulo e NAO
+   * import (`@portal/design-system/v2`) é outro especificador de módulo e NÃO
    * casa com ela -- sem esta linha, cada jornada que migrar para a v2 embutiria
-   * a propria copia da v2 no bundle, e o singleton do DS deixaria de ser um.
+   * a própria cópia da v2 no bundle, e o singleton do DS deixaria de ser um.
    *
-   * `requiredVersion: '^1.1.0'` porque foi nessa versao que o subpath `/v2`
-   * passou a existir. Com `strictVersion: false`, uma pagina que so tenha
+   * `requiredVersion: '^1.1.0'` porque foi nessa versão que o subpath `/v2`
+   * passou a existir. Com `strictVersion: false`, uma página que só tenha
    * bundles 1.0.0 no ar degrada com aviso no console em vez de derrubar a
-   * jornada -- que e a mesma politica das outras entradas desta lista.
+   * jornada -- que é a mesma política das outras entradas desta lista.
    */
   '@portal/design-system/': { singleton: true, strictVersion: false, requiredVersion: '^1.1.0' },
   '@portal/tokens': { singleton: true, strictVersion: false, requiredVersion: '^1.0.0' }
 };
 
-// Reexportado de ./container-name.mjs, que o shell tambem importa em runtime.
+// Reexportado de ./container-name.mjs, que o shell também importa em runtime.
 export { containerNameOf } from './container-name.mjs';
 
 /* -------------------------------------------------------------------------- */
@@ -102,9 +102,9 @@ const baseConfig = ({ dev, dir, entry, port, publicPath, htmlTemplate, htmlChunk
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
-    // Os pacotes de plataforma sao consumidos como FONTE (symlink do workspace).
+    // Os pacotes de plataforma são consumidos como FONTE (symlink do workspace).
     // Sem isto o Rspack resolveria o realpath e o `exclude: node_modules` do
-    // swc-loader continuaria valendo -- que e exatamente o que queremos.
+    // swc-loader continuaria valendo -- que é exatamente o que queremos.
     symlinks: true
   },
   module: {
@@ -113,10 +113,10 @@ const baseConfig = ({ dev, dir, entry, port, publicPath, htmlTemplate, htmlChunk
       /**
        * CSS nativo do Rspack -- sem css-loader nem style-loader.
        *
-       * A partir do Rspack 2 a regra e explicita (`experiments.css` foi
+       * A partir do Rspack 2 a regra é explícita (`experiments.css` foi
        * depreciado). `css/auto` trata `*.module.css` como CSS Modules e o
-       * resto como CSS global, que e o que o DS precisa: ele publica classes
-       * `ds-*` estaveis, propositalmente NAO hasheadas, porque as jornadas
+       * resto como CSS global, que é o que o DS precisa: ele pública classes
+       * `ds-*` estáveis, propositalmente NÃO hasheadas, porque as jornadas
        * (e o legado, e um dia outro framework) dependem desses nomes.
        */
       { test: /\.css$/, type: 'css/auto' },
@@ -129,16 +129,16 @@ const baseConfig = ({ dev, dir, entry, port, publicPath, htmlTemplate, htmlChunk
     dev && new ReactRefreshRspackPlugin()
   ].filter(Boolean),
   optimization: {
-    // Module Federation exige runtime unico: nada de runtimeChunk separado.
+    // Module Federation exige runtime único: nada de runtimeChunk separado.
     runtimeChunk: false,
-    // Chunk de vendor separado ajuda o cache do CDN entre versoes da jornada.
+    // Chunk de vendor separado ajuda o cache do CDN entre versões da jornada.
     splitChunks: dev ? false : { chunks: 'async', cacheGroups: { defaultVendors: false } }
   },
   devServer: {
     port,
     hot: true,
-    // Federacao e cross-origin por definicao: o shell (5173) baixa o
-    // remoteEntry da jornada (5001..500N). Sem CORS aqui, o `dev` nao federa.
+    // Federação é cross-origin por definição: o shell (5173) baixa o
+    // remoteEntry da jornada (5001..500N). Sem CORS aqui, o `dev` não federa.
     headers: { 'Access-Control-Allow-Origin': '*' },
     client: { overlay: { runtimeErrors: false } }
   },
@@ -151,11 +151,11 @@ const baseConfig = ({ dev, dir, entry, port, publicPath, htmlTemplate, htmlChunk
 /* -------------------------------------------------------------------------- */
 
 /**
- * O host NAO declara remotes.
+ * O host NÃO declara remotes.
  *
- * `remotes: {}` deixa o runtime de federacao disponivel, mas a lista real de
+ * `remotes: {}` deixa o runtime de federação disponível, mas a lista real de
  * jornadas chega do registro do BFF em runtime, via `registerRemotes()`.
- * E isso que faz "publicar jornada nova sem alterar o core" ser literal:
+ * É isso que faz "publicar jornada nova sem alterar o core" ser literal:
  * nenhuma jornada aparece neste arquivo, hoje nem nunca.
  */
 export function shellConfig({ dir, port = 5173, dev = process.env.NODE_ENV !== 'production' }) {
@@ -175,8 +175,8 @@ export function shellConfig({ dir, port = 5173, dev = process.env.NODE_ENV !== '
       name: 'shell',
       remotes: {},
       shared: SHARED_SINGLETONS,
-      // O host nao expoe nada, entao nao ha tipo para gerar nem para consumir:
-      // o plugin de DTS so subiria um servidor a mais e ruido a mais no log.
+      // O host não expõe nada, então não há tipo para gerar nem para consumir:
+      // o plugin de DTS só subiria um servidor a mais é ruído a mais no log.
       dts: false
     })
   );
@@ -191,12 +191,12 @@ export function shellConfig({ dir, port = 5173, dev = process.env.NODE_ENV !== '
 /* -------------------------------------------------------------------------- */
 
 /**
- * Uma jornada expoe UM modulo: `./journey`, que satisfaz `JourneyModule`.
- * Tudo o mais e privado da squad.
+ * Uma jornada expõe UM módulo: `./journey`, que satisfaz `JourneyModule`.
+ * Tudo o mais é privado da squad.
  *
- * `publicPath` absoluto e obrigatorio: os chunks precisam ser resolvidos a
- * partir da ORIGEM da jornada, nao da origem do shell. Em producao vem do CDN,
- * injetado por variavel de ambiente no pipeline da propria squad.
+ * `publicPath` absoluto é obrigatório: os chunks precisam ser resolvidos a
+ * partir da ORIGEM da jornada, não da origem do shell. Em produção vem do CDN,
+ * injetado por variável de ambiente no pipeline da própria squad.
  */
 export function journeyConfig({
   dir,
@@ -208,7 +208,7 @@ export function journeyConfig({
   const cfg = baseConfig({
     dev,
     dir,
-    // `standalone` e o harness de desenvolvimento isolado da squad: rodar a
+    // `standalone` é o harness de desenvolvimento isolado da squad: rodar a
     // jornada sozinha, sem shell, sem BFF e sem as outras 9 jornadas.
     entry: { standalone: './src/standalone.tsx' },
     port,
@@ -225,9 +225,9 @@ export function journeyConfig({
       filename: 'remoteEntry.js',
       exposes: { './journey': './src/journey.tsx' },
       shared: SHARED_SINGLETONS,
-      // O manifesto do MF nao substitui o registro do BFF: ele e o artefato de
-      // build (o que ESTE bundle expoe e compartilha). O registro e o artefato
-      // de operacao (qual versao esta no ar para quem). Papeis diferentes.
+      // O manifesto do MF não substitui o registro do BFF: ele é o artefato de
+      // build (o que ESTE bundle expõe e compartilha). O registro é o artefato
+      // de operação (qual versão está no ar para quem). Papéis diferentes.
       dts: false
     })
   );

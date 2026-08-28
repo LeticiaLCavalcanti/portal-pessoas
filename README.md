@@ -43,11 +43,14 @@ npm run test:watch  # idem, em watch
 npm run typecheck   # tipos dos 4 apps + dos testes
 npm run build       # build de produção de todos os bundles
 npm run preview     # build + sobe tudo servindo os artefatos estáticos
+npm run stop        # encerra o que sobrou de uma execução anterior (libera as 6 portas)
 ```
 
 > `concurrently` roda **sem** `--kill-others`, de propósito: derrubar o processo de uma
 > jornada não pode derrubar o portal. É a mesma promessa da arquitetura, aplicada ao script
 > de desenvolvimento — dá para matar a jornada `holerite` e ver o shell degradar ao vivo.
+> O preço disso é que um start interrompido no meio pode deixar processos sobrando: o
+> `predev` avisa qual porta está ocupada e `npm run stop` limpa.
 
 > **Desenvolvimento é igual a produção.** O Rspack federa e compartilha singletons também no
 > `dev` server, com HMR. Não é preciso buildar os remotes antes de subir o shell, e uma

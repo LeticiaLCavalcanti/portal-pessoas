@@ -3,15 +3,15 @@
  *  CAMADA 2 do DS: abas
  * ============================================================================
  *
- * Aba nao e botao de acao, e a diferenca importa para quem usa: botao GRAVA
- * alguma coisa, aba so troca o que esta na tela. Quando a aba ativa e um
- * `Button variant="primary"`, as duas viram o mesmo retangulo laranja solido e
- * o colaborador perde a unica pista de qual delas tem consequencia.
+ * Aba não é botão de ação, e a diferença importa para quem usa: botão GRAVA
+ * alguma coisa, aba só troca o que está na tela. Quando a aba ativa é um
+ * `Button variant="primary"`, as duas viram o mesmo retângulo laranja sólido e
+ * o colaborador perde a única pista de qual delas tem consequência.
  *
- * Este componente tambem cuida do teclado, que uma fileira de botoes nao faz:
- * pelo padrao ARIA de tablist, as setas navegam entre abas e o Tab pula a
+ * Este componente também cuida do teclado, que uma fileira de botões não faz:
+ * pelo padrão ARIA de tablist, as setas navegam entre abas e o Tab pula a
  * fileira inteira. Sem isso, quem navega por teclado passa por N paradas antes
- * de chegar no conteudo.
+ * de chegar no conteúdo.
  */
 import * as React from 'react';
 
@@ -27,7 +27,7 @@ export function Tabs({
   items: readonly TabItem[];
   current: string;
   onSelect: (id: string) => void;
-  /** Rotulo da fileira para leitor de tela. Ex.: "Seções de registro de ponto". */
+  /** Rótulo da fileira para leitor de tela. Ex.: "Seções de registro de ponto". */
   label: string;
 }) {
   const refs = React.useRef<(HTMLButtonElement | null)[]>([]);
@@ -37,8 +37,8 @@ export function Tabs({
     if (!step) return;
     e.preventDefault();
     const next = (i + step + items.length) % items.length;
-    // Move o foco E seleciona: e o comportamento de "automatic activation" do
-    // padrao ARIA, adequado quando trocar de aba e barato (nao ha formulario
+    // Move o foco E seleciona: é o comportamento de "automatic activation" do
+    // padrão ARIA, adequado quando trocar de aba é barato (não há formulário
     // pela metade para perder).
     refs.current[next]?.focus();
     onSelect(items[next]!.id);
@@ -55,8 +55,8 @@ export function Tabs({
             type="button"
             role="tab"
             aria-selected={isActive}
-            /* So a aba ativa fica na ordem de tabulacao -- o resto se alcanca
-               pelas setas. E o que o padrao ARIA chama de roving tabindex. */
+            /* Só a aba ativa fica na ordem de tabulação -- o resto se alcança
+               pelas setas. É o que o padrão ARIA chama de roving tabindex. */
             tabIndex={isActive ? 0 : -1}
             className={`ds-tab ${isActive ? 'is-active' : ''}`}
             onClick={() => onSelect(t.id)}

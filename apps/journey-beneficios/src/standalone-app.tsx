@@ -1,13 +1,13 @@
 /**
  * Contexto FALSO do portal, para desenvolvimento isolado.
  *
- * Ele e escrito contra o mesmo tipo `JourneyContext` do contrato. Se o contrato
- * mudar e este arquivo parar de compilar, o time descobre no proprio build --
- * e nao em producao, depois do deploy do shell.
+ * Ele é escrito contra o mesmo tipo `JourneyContext` do contrato. Se o contrato
+ * mudar e este arquivo parar de compilar, o time descobre no próprio build --
+ * e não em produção, depois do deploy do shell.
  *
- * O harness tambem simula o que o shell faz de verdade: navegacao real pela
+ * O harness também simula o que o shell faz de verdade: navegação real pela
  * History API (para `ctx.path` e `onPathChange` serem exercitados fora do
- * portal) e `fail` visivel na tela, e nao so no console.
+ * portal) e `fail` visível na tela, e não só no console.
  */
 import '@portal/design-system/styles.css';
 import journey from './journey';
@@ -49,7 +49,7 @@ const ctx: JourneyContext = {
   onThemeChange: () => () => undefined,
   flags: { 'beneficios.reembolso-v2': true },
   notify: (m, k) => console.info('[notify]', k ?? 'info', m),
-  /** No portal isto vira a superficie degradada do shell. Aqui, uma mensagem. */
+  /** No portal isto vira a superfície degradada do shell. Aqui, uma mensagem. */
   fail: (e) => {
     console.error('[fail]', e);
     root.innerHTML =

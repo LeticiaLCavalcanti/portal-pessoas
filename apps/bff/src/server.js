@@ -3,19 +3,19 @@
  *  BFF do Portal Pessoas
  * ============================================================================
  *
- * Por que existe um BFF (e nao chamadas diretas as APIs de dominio):
- *  1. AGREGACAO: a home precisa de 5 sistemas legados. Fazer isso no browser
+ * Por que existe um BFF (e não chamadas diretas as APIs de domínio):
+ *  1. AGREGAÇÃO: a home precisa de 5 sistemas legados. Fazer isso no browser
  *     custa 5 round-trips no 4G do colaborador em campo.
- *  2. CONTRATO ESTAVEL: o legado muda de forma e ritmo proprios. O BFF absorve
- *     essa instabilidade para que a jornada nao precise ser reescrita junto.
+ *  2. CONTRATO ESTÁVEL: o legado muda de forma e ritmo próprios. O BFF absorve
+ *     essa instabilidade para que a jornada não precise ser reescrita junto.
  *  3. SEGREDO E TOKEN: troca de token, escopos e credenciais de sistema ficam
  *     no servidor.
- *  4. REGISTRO DE JORNADAS: e o que permite publicar jornada sem tocar no shell.
+ *  4. REGISTRO DE JORNADAS: é o que permite publicar jornada sem tocar no shell.
  *
  * Risco assumido: o BFF pode virar um novo monolito compartilhado por 10 squads.
- * Mitigacao (ver docs/01-proposta-tecnica.md): um modulo por dominio, com
- * CODEOWNERS por pasta, e evolucao para GraphQL Federation quando o custo de
- * coordenacao superar o custo operacional de N subgraphs.
+ * Mitigação (ver docs/01-proposta-tecnica.md): um módulo por domínio, com
+ * CODEOWNERS por pasta, e evolução para GraphQL Federation quando o custo de
+ * coordenação superar o custo operacional de N subgraphs.
  */
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
@@ -29,7 +29,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const app = Fastify({ logger: { transport: { target: 'pino-pretty' } } });
 await app.register(cors, { origin: true, exposedHeaders: ['x-correlation-id'] });
 
-/** Propaga o correlation-id vindo do shell. Um id por sessao, ponta a ponta. */
+/** Propaga o correlation-id vindo do shell. Um id por sessão, ponta a ponta. */
 app.addHook('onRequest', async (req, reply) => {
   const cid = req.headers['x-correlation-id'] ?? `bff-${Date.now().toString(36)}`;
   req.cid = cid;
@@ -43,18 +43,18 @@ app.get('/v1/me', async () => db.user);
 app.get('/v1/flags', async () => db.flags);
 
 /**
- * Catalogo de jornadas visiveis para ESTE colaborador.
- * O BFF ja poda por papel; o rollout percentual e resolvido no cliente para
- * servir tambem de kill-switch local quando o remote falha.
+ * Catálogo de jornadas visíveis para ESTE colaborador.
+ * O BFF já poda por papel; o rollout percentual é resolvido no cliente para
+ * servir também de kill-switch local quando o remote falha.
  */
 /**
- * Uma unica definicao de "o que este colaborador enxerga".
+ * Uma única definição de "o que este colaborador enxerga".
  *
- * Existe como funcao, e nao repetida em cada rota, porque a busca precisa da
- * MESMA poda: um resultado de busca que leva a uma jornada fora do catalogo do
- * colaborador e um beco sem saida -- o shell nao acha a rota e desenha erro.
- * Enquanto isso era um filtro copiado, o catalogo podava por papel e a busca
- * nao.
+ * Existe como função, e não repetida em cada rota, porque a busca precisa da
+ * MESMA poda: um resultado de busca que leva a uma jornada fora do catálogo do
+ * colaborador é um beco sem saída -- o shell não acha a rota e desenha erro.
+ * Enquanto isso era um filtro copiado, o catálogo podava por papel e a busca
+ * não.
  */
 const journeysVisibleTo = (roles) =>
   loadRegistry().filter(
@@ -69,17 +69,17 @@ app.get('/v1/home', async () => ({
 }));
 
 /**
- * Busca global: fan-out por dominio com timeout curto e degradacao parcial.
+ * Busca global: fan-out por domínio com timeout curto e degradação parcial.
  *
- * A PARTICIPACAO NA BUSCA E DECLARADA NO MANIFESTO, nao no codigo do BFF.
- * `capabilities: ['search']` e o que coloca uma jornada no resultado -- e uma
- * jornada que nao declara simplesmente nao aparece, sem que ninguem edite este
- * arquivo. E o mecanismo que a ADR 0009 descreve; ate esta funcao existir, a
- * ADR estava certa no papel e o indice era consultado inteiro, incluindo
- * jornada que nao havia pedido para participar.
+ * A PARTICIPAÇÃO NA BUSCA É DECLARADA NO MANIFESTO, não no código do BFF.
+ * `capabilities: ['search']` é o que coloca uma jornada no resultado -- e uma
+ * jornada que não declara simplesmente não aparece, sem que ninguém edite este
+ * arquivo. É o mecanismo que a ADR 0009 descreve; até esta função existir, a
+ * ADR estava certa no papel e o índice era consultado inteiro, incluindo
+ * jornada que não havia pedido para participar.
  *
- * A poda por papel vem junto de graca, porque a fonte e o catalogo visivel e
- * nao o registro cru.
+ * A poda por papel vem junto de graça, porque a fonte é o catálogo visível e
+ * não o registro cru.
  */
 app.get('/v1/search', async (req) => {
   const query = String(req.query.q ?? '').trim();
@@ -90,8 +90,8 @@ app.get('/v1/search', async (req) => {
       .map((j) => j.id)
   );
 
-  // O casamento ignora acento -- ver search.js. Num portal em portugues, quem
-  // digita rapido escreve "ferias", e a comparacao literal devolvia zero.
+  // O casamento ignora acento -- ver search.js. Num portal em português, quem
+  // digita rápido escreve "ferias", e a comparação literal devolvia zero.
   return { query, hits: match(db.searchIndex, query, participants) };
 });
 
@@ -101,7 +101,7 @@ app.get('/v1/notifications', async () => db.notifications);
  * Marcar como lida.
  *
  * Existe porque o contador de avisos precisa reagir ao clique. Um badge que
- * nunca zera treina o colaborador a ignorar a notificacao -- e a partir dai
+ * nunca zera treina o colaborador a ignorar a notificação -- e a partir daí
  * nenhum aviso do portal funciona, inclusive os que importam.
  */
 app.post('/v1/notifications/:id/read', async (req, reply) => {
@@ -116,10 +116,10 @@ app.post('/v1/notifications/:id/read', async (req, reply) => {
 app.get('/v1/ponto', async () => db.ponto);
 
 /**
- * O carimbo do ponto e SEMPRE em horario de Brasilia, nunca no fuso do
- * processo. `getHours()` le o fuso do servidor -- que em container e UTC, e
+ * O carimbo do ponto é SEMPRE em horário de Brasília, nunca no fuso do
+ * processo. `getHours()` lê o fuso do servidor -- que em container é UTC, e
  * gravaria 17:32 num ponto batido as 14:32. A jornada contratual do
- * colaborador e em horario de Brasilia, entao e esse o unico fuso correto
+ * colaborador é em horário de Brasília, então é esse o único fuso correto
  * aqui, independente de onde o BFF rode.
  */
 const brasiliaTime = new Intl.DateTimeFormat('pt-BR', {
@@ -145,7 +145,7 @@ app.post('/v1/ponto/justificativas', async (req, reply) => {
   return created;
 });
 
-/* ------------------------------- beneficios ------------------------------ */
+/* ------------------------------- benefícios ------------------------------ */
 
 app.get('/v1/beneficios', async () => db.beneficios);
 
@@ -182,10 +182,10 @@ app.get('/v1/holerite', async () => db.holerite);
 /**
  * Documento do demonstrativo.
  *
- * O BFF entrega o arquivo ja materializado, e nao a URL do sistema de folha.
+ * O BFF entrega o arquivo já materializado, e não a URL do sistema de folha.
  * Motivo: a URL do SAP/Protheus carrega token e identificador interno -- expor
- * isso ao browser transforma uma questao de UI numa questao de seguranca.
- * Aqui o conteudo e simulado; em producao seria o PDF assinado pela folha.
+ * isso ao browser transforma uma questão de UI numa questão de segurança.
+ * Aqui o conteúdo é simulado; em produção seria o PDF assinado pela folha.
  */
 app.get('/v1/holerite/:competencia/documento', async (req, reply) => {
   const d = db.holerite.demonstrativos.find((x) => x.competencia === req.params.competencia);
@@ -208,7 +208,7 @@ app.get('/v1/holerite/:competencia/documento', async (req, reply) => {
   };
 });
 
-/** Coletor de telemetria. Em producao: OTLP -> Collector -> backend de observabilidade. */
+/** Coletor de telemetria. Em produção: OTLP -> Collector -> backend de observabilidade. */
 app.post('/v1/telemetry', async (req, reply) => {
   for (const r of req.body ?? []) {
     app.log.info(
@@ -220,14 +220,14 @@ app.post('/v1/telemetry', async (req, reply) => {
 });
 
 /**
- * Higiene do indice de busca, checada no boot.
+ * Higiene do índice de busca, checada no boot.
  *
- * Agora que a participacao e declarada, esquecer `capabilities: ['search']` faz
- * os resultados da jornada sumirem -- sem erro, sem log, sem nada. E o mesmo
- * formato de falha do `--pp-space-4` que custou caro no DS: nao quebra, nao
- * avisa, so para de funcionar. Entao avisamos.
+ * Agora que a participação é declarada, esquecer `capabilities: ['search']` faz
+ * os resultados da jornada sumirem -- sem erro, sem log, sem nada. É o mesmo
+ * formato de falha do `--pp-space-4` que custou caro no DS: não quebra, não
+ * avisa, só para de funcionar. Então avisamos.
  *
- * O contrario tambem e ruido: jornada que declara `search` e nao publicou
+ * O contrário também é ruído: jornada que declara `search` e não publicou
  * nenhuma entrada aparece como participante e nunca devolve resultado.
  */
 function checkSearchIndex() {
@@ -241,13 +241,13 @@ function checkSearchIndex() {
   if (missingCapability.length) {
     app.log.warn(
       { journeys: missingCapability },
-      'Indice de busca: publicam entradas mas NAO declaram capabilities:["search"] -- os resultados delas nao vao aparecer'
+      'Índice de busca: publicam entradas mas NÃO declaram capabilities:["search"] — os resultados delas não vão aparecer'
     );
   }
   if (missingEntries.length) {
     app.log.warn(
       { journeys: missingEntries },
-      'Indice de busca: declaram capabilities:["search"] mas nao publicaram nenhuma entrada'
+      'Índice de busca: declaram capabilities:["search"] mas não publicaram nenhuma entrada'
     );
   }
 }

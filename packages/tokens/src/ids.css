@@ -14,7 +14,7 @@
  * raio, motion e text styles). Como em produção o pacote oficial entra inteiro,
  * o recorte aqui não muda nenhuma decisão de arquitetura.
  *
- * Regra: nenhum componente do portal referencia `--ids_*` diretamente.
+ * Regra: nenhum componente do portal referência `--ids_*` diretamente.
  * Ver `bridge.json` e o comentário em `index.ts` para o porquê.
  */
 @import './fonts-fallback.css';

@@ -56,7 +56,7 @@ export function Icon({
 
   if (!shape) {
     // Nome desconhecido: mostra a marca crua do manifesto, para o item seguir
-    // clicavel e o erro de registro ficar visivel.
+    // clicável e o erro de registro ficar visível.
     return (
       <span
         className={`ds-icon ds-icon--raw ${className}`}

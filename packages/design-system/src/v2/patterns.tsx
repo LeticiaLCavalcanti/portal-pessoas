@@ -97,7 +97,7 @@ export function DataList({
      * receber, R$ 8.412,90") em vez de ler duas cadeias soltas dentro do mesmo
      * item de lista, sem dizer qual é rótulo e qual é valor.
      *
-     * Ganho estrutural, e o que de fato motivou a quebra: `<dd>` é container de
+     * Ganho estrutural, é o que de fato motivou a quebra: `<dd>` é container de
      * conteúdo de fluxo, então `value` pode ser um Badge, um botão ou uma Row
      * sem que o navegador reorganize a árvore. A v1 emitia `<p>` para o valor,
      * o parser FECHAVA o parágrafo ao encontrar um `<div>` dentro, e o React

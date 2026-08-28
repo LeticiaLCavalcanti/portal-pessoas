@@ -7,11 +7,11 @@ import { Home } from './pages/Home';
 import { JourneyHost } from './journeys/JourneyHost';
 
 /**
- * Roteamento dinamico.
+ * Roteamento dinâmico.
  *
- * Nao existe `<Route path="/ponto" element={<Ponto/>} />` em lugar nenhum.
- * Ha UMA rota curinga que consulta o registro. Adicionar jornada = adicionar
- * linha no registro. O core nao muda.
+ * Não existe `<Route path="/ponto" element={<Ponto/>} />` em lugar nenhum.
+ * Há UMA rota curinga que consulta o registro. Adicionar jornada = adicionar
+ * linha no registro. O core não muda.
  */
 function JourneyRoute() {
   const portal = usePortal();
@@ -75,12 +75,12 @@ export default function App() {
   return (
     <PortalProvider>
       {/*
-        As duas flags `future` ligam, hoje, o comportamento que vira padrao no
-        React Router v7. Nao e cosmetico: sem elas o console do portal nasce com
-        dois avisos permanentes, e console barulhento e como alerta que sempre
-        toca -- em pouco tempo ninguem olha, inclusive quando aparece o erro que
-        importa. `v7_relativeSplatPath` e especialmente relevante aqui porque
-        TODA jornada e montada sob uma rota curinga.
+        As duas flags `future` ligam, hoje, o comportamento que vira padrão no
+        React Router v7. Não é cosmético: sem elas o console do portal nasce com
+        dois avisos permanentes, e console barulhento é como alerta que sempre
+        toca -- em pouco tempo ninguém olha, inclusive quando aparece o erro que
+        importa. `v7_relativeSplatPath` é especialmente relevante aqui porque
+        TODA jornada é montada sob uma rota curinga.
       */}
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Layout />

@@ -7,7 +7,7 @@
  * do DS é explícita — L3 não mora lá. Se ele fosse para o DS, o time de
  * plataforma viraria revisor obrigatório de uma tela que não é dele.
  *
- * Ela também prova uma propriedade da arquitetura: a jornada publica o próprio
+ * Ela também prova uma propriedade da arquitetura: a jornada pública o próprio
  * CSS junto do seu bundle federado. O shell não sabe que este arquivo existe e
  * não precisa de deploy para ele mudar.
  *

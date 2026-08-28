@@ -1,6 +1,6 @@
 import type { JourneyManifest } from '@portal/journey-contract';
 
-/** Hash estavel: o mesmo colaborador cai sempre no mesmo bucket. */
+/** Hash estável: o mesmo colaborador cai sempre no mesmo bucket. */
 function bucketOf(userId: string, journeyId: string): number {
   const s = `${userId}:${journeyId}`;
   let h = 2166136261;
@@ -12,9 +12,9 @@ function bucketOf(userId: string, journeyId: string): number {
 }
 
 /**
- * Decide se ESTE colaborador ve a jornada moderna.
+ * Decide se ESTE colaborador vê a jornada moderna.
  *
- * Roda no cliente alem do BFF, de proposito -- ver docs/adr/0010.
+ * Roda no cliente além do BFF, de propósito -- ver docs/adr/0010.
  */
 export function resolveRollout(m: JourneyManifest, user: { id: string; roles: string[] }) {
   if (!m.rollout.enabled) return { active: false, reason: 'desligada' as const };

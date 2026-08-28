@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- *  DS v2 — DataList e a quebra estrutural que motivou a v2
+ *  DS v2 — DataList é a quebra estrutural que motivou a v2
  * ============================================================================
  *
  * A afirmação sob teste (MIGRATION.md §3, "DataList — <dl> no lugar de <ul>"):

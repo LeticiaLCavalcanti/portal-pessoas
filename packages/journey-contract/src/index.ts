@@ -3,10 +3,10 @@
  *  CONTRATO SHELL <-> JORNADA
  * ============================================================================
  *
- * Unico ponto de acoplamento entre o shell e as ~10 squads. Deliberadamente
- * pequeno, agnostico de framework e versionado por SemVer independente.
+ * Único ponto de acoplamento entre o shell e as ~10 squads. Deliberadamente
+ * pequeno, agnóstico de framework e versionado por SemVer independente.
  *
- * Decisao e trade-offs: docs/adr/0002.
+ * Decisão e trade-offs: docs/adr/0002.
  * Estado do contrato (1.0 -> 1.1): tabela ao final da docs/adr/0002.
  */
 import { z } from 'zod';
@@ -18,12 +18,12 @@ import { z } from 'zod';
 export const journeyKind = z.enum([
   'remote', // microfrontend moderno carregado via Module Federation
   'legacy', // plataforma legada embarcada em iframe/WebView com ponte
-  'native'  // jornada que so existe no app (biometria, camera, GPS)
+  'native'  // jornada que só existe no app (biometria, câmera, GPS)
 ]);
 
 export const rolloutSchema = z.object({
   enabled: z.boolean(),
-  /** % de colaboradores que veem a versao moderna. O resto cai no fallback. */
+  /** % de colaboradores que veem a versão moderna. O resto cai no fallback. */
   percentage: z.number().min(0).max(100),
   /** Grupos que sempre veem (canary interno). */
   allowlist: z.array(z.string()).default([]),
@@ -33,41 +33,41 @@ export const rolloutSchema = z.object({
 
 export const journeyManifestSchema = z.object({
   /**
-   * Id da jornada. E tambem a chave do container de Module Federation:
+   * Id da jornada. É também a chave do container de Module Federation:
    * `@portal/build-preset` deriva o nome do container do id (kebab -> snake),
-   * dos dois lados. Nao ha um segundo nome para manter em sincronia.
+   * dos dois lados. Não há um segundo nome para manter em sincronia.
    */
   id: z.string().regex(/^[a-z0-9-]+$/),
   name: z.string(),
   description: z.string().default(''),
   /**
-   * NOME semantico do icone (`clock`, `gift`, `receipt`), resolvido pelo
+   * NOME semântico do ícone (`clock`, `gift`, `receipt`), resolvido pelo
    * Design System -- nunca um glifo, um caractere ou uma URL de imagem.
    *
-   * `string` livre e nao enum, de proposito -- ver docs/adr/0008.
+   * `string` livre e não enum, de propósito -- ver docs/adr/0008.
    */
   icon: z.string().default('*'),
-  /** Dominio de negocio. Define ownership e agrupamento no catalogo. */
+  /** Domínio de negócio. Define ownership e agrupamento no catálogo. */
   domain: z.string(),
   /** Squad dona. Vira tag em todo evento de telemetria e alvo do alerta. */
   squad: z.string(),
   kind: journeyKind,
   /** SemVer do bundle publicado. O shell nunca depende de "latest". */
   version: z.string(),
-  /** Rota que o shell reserva para a jornada. Ela e dona de tudo abaixo dela. */
+  /** Rota que o shell reserva para a jornada. Ela é dona de tudo abaixo dela. */
   route: z.string().startsWith('/'),
-  /** URL do remoteEntry (kind=remote) ou da pagina legada (kind=legacy). */
+  /** URL do remoteEntry (kind=remote) ou da página legada (kind=legacy). */
   entry: z.string().url(),
-  /** Modulo exposto no Module Federation. Ex: './journey' */
+  /** Módulo exposto no Module Federation. Ex: './journey' */
   exposedModule: z.string().default('./journey'),
-  /** Jornadas de fallback nao aparecem no catalogo -- evita item duplicado. */
+  /** Jornadas de fallback não aparecem no catálogo -- evita item duplicado. */
   showInCatalog: z.boolean().default(true),
-  /** Permissoes exigidas. O BFF ja filtra, o shell so nao renderiza no menu. */
+  /** Permissões exigidas. O BFF já filtra, o shell só não renderiza no menu. */
   requiredRoles: z.array(z.string()).default([]),
   /** Recursos que a jornada oferece ao portal (ex.: indexar na busca global). */
   capabilities: z.array(z.enum(['search', 'home-widget', 'notifications'])).default([]),
   rollout: rolloutSchema,
-  /** Orcamento de carregamento. Estourou = alerta pro time dono, nao pro shell. */
+  /** Orçamento de carregamento. Estourou = alerta pro time dono, não pro shell. */
   budget: z.object({ loadTimeoutMs: z.number().default(8000) }).default({ loadTimeoutMs: 8000 })
 });
 
@@ -99,56 +99,56 @@ export interface JourneyHttp {
 }
 
 export interface JourneyContext {
-  /** Sessao ja resolvida pelo shell. A jornada NUNCA faz login. */
+  /** Sessão já resolvida pelo shell. A jornada NUNCA faz login. */
   user: JourneyUser;
-  /** Cliente HTTP para o BFF, ja com token, correlation-id e tag da jornada. */
+  /** Cliente HTTP para o BFF, já com token, correlation-id e tag da jornada. */
   http: JourneyHttp;
-  /** Telemetria pre-marcada com journeyId/squad/version. */
+  /** Telemetria pré-marcada com journeyId/squad/version. */
   telemetry: JourneyTelemetry;
-  /** Navegacao do portal. A jornada nao manipula window.history diretamente. */
+  /** Navegação do portal. A jornada não manipula window.history diretamente. */
   navigate(to: string): void;
   /** Rota interna atual, relativa a base da jornada. */
   path: string;
-  /** Assina mudanca de rota feita pelo shell (voltar do browser, deep link). */
+  /** Assina mudança de rota feita pelo shell (voltar do browser, deep link). */
   onPathChange(cb: (path: string) => void): () => void;
   /** Tema vigente. Muda em runtime; a jornada deve reagir. */
   theme: 'light' | 'dark';
   onThemeChange(cb: (theme: 'light' | 'dark') => void): () => void;
-  /** Feature flags ja resolvidas para este usuario. */
+  /** Feature flags já resolvidas para este usuário. */
   flags: Record<string, boolean>;
-  /** Notificacao global (toast do shell). Consistencia de UX entre jornadas. */
+  /** Notificação global (toast do shell). Consistência de UX entre jornadas. */
   notify(message: string, kind?: 'info' | 'success' | 'danger'): void;
   /**
-   * Reporta uma falha IRRECUPERAVEL da jornada (contrato v1.1).
+   * Reporta uma falha IRRECUPERÁVEL da jornada (contrato v1.1).
    *
-   * Necessario porque error boundary nao atravessa fronteira de raiz React --
-   * ver docs/adr/0007. Aditivo: jornadas v1.0 montam sem alteracao.
+   * Necessário porque error boundary não atravessa fronteira de raiz React --
+   * ver docs/adr/0007. Aditivo: jornadas v1.0 montam sem alteração.
    */
   fail(error: unknown): void;
 }
 
-/** A ausencia de `registerSearchProvider` e deliberada -- ver docs/adr/0009. */
+/** A ausência de `registerSearchProvider` e deliberada -- ver docs/adr/0009. */
 
 /* -------------------------------------------------------------------------- */
-/* 3. O modulo que a jornada precisa exportar                                  */
+/* 3. O módulo que a jornada precisa exportar                                  */
 /* -------------------------------------------------------------------------- */
 
 export interface JourneyModule {
-  /** Versao do contrato que a jornada implementa. O shell valida antes de montar. */
+  /** Versão do contrato que a jornada implementa. O shell valida antes de montar. */
   contractVersion: `${number}.${number}`;
   /**
    * Monta a jornada no elemento dado.
-   * Retorna a funcao de desmonte -- obrigatoria, senao vazamos listeners
-   * a cada troca de jornada (o portal e uma SPA de longa duracao).
+   * Retorna a função de desmonte -- obrigatória, senão vazamos listeners
+   * a cada troca de jornada (o portal é uma SPA de longa duração).
    */
   mount(container: HTMLElement, ctx: JourneyContext): Promise<JourneyUnmount> | JourneyUnmount;
 }
 
 export type JourneyUnmount = () => void;
 
-/** Versao suportada pelo shell atual. */
+/** Versão suportada pelo shell atual. */
 export const SUPPORTED_CONTRACT_MAJOR = 1;
-/** Versao que o shell IMPLEMENTA. Usada so para diagnostico e telemetria. */
+/** Versão que o shell IMPLEMENTA. Usada só para diagnóstico e telemetria. */
 export const CONTRACT_VERSION = '1.1';
 
 export function isContractCompatible(v: string | undefined): boolean {

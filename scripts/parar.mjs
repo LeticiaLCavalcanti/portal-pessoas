@@ -1,8 +1,8 @@
 /**
- * Encerra o que sobrou de uma execucao anterior do portal.
+ * Encerra o que sobrou de uma execução anterior do portal.
  *
- * So mata processo que esteja escutando UMA das portas do projeto -- nunca um
- * `node` qualquer da maquina. Manda SIGTERM (o dev server fecha sozinho) e so
+ * Só mata processo que esteja escutando UMA das portas do projeto -- nunca um
+ * `node` qualquer da maquina. Manda SIGTERM (o dev server fecha sozinho) e só
  * escala para SIGKILL no que resistir.
  */
 import { execFileSync } from 'node:child_process';
@@ -23,18 +23,18 @@ const listeningOn = (port) => {
 const targets = [...new Set(PORTS.flatMap(listeningOn))];
 
 if (targets.length === 0) {
-  console.log('  Nenhuma porta do portal esta ocupada. Nada a fazer.');
+  console.log('  Nenhuma porta do portal está ocupada. Nada a fazer.');
   process.exit(0);
 }
 
 for (const pid of targets) {
-  try { process.kill(Number(pid), 'SIGTERM'); } catch { /* ja saiu */ }
+  try { process.kill(Number(pid), 'SIGTERM'); } catch { /* já saiu */ }
 }
 await wait(2500);
 
 const stubborn = [...new Set(PORTS.flatMap(listeningOn))];
 for (const pid of stubborn) {
-  try { process.kill(Number(pid), 'SIGKILL'); } catch { /* ja saiu */ }
+  try { process.kill(Number(pid), 'SIGKILL'); } catch { /* já saiu */ }
 }
 await wait(500);
 

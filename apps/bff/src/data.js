@@ -1,5 +1,5 @@
-/** Dados simulados. Em producao cada bloco viria de um sistema distinto
- *  (Protheus/SAP, motor de beneficios, ponto eletronico, CMS de comunicacao). */
+/** Dados simulados. Em produção cada bloco viria de um sistema distinto
+ *  (Protheus/SAP, motor de benefícios, ponto eletrônico, CMS de comunicação). */
 export const user = {
   id: 'u-19472',
   name: 'Letícia Andrade',
@@ -23,12 +23,12 @@ export const homeCards = [
   { id: 'h4', journeyId: 'ferias-legado', kind: 'info', title: '18 dias de férias disponíveis', cta: 'Programar férias', route: '/ferias' }
 ];
 
-/** Indice de busca por dominio. Em producao: cada squad publica seu indice
- *  (ex.: Elasticsearch por dominio) e o BFF faz fan-out com timeout curto.
+/** Índice de busca por domínio. Em produção: cada squad pública seu índice
+ *  (ex.: Elasticsearch por domínio) e o BFF faz fan-out com timeout curto.
  *
  *  REGRA DE HIGIENE: toda rota daqui precisa existir na jornada dona. Um
- *  resultado de busca que leva a uma tela que nao trata aquela rota e, para o
- *  colaborador, indistinguivel de um link quebrado. */
+ *  resultado de busca que leva a uma tela que não trata aquela rota e, para o
+ *  colaborador, indistinguível de um link quebrado. */
 export const searchIndex = [
   { journeyId: 'ponto', title: 'Espelho de ponto', subtitle: 'Jornada de trabalho', route: '/ponto/espelho' },
   { journeyId: 'ponto', title: 'Banco de horas', subtitle: 'Jornada de trabalho', route: '/ponto/banco' },
@@ -83,7 +83,7 @@ export const reembolsos = [
 
 export const solicitacoesBeneficio = [];
 
-/** Folha de pagamento. Em producao: SAP/Protheus atras do BFF. */
+/** Folha de pagamento. Em produção: SAP/Protheus atrás do BFF. */
 export const holerite = {
   demonstrativos: [
     {

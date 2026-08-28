@@ -1,9 +1,9 @@
 /**
  * Config de build do shell (host).
  *
- * Repare no que NAO esta aqui: nenhuma jornada. Nenhum `remotes: { ponto: ... }`.
- * O host so declara os singletons; a lista de jornadas chega do registro do BFF
- * em runtime. Publicar uma jornada nova nao muda este arquivo.
+ * Repare no que NÃO está aqui: nenhuma jornada. Nenhum `remotes: { ponto: ... }`.
+ * O host só declara os singletons; a lista de jornadas chega do registro do BFF
+ * em runtime. Publicar uma jornada nova não muda este arquivo.
  */
 import { shellConfig } from '@portal/build-preset';
 

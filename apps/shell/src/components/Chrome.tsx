@@ -1,8 +1,8 @@
 /**
- * "Chrome" do portal: barra superior, catalogo lateral, notificacoes e avisos.
+ * "Chrome" do portal: barra superior, catálogo lateral, notificações e avisos.
  *
- * Tudo aqui e do time de plataforma. As squads NAO podem injetar itens de menu
- * por codigo -- so declarando o manifesto, para o shell nao acumular
+ * Tudo aqui é do time de plataforma. As squads NÃO podem injetar itens de menu
+ * por código -- só declarando o manifesto, para o shell não acumular
  * `if (jornada === 'x')`.
  */
 import * as React from 'react';
@@ -61,8 +61,8 @@ export function TopBar() {
 
   return (
     <header className="pp-topbar">
-      {/* Marca, busca e acoes precisam ser filhos DIRETOS do header: e o que
-          deixa a busca cair para uma linha propria via `order`/`flex-basis`.
+      {/* Marca, busca e ações precisam ser filhos DIRETOS do header: é o que
+          deixa a busca cair para uma linha própria via `order`/`flex-basis`.
           Aninhada junto da marca, ela era espremida a zero em 390px. */}
       <Brand product="Portal Pessoas" onClick={() => navigate('/')} />
       {portal.flags['portal.busca-global'] && <GlobalSearch />}
@@ -101,7 +101,7 @@ export function TopBar() {
           )}
         </div>
 
-        {/* O icone mostra o tema de DESTINO, nao o atual. */}
+        {/* O ícone mostra o tema de DESTINO, não o atual. */}
         <Button
           variant="ghost"
           onClick={portal.toggleTheme}
@@ -111,7 +111,7 @@ export function TopBar() {
           {portal.theme === 'light' ? 'Escuro' : 'Claro'}
         </Button>
 
-        {/* Indicador de sessao, nao botao: nao ha menu de usuario para abrir. */}
+        {/* Indicador de sessão, não botão: não há menu de usuário para abrir. */}
         <span className="pp-user" title={`${portal.user?.name} · matrícula ${portal.user?.registration}`}>
           {portal.user?.firstName?.slice(0, 2).toUpperCase()}
         </span>
@@ -170,9 +170,9 @@ export function Toasts() {
 
 /**
  * Painel de observabilidade embutido.
- * Em producao isto nao existe -- os mesmos eventos vao para o backend de
- * observabilidade. Aqui ele torna visivel, no case, a rastreabilidade exigida
- * pelo requisito nao funcional.
+ * Em produção isto não existe -- os mesmos eventos vão para o backend de
+ * observabilidade. Aqui ele torna visível, no case, a rastreabilidade exigida
+ * pelo requisito não funcional.
  */
 export function TelemetryPanel() {
   const portal = usePortal();

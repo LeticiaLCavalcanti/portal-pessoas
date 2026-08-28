@@ -1,8 +1,8 @@
 /**
- * Nucleo do shell: sessao, catalogo, flags, tema, telemetria e avisos.
+ * Núcleo do shell: sessão, catálogo, flags, tema, telemetria e avisos.
  *
- * TUDO que e transversal mora aqui e e entregue as jornadas pelo
- * `JourneyContext`: as squads nao instanciam auth, nao criam cliente HTTP e nao
+ * TUDO que é transversal mora aqui e é entregue às jornadas pelo
+ * `JourneyContext`: as squads não instanciam auth, não criam cliente HTTP e não
  * escolhem lib de telemetria. Ver docs/adr/0002.
  */
 import * as React from 'react';
@@ -22,7 +22,7 @@ interface PortalState {
   status: 'loading' | 'ready' | 'error';
   user: JourneyUser | null;
   journeys: JourneyManifest[];
-  /** Manifestos invalidos: nao sobem, mas sao reportados. Governanca visivel. */
+  /** Manifestos inválidos: não sobem, mas são reportados. Governança visível. */
   rejected: { id: string; problem: string }[];
   flags: Record<string, boolean>;
   theme: Theme;
@@ -71,7 +71,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
         correlationId,
         sessionId,
         sink: (batch) => {
-          // keepalive: nao perdemos o ultimo lote quando o colaborador fecha a aba
+          // keepalive: não perdemos o último lote quando o colaborador fecha a aba
           fetch(`${BFF}/v1/telemetry`, {
             method: 'POST', keepalive: true,
             headers: { 'content-type': 'application/json', 'x-correlation-id': correlationId },
@@ -106,7 +106,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
         ]);
 
         // Todo manifesto passa pelo schema antes de virar rota: um manifesto
-        // malformado derruba a PROPRIA jornada, nunca o portal (docs/adr/0004).
+        // malformado derruba a PRÓPRIA jornada, nunca o portal (docs/adr/0004).
         const ok: JourneyManifest[] = [];
         const bad: { id: string; problem: string }[] = [];
         for (const item of raw) {

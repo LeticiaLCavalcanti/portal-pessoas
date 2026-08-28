@@ -174,14 +174,14 @@ body {
 
 .pp-main { flex: 1; min-width: 0; padding: var(--space-6) var(--space-6) var(--space-8); }
 /* Grade da home. O mesmo desenho de `.ds-grid` do DS, mantido aqui apenas
-   porque e o shell quem desenha a home -- as jornadas usam `.ds-grid`. */
+   porque é o shell quem desenha a home -- as jornadas usam `.ds-grid`. */
 .pp-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
-/* Resultado da busca sob o cursor OU sob a navegacao por setas: os dois
-   precisam do mesmo destaque, senao navegar pelo teclado fica invisivel. */
+/* Resultado da busca sob o cursor OU sob a navegação por setas: os dois
+   precisam do mesmo destaque, senão navegar pelo teclado fica invisível. */
 .pp-search__hit.is-active { background: var(--c-accent-subtle); }
 
-/* Aviso ja lido continua clicavel, mas para de competir por atencao. */
+/* Aviso já lido continua clicável, mas para de competir por atenção. */
 .pp-notif__item.is-read { opacity: .62; }
 
 .pp-toasts {

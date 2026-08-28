@@ -1,9 +1,9 @@
 /**
- * Busca global do shell, alimentada pelo indice agregado do BFF -- decisao e
+ * Busca global do shell, alimentada pelo índice agregado do BFF -- decisão e
  * alternativas em docs/adr/0009.
  *
  * O resultado navega para uma rota INTERNA da jornada (`/ponto/espelho`): o
- * shell garante a rota, reconhece-la e da jornada dona, via `ctx.path`.
+ * shell garante a rota, reconhecê-la é da jornada dona, via `ctx.path`.
  */
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -32,7 +32,7 @@ export function GlobalSearch() {
         portal.telemetry.forJourney({ journeyId: 'shell', squad: 'plataforma', version: '1.0.0' })
           .event('busca.consulta', { term: q, results: r.hits.length });
       } catch { setHits([]); }
-    }, 220); // debounce: 10 squads no indice, 1 requisicao por pausa de digitacao
+    }, 220); // debounce: 10 squads no índice, 1 requisição por pausa de digitação
     return () => clearTimeout(t);
   }, [q, portal]);
 
@@ -54,9 +54,9 @@ export function GlobalSearch() {
   };
 
   /**
-   * Teclado nao e enfeite aqui: a busca e a forma mais rapida de chegar a
-   * qualquer jornada, e quem usa o portal o dia inteiro nao tira a mao do
-   * teclado. Sem Enter, digitar e depois teclar Enter nao fazia nada.
+   * Teclado não é enfeite aqui: a busca é a forma mais rápida de chegar a
+   * qualquer jornada, e quem usa o portal o dia inteiro não tira a mão do
+   * teclado. Sem Enter, digitar e depois teclar Enter não fazia nada.
    */
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') { setOpen(false); return; }
@@ -74,12 +74,12 @@ export function GlobalSearch() {
 
   return (
     <div className="pp-search" ref={boxRef}>
-      {/* Decorativo: o campo ja tem `aria-label`, entao o icone fica mudo para
+      {/* Decorativo: o campo já tem `aria-label`, então o ícone fica mudo para
           o leitor de tela em vez de anunciar "busca" duas vezes.
 
-          Sem `size`: o tamanho vem de `--pp-search-icon` no styles.css, que e
-          a MESMA variavel usada para calcular o recuo do texto do campo.
-          Cravar o numero aqui obrigava os dois lugares a concordarem na mao. */}
+          Sem `size`: o tamanho vem de `--pp-search-icon` no styles.css, que é
+          a MESMA variável usada para calcular o recuo do texto do campo.
+          Cravar o número aqui obrigava os dois lugares a concordarem na mão. */}
       <Icon name="search" className="pp-search__icon" />
       <input
         ref={inputRef}

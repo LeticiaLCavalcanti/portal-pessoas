@@ -20,9 +20,9 @@ export type SemanticToken = keyof typeof raw.alias;
 export const token = (name: string) => `var(--c-${name})`;
 
 /**
- * Degraus da escala de espacamento. Tipado de proposito: `space(9)` nao
+ * Degraus da escala de espaçamento. Tipado de propósito: `space(9)` não
  * compila, em vez de virar `var(--space-9)` -- uma custom property inexistente,
- * que o CSS ignora em silencio e que devolve `gap: 0` sem nenhum aviso.
+ * que o CSS ignora em silêncio e que devolve `gap: 0` sem nenhum aviso.
  */
 export type SpaceStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export const space = (n: SpaceStep) => `var(--space-${n})`;

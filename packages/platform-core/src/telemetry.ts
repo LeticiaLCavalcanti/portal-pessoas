@@ -15,13 +15,13 @@ export interface TelemetryRecord {
 }
 
 /**
- * Coletor unico do portal.
+ * Coletor único do portal.
  *
- * Decisao: telemetria e responsabilidade da PLATAFORMA, nao de cada squad.
+ * Decisão: telemetria é responsabilidade da PLATAFORMA, não de cada squad.
  * Se cada time escolhesse sua lib, perderiamos a capacidade de responder
- * "a jornada de ferias esta lenta ou o portal inteiro esta lento?".
+ * "a jornada de férias está lenta ou o portal inteiro está lento?".
  *
- * Em producao isto seria o SDK do OpenTelemetry (web) exportando para
+ * Em produção isto seria o SDK do OpenTelemetry (web) exportando para
  * OTLP -> Collector -> Datadog/Grafana. Aqui mandamos para o BFF em batch.
  */
 export function createTelemetryHub(params: { correlationId: string; sessionId: string; sink: Sink }) {
@@ -47,7 +47,7 @@ export function createTelemetryHub(params: { correlationId: string; sessionId: s
   };
 
   return {
-    /** Cria um emissor ja carimbado com a identidade da jornada. */
+    /** Cria um emissor já carimbado com a identidade da jornada. */
     forJourney(meta: { journeyId: string; squad: string; version: string }): JourneyTelemetry {
       const base = { ...meta, correlationId: params.correlationId, sessionId: params.sessionId };
       return {

@@ -12,7 +12,7 @@
  *
  * Três cuidados deliberados:
  *
- *  1. `process.env.NODE_ENV` e não uma flag nossa. O bundler substitui o
+ *  1. `process.env.NODE_ENV` é não uma flag nossa. O bundler substitui o
  *     literal em build de produção, então o corpo inteiro da função vira código
  *     morto e some no minificador. O colaborador não paga bytes pelo nosso
  *     débito.
@@ -21,7 +21,7 @@
  *     lista de 200 linhas emitiria 200 avisos por render e o console viraria
  *     inútil -- que é o mesmo que não avisar.
  *
- *  3. `console.warn` e não `throw`. Depreciação que quebra a tela não é
+ *  3. `console.warn` é não `throw`. Depreciação que quebra a tela não é
  *     depreciação, é remoção.
  */
 

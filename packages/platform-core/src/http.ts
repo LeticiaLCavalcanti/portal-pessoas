@@ -3,9 +3,9 @@ import type { JourneyHttp } from '@portal/journey-contract';
 export interface HttpOptions {
   baseUrl: string;
   getToken: () => string;
-  /** Id de correlacao da SESSAO. Amarra shell -> jornada -> BFF -> APIs. */
+  /** Id de correlação da SESSÃO. Amarra shell -> jornada -> BFF -> APIs. */
   correlationId: string;
-  /** Quem esta chamando. Permite ao BFF cobrar SLO por jornada, nao por "frontend". */
+  /** Quem está chamando. Permite ao BFF cobrar SLO por jornada, não por "frontend". */
   journeyId?: string;
 }
 

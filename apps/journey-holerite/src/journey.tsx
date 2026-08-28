@@ -4,17 +4,17 @@
  * ============================================================================
  *
  * Prova do requisito "incluir jornada sem alterar o core": nenhum arquivo de
- * `apps/shell` foi tocado para ela existir -- so uma linha em
+ * `apps/shell` foi tocado para ela existir -- só uma linha em
  * `apps/bff/src/registry.json` (docs/adr/0004).
  *
- * Declara `fallbackJourneyId`: se este bundle cair, o shell oferece a versao
+ * Declara `fallbackJourneyId`: se este bundle cair, o shell oferece a versão
  * legada (docs/adr/0010).
  *
- * DUAS VERSOES DO DESIGN SYSTEM CONVIVEM AQUI, de proposito.
- * Este arquivo (`Screen` e `IncomeStatement`) segue na v1. `./Detail.tsx` ja esta na v2.
- * As duas telas renderizam na mesma arvore React e sao indistinguiveis, porque
- * as duas versoes leem os mesmos tokens L0 do IDS. E a migracao gradual da
- * ADR 0011 acontecendo em um diretorio de verdade -- nao um plano no papel.
+ * DUAS VERSÕES DO DESIGN SYSTEM CONVIVEM AQUI, de propósito.
+ * Este arquivo (`Screen` e `IncomeStatement`) segue na v1. `./Detail.tsx` já está na v2.
+ * As duas telas renderizam na mesma árvore React e são indistinguíveis, porque
+ * as duas versões leem os mesmos tokens L0 do IDS. É a migração gradual da
+ * ADR 0011 acontecendo em um diretório de verdade -- não um plano no papel.
  */
 import * as React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -136,7 +136,7 @@ const journey: JourneyModule = {
     );
 
     /**
-     * Desmonte obrigatorio: sem ele o portal vaza uma arvore a cada navegacao.
+     * Desmonte obrigatório: sem ele o portal vaza uma árvore a cada navegação.
      *
      * O `queueMicrotask` tira o desmonte do commit do React do shell -- sem
      * ele, "Attempted to synchronously unmount a root while React was already
