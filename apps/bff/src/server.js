@@ -23,6 +23,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import * as db from './data.js';
+import { casar } from './busca.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const app = Fastify({ logger: { transport: { target: 'pino-pretty' } } });
@@ -46,24 +47,52 @@ app.get('/v1/flags', async () => db.flags);
  * O BFF ja poda por papel; o rollout percentual e resolvido no cliente para
  * servir tambem de kill-switch local quando o remote falha.
  */
-app.get('/v1/journeys', async () => {
-  const roles = new Set(db.user.roles);
-  return loadRegistry().filter(
+/**
+ * Uma unica definicao de "o que este colaborador enxerga".
+ *
+ * Existe como funcao, e nao repetida em cada rota, porque a busca precisa da
+ * MESMA poda: um resultado de busca que leva a uma jornada fora do catalogo do
+ * colaborador e um beco sem saida -- o shell nao acha a rota e desenha erro.
+ * Enquanto isso era um filtro copiado, o catalogo podava por papel e a busca
+ * nao.
+ */
+const jornadasVisiveisPara = (roles) =>
+  loadRegistry().filter(
     (j) => j.requiredRoles.length === 0 || j.requiredRoles.some((r) => roles.has(r))
   );
-});
+
+app.get('/v1/journeys', async () => jornadasVisiveisPara(new Set(db.user.roles)));
 
 app.get('/v1/home', async () => ({
   greeting: `Bom te ver, ${db.user.firstName}`,
   cards: db.homeCards
 }));
 
-/** Busca global: fan-out por dominio com timeout curto e degradacao parcial. */
+/**
+ * Busca global: fan-out por dominio com timeout curto e degradacao parcial.
+ *
+ * A PARTICIPACAO NA BUSCA E DECLARADA NO MANIFESTO, nao no codigo do BFF.
+ * `capabilities: ['search']` e o que coloca uma jornada no resultado -- e uma
+ * jornada que nao declara simplesmente nao aparece, sem que ninguem edite este
+ * arquivo. E o mecanismo que a ADR 0009 descreve; ate esta funcao existir, a
+ * ADR estava certa no papel e o indice era consultado inteiro, incluindo
+ * jornada que nao havia pedido para participar.
+ *
+ * A poda por papel vem junto de graca, porque a fonte e o catalogo visivel e
+ * nao o registro cru.
+ */
 app.get('/v1/search', async (req) => {
-  const q = String(req.query.q ?? '').trim().toLowerCase();
-  if (q.length < 2) return { query: q, hits: [] };
-  const hits = db.searchIndex.filter((h) => h.title.toLowerCase().includes(q));
-  return { query: q, hits };
+  const consulta = String(req.query.q ?? '').trim();
+
+  const participantes = new Set(
+    jornadasVisiveisPara(new Set(db.user.roles))
+      .filter((j) => j.capabilities.includes('search'))
+      .map((j) => j.id)
+  );
+
+  // O casamento ignora acento -- ver busca.js. Num portal em portugues, quem
+  // digita rapido escreve "ferias", e a comparacao literal devolvia zero.
+  return { query: consulta, hits: casar(db.searchIndex, consulta, participantes) };
 });
 
 app.get('/v1/notifications', async () => db.notifications);
@@ -175,5 +204,40 @@ app.post('/v1/telemetry', async (req, reply) => {
   }
   reply.code(204);
 });
+
+/**
+ * Higiene do indice de busca, checada no boot.
+ *
+ * Agora que a participacao e declarada, esquecer `capabilities: ['search']` faz
+ * os resultados da jornada sumirem -- sem erro, sem log, sem nada. E o mesmo
+ * formato de falha do `--pp-space-4` que custou caro no DS: nao quebra, nao
+ * avisa, so para de funcionar. Entao avisamos.
+ *
+ * O contrario tambem e ruido: jornada que declara `search` e nao publicou
+ * nenhuma entrada aparece como participante e nunca devolve resultado.
+ */
+function conferirIndiceDeBusca() {
+  const jornadas = loadRegistry();
+  const declaram = new Set(jornadas.filter((j) => j.capabilities.includes('search')).map((j) => j.id));
+  const indexam = new Set(db.searchIndex.map((h) => h.journeyId));
+
+  const semDeclarar = [...indexam].filter((id) => !declaram.has(id));
+  const semIndice = [...declaram].filter((id) => !indexam.has(id));
+
+  if (semDeclarar.length) {
+    app.log.warn(
+      { jornadas: semDeclarar },
+      'Indice de busca: publicam entradas mas NAO declaram capabilities:["search"] -- os resultados delas nao vao aparecer'
+    );
+  }
+  if (semIndice.length) {
+    app.log.warn(
+      { jornadas: semIndice },
+      'Indice de busca: declaram capabilities:["search"] mas nao publicaram nenhuma entrada'
+    );
+  }
+}
+
+conferirIndiceDeBusca();
 
 await app.listen({ port: 4000, host: '0.0.0.0' });

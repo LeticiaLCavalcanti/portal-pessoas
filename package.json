@@ -14,7 +14,9 @@
     "tokens": "node packages/tokens/scripts/generate.mjs",
     "predev": "node scripts/checar-portas.mjs",
     "stop": "node scripts/parar.mjs",
-    "typecheck": "tsc -p apps/shell --noEmit && tsc -p apps/journey-ponto --noEmit && tsc -p apps/journey-beneficios --noEmit && tsc -p apps/journey-holerite --noEmit",
+    "typecheck": "tsc -p apps/shell --noEmit && tsc -p apps/journey-ponto --noEmit && tsc -p apps/journey-beneficios --noEmit && tsc -p apps/journey-holerite --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "build:remotes": "npm run build -w @portal/journey-ponto && npm run build -w @portal/journey-beneficios && npm run build -w @portal/journey-holerite",
     "build": "npm run build:remotes && npm run build -w @portal/shell",
     "serve:legacy": "serve --cors --no-port-switching -l 5003 apps/legacy-ferias",
@@ -28,11 +30,15 @@
     "@rspack/core": "^2.2.0",
     "@rspack/dev-server": "^2.2.1",
     "@rspack/plugin-react-refresh": "^2.0.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.4.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "concurrently": "^9.1.0",
+    "jsdom": "^30.0.1",
     "react-refresh": "^0.14.2",
     "serve": "^14.2.4",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^3.2.7"
   }
 }

@@ -89,51 +89,46 @@ export const holerite = {
     {
       competencia: '2026-08',
       referencia: 'Agosto/2026',
-      bruto: 'R$ 14.280,00',
-      descontos: 'R$ 4.867,45',
-      liquido: 'R$ 9.412,55',
+      bruto: 'R$ 20.880,00',
+      descontos: 'R$ 5.492,19',
+      liquido: 'R$ 15.387,81',
       situacao: 'disponível',
       tipo: 'mensal',
       linhas: [
-        { descricao: 'Salário base', tipo: 'provento', valor: 'R$ 12.400,00' },
+        { descricao: 'Salário base', tipo: 'provento', valor: 'R$ 20.000,00' },
         { descricao: 'Adicional de tempo de casa', tipo: 'provento', valor: 'R$ 880,00' },
-        { descricao: 'Participação em projeto', tipo: 'provento', valor: 'R$ 1.000,00' },
         { descricao: 'INSS', tipo: 'desconto', valor: 'R$ 908,86' },
-        { descricao: 'IRRF', tipo: 'desconto', valor: 'R$ 2.541,29' },
-        { descricao: 'Plano de saúde', tipo: 'desconto', valor: 'R$ 417,30' },
-        { descricao: 'Vale refeição (coparticipação)', tipo: 'desconto', valor: 'R$ 1.000,00' }
+        { descricao: 'IRRF', tipo: 'desconto', valor: 'R$ 4.583,33' }
       ]
     },
     {
       competencia: '2026-07',
       referencia: 'Julho/2026',
-      bruto: 'R$ 14.220,00',
-      descontos: 'R$ 4.839,90',
-      liquido: 'R$ 9.380,10',
+      bruto: 'R$ 21.820,00',
+      descontos: 'R$ 5.750,69',
+      liquido: 'R$ 16.069,31',
       situacao: 'pago',
       tipo: 'mensal',
       linhas: [
-        { descricao: 'Salário base', tipo: 'provento', valor: 'R$ 12.400,00' },
+        { descricao: 'Salário base', tipo: 'provento', valor: 'R$ 20.000,00' },
         { descricao: 'Adicional de tempo de casa', tipo: 'provento', valor: 'R$ 880,00' },
         { descricao: 'Horas extras', tipo: 'provento', valor: 'R$ 940,00' },
         { descricao: 'INSS', tipo: 'desconto', valor: 'R$ 908,86' },
-        { descricao: 'IRRF', tipo: 'desconto', valor: 'R$ 2.513,74' },
-        { descricao: 'Plano de saúde', tipo: 'desconto', valor: 'R$ 417,30' },
-        { descricao: 'Vale refeição (coparticipação)', tipo: 'desconto', valor: 'R$ 1.000,00' }
+        { descricao: 'IRRF', tipo: 'desconto', valor: 'R$ 4.841,83' }
       ]
     },
     {
       competencia: '2025-13',
       referencia: '13º salário / 2025',
-      bruto: 'R$ 6.200,00',
-      descontos: 'R$ 1.510,00',
-      liquido: 'R$ 4.690,00',
+      bruto: 'R$ 10.000,00',
+      descontos: 'R$ 5.250,19',
+      liquido: 'R$ 4.749,81',
       situacao: 'pago',
       tipo: 'decimo-terceiro',
       linhas: [
-        { descricao: '13º salário (2ª parcela)', tipo: 'provento', valor: 'R$ 6.200,00' },
-        { descricao: 'INSS', tipo: 'desconto', valor: 'R$ 486,00' },
-        { descricao: 'IRRF', tipo: 'desconto', valor: 'R$ 1.024,00' }
+        { descricao: '13º salário (2ª parcela)', tipo: 'provento', valor: 'R$ 10.000,00' },
+        { descricao: 'INSS', tipo: 'desconto', valor: 'R$ 908,86' },
+        { descricao: 'IRRF', tipo: 'desconto', valor: 'R$ 4.341,33' }
       ]
     }
   ],

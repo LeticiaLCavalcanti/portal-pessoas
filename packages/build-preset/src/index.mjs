@@ -49,6 +49,20 @@ export const SHARED_SINGLETONS = {
   react: { singleton: true, strictVersion: false, requiredVersion: '^18.3.1' },
   'react-dom': { singleton: true, strictVersion: false, requiredVersion: '^18.3.1' },
   '@portal/design-system': { singleton: true, strictVersion: false, requiredVersion: '^1.0.0' },
+  /**
+   * A barra no fim e SHARING POR PREFIXO, e ela existe por causa do DS v2.
+   *
+   * A chave sem barra compartilha exatamente `@portal/design-system`. Deep
+   * import (`@portal/design-system/v2`) e outro especificador de modulo e NAO
+   * casa com ela -- sem esta linha, cada jornada que migrar para a v2 embutiria
+   * a propria copia da v2 no bundle, e o singleton do DS deixaria de ser um.
+   *
+   * `requiredVersion: '^1.1.0'` porque foi nessa versao que o subpath `/v2`
+   * passou a existir. Com `strictVersion: false`, uma pagina que so tenha
+   * bundles 1.0.0 no ar degrada com aviso no console em vez de derrubar a
+   * jornada -- que e a mesma politica das outras entradas desta lista.
+   */
+  '@portal/design-system/': { singleton: true, strictVersion: false, requiredVersion: '^1.1.0' },
   '@portal/tokens': { singleton: true, strictVersion: false, requiredVersion: '^1.0.0' }
 };
 

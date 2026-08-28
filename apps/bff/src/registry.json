@@ -71,7 +71,9 @@
       "entry": "http://localhost:5003/?jornada=ferias",
       "exposedModule": "./journey",
       "requiredRoles": [],
-      "capabilities": [],
+      "capabilities": [
+        "search"
+      ],
       "rollout": {
         "enabled": true,
         "percentage": 100,

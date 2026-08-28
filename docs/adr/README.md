@@ -20,6 +20,7 @@ colateral não óbvio, o motivo de uma linha parecer estranha.
 | [0008](0008-iconografia-por-nome-semantico.md) | Iconografia por nome semântico, tolerante | Ícone vindo de manifesto externo |
 | [0009](0009-busca-global-agregada-no-bff.md) | Busca global agregada no BFF | Por que não há `registerSearchProvider` |
 | [0010](0010-rollout-resolvido-tambem-no-cliente.md) | Rollout resolvido também no cliente | Kill switch local na falha do remote |
+| [0011](0011-design-system-v2-conviver-com-a-v1.md) | DS v2 convivendo com a v1 no mesmo pacote | Major sem big bang em 10 squads |
 
 ## Leitura sugerida
 

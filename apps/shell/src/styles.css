@@ -63,14 +63,41 @@ body {
 .pp-search {
   position: relative; flex: 1; max-width: 360px; margin-right: auto;
   display: flex; align-items: center;
+  /* Tamanho da lupa. UM valor com DOIS consumidores: o próprio ícone e o
+     recuo do texto do campo. Antes o recuo trazia `17px` cravado no `calc`,
+     que precisava bater com o `size={17}` do <Icon> no TSX — dois lugares
+     obrigados a concordar, sem nada garantindo isso. Aqui o CSS é o dono. */
+  --pp-search-icon: 17px;
 }
+
 /* Lupa dentro do campo: posicionada por token, e o padding do input abre
-   espaço para ela — nada de `text-indent`, que quebra com o placeholder. */
+   espaço para ela — nada de `text-indent`, que quebra com o placeholder.
+   `width`/`height` em CSS vencem os atributos do <svg>, então o tamanho vem
+   da variável acima e não da prop do componente. */
 .pp-search__icon {
-  position: absolute; left: var(--space-3); pointer-events: none; opacity: .7;
+  position: absolute; left: var(--space-3);
+  width: var(--pp-search-icon); height: var(--pp-search-icon);
+  pointer-events: none; opacity: .7;
 }
-.pp-search__input {
-  padding: var(--space-1) var(--space-3) var(--space-1) calc(var(--space-3) * 2 + 17px);
+
+/* DOIS seletores de propósito, e não um.
+ *
+ * `.ds-input` do DS declara o próprio `padding`, e tinha exatamente a MESMA
+ * especificidade que `.pp-search__input` tinha aqui. Nesse empate, quem vence
+ * é quem for aplicado por último — e as duas regras moram em ARQUIVOS de CSS
+ * diferentes, carregados como chunks separados. Com o DS sendo módulo
+ * compartilhado de Module Federation, essa ordem não é garantida.
+ *
+ * Quando o DS entrava por último, o campo voltava ao padding do DS e a lupa
+ * caía em cima do placeholder — "Buscar em todo o portal" com a lupa sobre o
+ * B. Especificidade maior tira o layout das mãos do carregador de chunks.
+ *
+ * É a mesma forma de todas as outras regras daqui que tocam o DS
+ * (`.pp-topbar .ds-input`, `.pp-side__link .ds-icon`): esta era a única
+ * exceção, e por isso foi a única que quebrou. */
+.pp-search .pp-search__input {
+  padding: var(--space-1) var(--space-3);
+  padding-left: calc(var(--space-3) * 2 + var(--pp-search-icon));
   font: var(--ts-body-sm);
 }
 .pp-search__results {

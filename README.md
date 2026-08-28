@@ -38,7 +38,9 @@ npm run dev -w @portal/journey-ponto     # http://localhost:5001
 Outros comandos:
 
 ```bash
-npm run typecheck   # tipos dos 4 apps
+npm test            # testes unitários (vitest)
+npm run test:watch  # idem, em watch
+npm run typecheck   # tipos dos 4 apps + dos testes
 npm run build       # build de produção de todos os bundles
 npm run preview     # build + sobe tudo servindo os artefatos estáticos
 ```
@@ -100,6 +102,16 @@ proprietário, pela mesma razão das fontes. Dentro da rede, a troca é de uma l
 comentada no próprio arquivo; as medidas em volta vêm de tokens, então o lockup não se
 desloca quando o ativo real entra.
 
+**O DS está em duas versões ao mesmo tempo**, de propósito. `@portal/design-system` é a v1;
+`@portal/design-system/v2` é a v2 — mesmo pacote, subpath diferente, prefixo de CSS disjunto
+(`ds-` × `ds2-`) e ponte que aceita as props da v1 traduzindo-as com aviso de depreciação.
+Migrar é trocar **uma linha de import em um arquivo**, sem coordenar com as outras squads e
+sem rebuild de nenhuma jornada. `apps/journey-holerite` está parcialmente migrada e serve de
+exemplo vivo: `src/Detalhe.tsx` está na v2, `src/journey.tsx` segue na v1, as duas telas
+renderizam na mesma árvore React e são indistinguíveis — porque as duas leem os mesmos
+tokens L0. Ver [MIGRATION.md](packages/design-system/MIGRATION.md) e
+[ADR 0011](docs/adr/0011-design-system-v2-conviver-com-a-v1.md).
+
 ```
 apps/
   bff/                registro de jornadas, agregação, coletor de telemetria
@@ -114,7 +126,7 @@ docs/                 proposta técnica e ADRs
 mobile/               casca nativa: desenho e protocolo da ponte (documentado)
 packages/
   build-preset/       config de Rspack + a lista `shared` do Module Federation
-  design-system/      L1 primitivos + L2 composições
+  design-system/      L1 primitivos + L2 composições (v1 na raiz, v2 em src/v2)
   journey-contract/   manifesto (Zod) + JourneyContext + JourneyModule
   platform-core/      http com correlation-id, telemetria, rollout
   tokens/             alias semântico sobre o IDS (gera CSS e objeto para React Native)
@@ -156,6 +168,43 @@ A correção não foi só trocar o prefixo: `space()` agora vem tipado de `@port
 o nome da variável é importado em vez de digitado, e um erro de prefixo passa a ser erro de
 compilação. É o mesmo padrão de `containerNameOf` — quando dois lugares precisam concordar
 sobre um nome, ele vira código, não convenção.
+
+---
+
+## O que os testes testam
+
+`npm test` roda 97 testes em menos de dois segundos. A regra que define o que entra:
+**cada arquivo de teste mira uma afirmação que o projeto faz por escrito** — numa ADR, no
+README ou no `MIGRATION.md` — e fica vermelho quando ela deixa de ser verdade. Não
+perseguimos cobertura de linha: teste que só confirma que `render(<Button/>)` produz um
+`<button>` não paga o próprio custo de manutenção.
+
+| Arquivo | A afirmação que ele protege |
+| --- | --- |
+| `design-system/src/v2/primitives.test.tsx` | "Trocar o import para `/v2` é, sozinho, uma mudança **sem efeito**" — a ponte de props da v1 |
+| `design-system/src/v2/index.test.ts` | "`/v2` é sempre a superfície **completa** do DS" — deriva a lista da v1, em vez de repeti-la à mão |
+| `design-system/src/v2/patterns.test.tsx` | "`<dd>` aceita ReactNode sem reorganizar a árvore" — espia `console.error` do React para pegar aninhamento inválido |
+| `design-system/src/primitives.test.tsx` | ADR 0007: sem `fallback` o boundary não desenha nada, e `resetKey` é o que faz "tentar de novo" ter efeito |
+| `tokens/src/tokens.test.ts` | "O CI falha se `tokens.css` divergir de `tokens.json`" — a verificação que o gerador **afirmava** existir e que nada fazia. Inclui a invariante do bug do `--pp-space-4` |
+| `journey-contract/src/index.test.ts` | O portão de versão do contrato, e o `registry.json` **real** validado contra o schema Zod |
+| `build-preset/src/container-name.test.ts` | Que todo id do registro vire um nome de container federado válido e sem colisão |
+| `bff/src/search.test.ts` | ADR 0009: "quer aparecer na busca? declare `capabilities: ['search']`" — checa o índice contra o `registry.json` real, nas duas direções |
+| `journey-holerite/src/Detalhe.test.tsx` | Que as duas versões do DS renderizem na mesma árvore — um `Icon` da v1 dentro de um `Button` da v2, no mesmo nó |
+
+Os testes de invariante (tokens, contrato, nomes de container) leem os **arquivos reais** do
+repositório, não fixtures. É o que os faz pegar um typo no `registry.json` — o arquivo que
+muda sem passar por build, e por isso o de maior chance de receber um erro que ninguém
+compila.
+
+**O que ainda não existe:** teste de integração entre microfrontends. O que faltaria é
+específico — *contract tests* do `JourneyModule` rodando no CI de cada squad contra o
+contrato publicado, e um smoke end-to-end no shell que monte cada jornada do registro.
+`isContractCompatible` já é o ponto onde o primeiro se encaixaria.
+
+> **Vitest não reintroduz o Vite como bundler.** A [ADR 0006](docs/adr/0006-rspack-como-bundler.md)
+> trocou Vite por Rspack por causa de Module Federation — os remotes só federavam depois de
+> `build`. Nada disso vale para um runner de teste, que não federa nem empacota para
+> produção. O acoplamento com o bundler continua nos dois arquivos de sempre.
 
 ---
 

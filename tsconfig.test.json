@@ -1,0 +1,25 @@
+{
+  // Os testes são tipados pelo mesmo `npm run typecheck` dos apps.
+  //
+  // Sem isto, um teste com erro de tipo passaria despercebido: o Vitest
+  // transpila TSX sem checar tipos (esbuild apaga os tipos, não os verifica), e
+  // os tsconfigs dos apps só alcançam arquivos que a árvore de imports toca --
+  // um arquivo de teste não é importado por ninguém.
+  //
+  // `types: ["node"]` porque os testes de invariante leem tokens.css e
+  // registry.json do disco. É o único lugar do monorepo que precisa das APIs de
+  // Node; o código de browser continua com a declaração mínima de
+  // `types/globals.d.ts`.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    // O BFF e JS puro (sem build). O teste de higiene do indice de busca
+    // importa `apps/bff/src/data.js` direto, entao o typecheck precisa deixar
+    // um .ts importar um .js do repositorio.
+    "allowJs": true,
+    "checkJs": false
+  },
+  "include": ["**/*.test.ts", "**/*.test.tsx", "vitest.config.mts"],
+  "exclude": ["node_modules", "**/dist"]
+}

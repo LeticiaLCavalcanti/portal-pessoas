@@ -28,6 +28,14 @@ expõe `GET /v1/search?q=`. O shell consome um endpoint e renderiza.
 O manifesto declara a participação via `capabilities: ['search']` — é dado, não código.
 **Não há `registerSearchProvider` no contrato**, e essa ausência é deliberada.
 
+> **Nota de implementação.** Esta frase já foi verdadeira só no papel: o `/v1/search`
+> varria o índice inteiro sem consultar o manifesto, e uma jornada com
+> `capabilities: []` aparecia nos resultados assim mesmo. O modo de falha é o pior
+> possível — nada quebra, a busca segue devolvendo resultados, e a divergência entre o
+> texto e o código só aparece se alguém conferir. Hoje o BFF deriva os participantes do
+> catálogo visível ao colaborador, `apps/bff/src/search.test.ts` trava a regra sobre os
+> arquivos reais, e o BFF avisa no boot quem publicou índice sem declarar a capacidade.
+
 O resultado navega para uma rota **interna** da jornada (`/ponto/espelho`). O shell garante
 a rota; reconhecê-la é responsabilidade da jornada dona, via `ctx.path`.
 

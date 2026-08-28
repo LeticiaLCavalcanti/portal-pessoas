@@ -9,6 +9,12 @@
  *
  * Declara `fallbackJourneyId`: se este bundle cair, o shell oferece a versao
  * legada (docs/adr/0010).
+ *
+ * DUAS VERSOES DO DESIGN SYSTEM CONVIVEM AQUI, de proposito.
+ * Este arquivo (`Tela` e `Informe`) segue na v1. `./Detalhe.tsx` ja esta na v2.
+ * As duas telas renderizam na mesma arvore React e sao indistinguiveis, porque
+ * as duas versoes leem os mesmos tokens L0 do IDS. E a migracao gradual da
+ * ADR 0011 acontecendo em um diretorio de verdade -- nao um plano no papel.
  */
 import * as React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -16,22 +22,8 @@ import type { JourneyContext, JourneyModule } from '@portal/journey-contract';
 import {
   Badge, Button, Card, DataList, EmptyState, ErrorBoundary, Row, Skeleton, Stack, Text
 } from '@portal/design-system';
-
-interface Demonstrativo {
-  competencia: string;
-  referencia: string;
-  bruto: string;
-  descontos: string;
-  liquido: string;
-  situacao: string;
-  tipo: 'mensal' | 'decimo-terceiro';
-  linhas: { descricao: string; tipo: 'provento' | 'desconto'; valor: string }[];
-}
-
-interface Holerite {
-  demonstrativos: Demonstrativo[];
-  informeRendimentos: { ano: string; situacao: string }[];
-}
+import { Detalhe } from './Detalhe';
+import type { Holerite } from './tipos';
 
 function Tela({ ctx }: { ctx: JourneyContext }) {
   const [dados, setDados] = React.useState<Holerite | null>(null);
@@ -97,79 +89,6 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
             </Stack>
           </Card>
         ))}
-      </div>
-    </Stack>
-  );
-}
-
-function Detalhe({ ctx, d }: { ctx: JourneyContext; d: Demonstrativo }) {
-  const [baixando, setBaixando] = React.useState(false);
-
-  /**
-   * O "baixar" real: o BFF devolve o PDF ja assinado pelo sistema de folha, o
-   * front so materializa o download. Fazer isso no cliente a partir de um
-   * Blob evita expor a URL do sistema de origem e mantem o token fora da barra
-   * de endereco -- o mesmo motivo pelo qual o legado recebe token por
-   * postMessage e nao por querystring.
-   */
-  const baixar = async () => {
-    setBaixando(true);
-    try {
-      const r = await ctx.http.get<{ nomeArquivo: string; conteudoBase64: string; mimeType: string }>(
-        `/v1/holerite/${d.competencia}/documento`
-      );
-      const bytes = Uint8Array.from(atob(r.conteudoBase64), (c) => c.charCodeAt(0));
-      const url = URL.createObjectURL(new Blob([bytes], { type: r.mimeType }));
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = r.nomeArquivo;
-      a.click();
-      URL.revokeObjectURL(url);
-      ctx.notify(`Demonstrativo de ${d.referencia} baixado.`, 'success');
-      ctx.telemetry.event('holerite.documento_baixado', { competencia: d.competencia });
-    } catch (e) {
-      ctx.telemetry.error(e, { acao: 'baixar', competencia: d.competencia });
-      ctx.notify('Não foi possível baixar o demonstrativo agora.', 'danger');
-    } finally {
-      setBaixando(false);
-    }
-  };
-
-  const proventos = d.linhas.filter((l) => l.tipo === 'provento');
-  const descontos = d.linhas.filter((l) => l.tipo === 'desconto');
-
-  return (
-    <Stack gap={4}>
-      <Button variant="ghost" onClick={() => ctx.navigate('/holerite')}>← Todos os demonstrativos</Button>
-
-      <Card
-        title={d.referencia}
-        hint={`Competência ${d.competencia}`}
-        actions={<Badge tone={d.situacao === 'pago' ? 'success' : 'accent'}>{d.situacao}</Badge>}
-      >
-        <Stack gap={5}>
-          <DataList
-            items={[
-              { label: 'Total de proventos', value: d.bruto },
-              { label: 'Total de descontos', value: d.descontos },
-              { label: 'Líquido a receber', value: <Text size="lg">{d.liquido}</Text> }
-            ]}
-          />
-          <Row gap={3} style={{ flexWrap: 'wrap' }}>
-            <Button onClick={baixar} disabled={baixando}>
-              {baixando ? 'Gerando…' : 'Baixar demonstrativo'}
-            </Button>
-          </Row>
-        </Stack>
-      </Card>
-
-      <div className="ds-grid">
-        <Card title="Proventos">
-          <DataList items={proventos.map((l) => ({ label: l.descricao, value: l.valor }))} />
-        </Card>
-        <Card title="Descontos">
-          <DataList items={descontos.map((l) => ({ label: l.descricao, value: l.valor }))} />
-        </Card>
       </div>
     </Stack>
   );

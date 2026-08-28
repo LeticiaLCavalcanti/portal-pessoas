@@ -75,8 +75,12 @@ export function GlobalSearch() {
   return (
     <div className="pp-search" ref={boxRef}>
       {/* Decorativo: o campo ja tem `aria-label`, entao o icone fica mudo para
-          o leitor de tela em vez de anunciar "busca" duas vezes. */}
-      <Icon name="search" size={17} className="pp-search__icon" />
+          o leitor de tela em vez de anunciar "busca" duas vezes.
+
+          Sem `size`: o tamanho vem de `--pp-search-icon` no styles.css, que e
+          a MESMA variavel usada para calcular o recuo do texto do campo.
+          Cravar o numero aqui obrigava os dois lugares a concordarem na mao. */}
+      <Icon name="search" className="pp-search__icon" />
       <input
         ref={inputRef}
         className="ds-input pp-search__input"
