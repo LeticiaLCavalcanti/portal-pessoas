@@ -44,7 +44,7 @@ describe('DataList — semântica', () => {
    * teste vermelho.
    */
   it('aceita ReactNode com <div> no valor sem aninhamento inválido', () => {
-    const erro = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     render(
       <DataList
@@ -54,11 +54,11 @@ describe('DataList — semântica', () => {
       />
     );
 
-    const avisosDeAninhamento = erro.mock.calls
+    const nestingWarnings = errorSpy.mock.calls
       .map((args) => String(args[0]))
       .filter((msg) => /validateDOMNesting|cannot (?:be a descendant|appear as a descendant)/i.test(msg));
 
-    expect(avisosDeAninhamento, avisosDeAninhamento.join('\n')).toEqual([]);
+    expect(nestingWarnings, nestingWarnings.join('\n')).toEqual([]);
   });
 
   it('marca a linha de destaque para o DS decidir a hierarquia do total', () => {
@@ -71,10 +71,10 @@ describe('DataList — semântica', () => {
       />
     );
 
-    const linhas = container.querySelectorAll('.ds2-datalist__row');
-    expect(linhas).toHaveLength(2);
-    expect(linhas[0]!.className).not.toContain('is-emphasis');
-    expect(linhas[1]!.className).toContain('is-emphasis');
+    const rows = container.querySelectorAll('.ds2-datalist__row');
+    expect(rows).toHaveLength(2);
+    expect(rows[0]!.className).not.toContain('is-emphasis');
+    expect(rows[1]!.className).toContain('is-emphasis');
   });
 
   it('renderiza o texto auxiliar dentro do rótulo, não do valor', () => {

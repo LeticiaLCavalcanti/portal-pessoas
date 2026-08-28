@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- *  Holerite / Detalhe — a prova de convivência entre as duas versões do DS
+ *  Holerite / Detail — a prova de convivência entre as duas versões do DS
  * ============================================================================
  *
  * A afirmação sob teste está no README e na ADR 0011:
@@ -19,12 +19,12 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import type { JourneyContext } from '@portal/journey-contract';
-import { Detalhe } from './Detalhe';
-import type { Demonstrativo } from './tipos';
+import { Detail } from './Detail';
+import type { Payslip } from './types';
 
 afterEach(cleanup);
 
-const demonstrativo: Demonstrativo = {
+const payslip: Payslip = {
   competencia: '2026-08',
   referencia: 'Agosto/2026',
   bruto: 'R$ 20.880,00',
@@ -44,7 +44,7 @@ const demonstrativo: Demonstrativo = {
  * mecanismo que o harness `standalone.tsx` usa para a squad descobrir a
  * mudança no próprio build, e não depois do deploy do shell.
  */
-function contextoFalso(over: Partial<JourneyContext> = {}): JourneyContext {
+function fakeContext(over: Partial<JourneyContext> = {}): JourneyContext {
   return {
     user: {
       id: 'u-1', name: 'Dev', firstName: 'Dev',
@@ -64,9 +64,9 @@ function contextoFalso(over: Partial<JourneyContext> = {}): JourneyContext {
   } as JourneyContext;
 }
 
-describe('Detalhe — está de fato na v2', () => {
+describe('Detail — está de fato na v2', () => {
   it('renderiza os componentes com as classes da v2', () => {
-    const { container } = render(<Detalhe ctx={contextoFalso()} d={demonstrativo} />);
+    const { container } = render(<Detail ctx={fakeContext()} d={payslip} />);
 
     expect(container.querySelector('.ds2-card')).not.toBeNull();
     expect(container.querySelector('.ds2-datalist')).not.toBeNull();
@@ -75,24 +75,24 @@ describe('Detalhe — está de fato na v2', () => {
   });
 
   it('usa a estrutura <dl> da v2 para os valores do demonstrativo', () => {
-    const { container } = render(<Detalhe ctx={contextoFalso()} d={demonstrativo} />);
+    const { container } = render(<Detail ctx={fakeContext()} d={payslip} />);
 
-    const rotulos = [...container.querySelectorAll('dt')].map((n) => n.textContent);
-    expect(rotulos).toContain('Total de proventos');
-    expect(rotulos).toContain('Líquido a receber');
+    const labels = [...container.querySelectorAll('dt')].map((n) => n.textContent);
+    expect(labels).toContain('Total de proventos');
+    expect(labels).toContain('Líquido a receber');
   });
 
   /** O total é destacado pelo DS, não por um <Text size="lg"> no ponto de uso. */
   it('marca o líquido a receber como linha de destaque', () => {
-    const { container } = render(<Detalhe ctx={contextoFalso()} d={demonstrativo} />);
+    const { container } = render(<Detail ctx={fakeContext()} d={payslip} />);
 
-    const destaque = container.querySelector('.ds2-datalist__row.is-emphasis');
-    expect(destaque?.querySelector('dt')?.textContent).toContain('Líquido a receber');
-    expect(destaque?.querySelector('dd')?.textContent).toBe('R$ 15.387,81');
+    const emphasised = container.querySelector('.ds2-datalist__row.is-emphasis');
+    expect(emphasised?.querySelector('dt')?.textContent).toContain('Líquido a receber');
+    expect(emphasised?.querySelector('dd')?.textContent).toBe('R$ 15.387,81');
   });
 });
 
-describe('Detalhe — convivência v1 + v2 na mesma árvore', () => {
+describe('Detail — convivência v1 + v2 na mesma árvore', () => {
   /**
    * O teste mais direto da tese: `Icon` é primitivo da v1, reexportado pela
    * superfície `/v2`, e está DENTRO de um `Button` da v2. Um `<svg>` com a
@@ -100,13 +100,13 @@ describe('Detalhe — convivência v1 + v2 na mesma árvore', () => {
    * no mesmo nó, sem adaptador e sem wrapper.
    */
   it('renderiza um Icon da v1 dentro de um Button da v2', () => {
-    render(<Detalhe ctx={contextoFalso()} d={demonstrativo} />);
+    render(<Detail ctx={fakeContext()} d={payslip} />);
 
-    const botao = screen.getByRole('button', { name: /Baixar demonstrativo/ });
-    expect(botao.className).toContain('ds2-btn');
+    const button = screen.getByRole('button', { name: /Baixar demonstrativo/ });
+    expect(button.className).toContain('ds2-btn');
 
-    const icone = botao.querySelector('svg.ds-icon');
-    expect(icone, 'o Icon da v1 deveria renderizar dentro do Button da v2').not.toBeNull();
+    const icon = button.querySelector('svg.ds-icon');
+    expect(icon, 'o Icon da v1 deveria renderizar dentro do Button da v2').not.toBeNull();
   });
 
   /**
@@ -116,12 +116,12 @@ describe('Detalhe — convivência v1 + v2 na mesma árvore', () => {
    * proventos e descontos vira uma coluna só, em silêncio.
    */
   it('mantém o utilitário de grade da v1 na tela migrada', () => {
-    const { container } = render(<Detalhe ctx={contextoFalso()} d={demonstrativo} />);
+    const { container } = render(<Detail ctx={fakeContext()} d={payslip} />);
     expect(container.querySelector('.ds-grid')).not.toBeNull();
   });
 
   it('separa proventos e descontos em cards próprios', () => {
-    render(<Detalhe ctx={contextoFalso()} d={demonstrativo} />);
+    render(<Detail ctx={fakeContext()} d={payslip} />);
 
     expect(screen.getByRole('heading', { name: 'Proventos' })).toBeDefined();
     expect(screen.getByRole('heading', { name: 'Descontos' })).toBeDefined();
@@ -130,7 +130,7 @@ describe('Detalhe — convivência v1 + v2 na mesma árvore', () => {
   });
 });
 
-describe('Detalhe — o loading que a v2 trouxe', () => {
+describe('Detail — o loading que a v2 trouxe', () => {
   /**
    * O ganho concreto da migração (MIGRATION.md §3): a v1 trocava o RÓTULO na
    * mão, o que não anuncia nada para leitor de tela e mudava a largura do botão
@@ -141,21 +141,21 @@ describe('Detalhe — o loading que a v2 trouxe', () => {
    * observável.
    */
   it('marca aria-busy e preserva o rótulo enquanto baixa', () => {
-    render(<Detalhe ctx={contextoFalso()} d={demonstrativo} />);
+    render(<Detail ctx={fakeContext()} d={payslip} />);
 
-    const botao = screen.getByRole('button', { name: /Baixar demonstrativo/ });
-    expect(botao.hasAttribute('aria-busy')).toBe(false);
+    const button = screen.getByRole('button', { name: /Baixar demonstrativo/ });
+    expect(button.hasAttribute('aria-busy')).toBe(false);
 
-    fireEvent.click(botao);
+    fireEvent.click(button);
 
-    expect(botao.getAttribute('aria-busy')).toBe('true');
-    expect((botao as HTMLButtonElement).disabled).toBe(true);
-    expect(botao.textContent).toContain('Baixar demonstrativo');
+    expect(button.getAttribute('aria-busy')).toBe('true');
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    expect(button.textContent).toContain('Baixar demonstrativo');
   });
 
   it('pede o documento da competência certa ao BFF', () => {
     const get = vi.fn(() => new Promise(() => {}));
-    render(<Detalhe ctx={contextoFalso({ http: { get, post: vi.fn() } as never })} d={demonstrativo} />);
+    render(<Detail ctx={fakeContext({ http: { get, post: vi.fn() } as never })} d={payslip} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Baixar demonstrativo/ }));
 
@@ -164,7 +164,7 @@ describe('Detalhe — o loading que a v2 trouxe', () => {
 
   it('navega de volta para a lista pelo botão de voltar', () => {
     const navigate = vi.fn();
-    render(<Detalhe ctx={contextoFalso({ navigate })} d={demonstrativo} />);
+    render(<Detail ctx={fakeContext({ navigate })} d={payslip} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Todos os demonstrativos/ }));
 

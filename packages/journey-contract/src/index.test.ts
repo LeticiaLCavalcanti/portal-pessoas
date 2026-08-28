@@ -29,9 +29,9 @@ import {
   SUPPORTED_CONTRACT_MAJOR
 } from './index';
 
-const raizDoRepo = join(dirname(fileURLToPath(import.meta.url)), '../../..');
-const registro = JSON.parse(
-  readFileSync(join(raizDoRepo, 'apps/bff/src/registry.json'), 'utf8')
+const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..');
+const registry = JSON.parse(
+  readFileSync(join(repoRoot, 'apps/bff/src/registry.json'), 'utf8')
 ) as { journeys: unknown[] };
 
 describe('isContractCompatible', () => {
@@ -72,28 +72,28 @@ describe('isContractCompatible', () => {
 
 describe('registry.json — o catálogo real do BFF', () => {
   it('tem jornadas', () => {
-    expect(registro.journeys.length).toBeGreaterThan(0);
+    expect(registry.journeys.length).toBeGreaterThan(0);
   });
 
   it('valida inteiro contra o schema do manifesto', () => {
-    const erros = registro.journeys
+    const errors = registry.journeys
       .map((j, i) => {
         const r = journeyManifestSchema.safeParse(j);
         return r.success ? null : `journeys[${i}]: ${r.error.issues.map((e) => `${e.path.join('.')} ${e.message}`).join('; ')}`;
       })
       .filter(Boolean);
 
-    expect(erros, erros.join('\n')).toEqual([]);
+    expect(errors, errors.join('\n')).toEqual([]);
   });
 
   it('não repete id — o id é a chave do container federado', () => {
-    const ids = registro.journeys.map((j) => journeyManifestSchema.parse(j).id);
+    const ids = registry.journeys.map((j) => journeyManifestSchema.parse(j).id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
   it('não repete rota — duas jornadas na mesma rota é ambiguidade de roteamento', () => {
-    const rotas = registro.journeys.map((j) => journeyManifestSchema.parse(j).route);
-    expect(new Set(rotas).size).toBe(rotas.length);
+    const routes = registry.journeys.map((j) => journeyManifestSchema.parse(j).route);
+    expect(new Set(routes).size).toBe(routes.length);
   });
 
   /**
@@ -103,7 +103,7 @@ describe('registry.json — o catálogo real do BFF', () => {
    * colaborador clica em "Abrir versão anterior" para lugar nenhum.
    */
   it('só aponta fallback para jornada que existe no registro', () => {
-    const manifestos = registro.journeys.map((j) => journeyManifestSchema.parse(j));
+    const manifestos = registry.journeys.map((j) => journeyManifestSchema.parse(j));
     const ids = new Set(manifestos.map((m) => m.id));
 
     const quebrados = manifestos

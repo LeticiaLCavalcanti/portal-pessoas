@@ -17,7 +17,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { Badge, Button } from './primitives';
-import { _limparAvisos } from './deprecations';
+import { _clearWarnings } from './deprecations';
 
 /**
  * O aviso de depreciacao e comportamento ESPERADO na maioria destes testes.
@@ -37,7 +37,7 @@ afterEach(() => {
   cleanup();
   // O registro de "ja avisei" e modulo-level e sobrevive entre testes; sem
   // limpar, o teste de "avisa uma vez por chave" passaria por acidente.
-  _limparAvisos();
+  _clearWarnings();
 });
 
 describe('Button — tradução das props da v1', () => {

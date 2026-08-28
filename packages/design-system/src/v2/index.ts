@@ -33,8 +33,8 @@
  *  Passo 3 — nada. Não existe passo 3: a jornada já está na v2.
  *
  *  Os dois passos podem estar a sprints de distância, e podem conviver no mesmo
- *  arquivo. É o que a jornada de holerite faz hoje: `Detalhe` está em v2,
- *  `Tela` e `Informe` seguem em v1, e as duas telas são indistinguíveis.
+ *  arquivo. É o que a jornada de holerite faz hoje: `Detail` está em v2,
+ *  `Screen` e `IncomeStatement` seguem em v1, e as duas telas são indistinguíveis.
  *
  * ---------------------------------------------------------------------------
  *  Por que este arquivo reexporta metade da v1

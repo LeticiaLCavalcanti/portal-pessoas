@@ -13,7 +13,7 @@ import { JourneyHost } from './journeys/JourneyHost';
  * Ha UMA rota curinga que consulta o registro. Adicionar jornada = adicionar
  * linha no registro. O core nao muda.
  */
-function RotaDeJornada() {
+function JourneyRoute() {
   const portal = usePortal();
   const location = useLocation();
   const manifest = portal.journeyByRoute(location.pathname);
@@ -37,10 +37,10 @@ function RotaDeJornada() {
 function Layout() {
   const portal = usePortal();
 
-  if (portal.status === 'carregando') {
+  if (portal.status === 'loading') {
     return <div className="pp-boot"><Text tone="muted">Carregando o portal…</Text></div>;
   }
-  if (portal.status === 'erro') {
+  if (portal.status === 'error') {
     return (
       <div className="pp-boot">
         <EmptyState
@@ -61,7 +61,7 @@ function Layout() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/inicio" element={<Navigate to="/" replace />} />
-            <Route path="*" element={<RotaDeJornada />} />
+            <Route path="*" element={<JourneyRoute />} />
           </Routes>
         </main>
       </div>

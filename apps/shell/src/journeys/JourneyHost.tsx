@@ -16,9 +16,9 @@ import { LegacyFrame } from './LegacyFrame';
 import { JourneyBoundary } from './JourneyBoundary';
 
 type Phase =
-  | { s: 'carregando' }
-  | { s: 'montada'; ms: number }
-  | { s: 'erro'; message: string; fase: 'carregamento' | 'render' };
+  | { s: 'loading' }
+  | { s: 'mounted'; ms: number }
+  | { s: 'error'; message: string; step: 'load' | 'render' };
 
 export function JourneyHost({ manifest, path }: { manifest: JourneyManifest; path: string }) {
   const portal = usePortal();
@@ -51,7 +51,7 @@ export function JourneyHost({ manifest, path }: { manifest: JourneyManifest; pat
         onError={(e) =>
           portal.telemetry
             .forJourney({ journeyId: effective.id, squad: effective.squad, version: effective.version })
-            .error(e, { fase: 'render' })
+            .error(e, { step: 'render' })
         }
         fallback={(retry) => (
           <Card>
@@ -81,7 +81,7 @@ function JourneySurface({
 }) {
   const portal = usePortal();
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const [phase, setPhase] = React.useState<Phase>({ s: 'carregando' });
+  const [phase, setPhase] = React.useState<Phase>({ s: 'loading' });
   const [attempt, setAttempt] = React.useState(0);
 
   const pathListeners = React.useRef(new Set<(p: string) => void>());
@@ -98,8 +98,8 @@ function JourneySurface({
   failRef.current = (e: unknown) => {
     portal.telemetry
       .forJourney({ journeyId: manifest.id, squad: manifest.squad, version: manifest.version })
-      .error(e, { fase: 'render' });
-    setPhase({ s: 'erro', message: e instanceof Error ? e.message : String(e), fase: 'render' });
+      .error(e, { step: 'render' });
+    setPhase({ s: 'error', message: e instanceof Error ? e.message : String(e), step: 'render' });
   };
 
   const ctx: JourneyContext = React.useMemo(() => {
@@ -144,16 +144,16 @@ function JourneySurface({
   React.useEffect(() => {
     if (manifest.kind !== 'remote') return;
     let unmount: (() => void) | undefined;
-    let cancelado = false;
+    let cancelled = false;
     const t0 = performance.now();
-    setPhase({ s: 'carregando' });
+    setPhase({ s: 'loading' });
 
     loadJourneyModule({
       id: manifest.id, version: manifest.version, entry: manifest.entry,
       exposedModule: manifest.exposedModule, timeoutMs: manifest.budget.loadTimeoutMs
     })
       .then(async (mod) => {
-        if (cancelado) return;
+        if (cancelled) return;
         if (!isContractCompatible(mod.contractVersion)) {
           throw new Error(
             `Contrato incompatível: a jornada implementa v${mod.contractVersion} e o shell suporta v1.x`
@@ -162,29 +162,29 @@ function JourneySurface({
         const el = containerRef.current;
         if (!el) return;
         unmount = await mod.mount(el, ctx);
-        if (cancelado) { unmount?.(); return; }
+        if (cancelled) { unmount?.(); return; }
         const ms = Math.round(performance.now() - t0);
-        setPhase({ s: 'montada', ms });
+        setPhase({ s: 'mounted', ms });
         ctx.telemetry.timing('jornada.tempo_de_montagem', ms);
         ctx.telemetry.event('jornada.montada', { kind: manifest.kind });
       })
       .catch((e) => {
-        if (cancelado) return;
+        if (cancelled) return;
         setPhase({
-          s: 'erro',
+          s: 'error',
           message: e instanceof Error ? e.message : String(e),
-          fase: 'carregamento'
+          step: 'load'
         });
-        // Na telemetria vai o erro TECNICO completo (`causa`), nao a frase
+        // Na telemetria vai o erro TECNICO completo (`cause`), nao a frase
         // amigavel: quem le isto e a squad dona, de madrugada, no alerta.
-        ctx.telemetry.error((e as { causa?: unknown })?.causa ?? e, {
-          fase: 'carregamento',
+        ctx.telemetry.error((e as { cause?: unknown })?.cause ?? e, {
+          step: 'load',
           entry: manifest.entry,
-          mensagemExibida: e instanceof Error ? e.message : String(e)
+          displayedMessage: e instanceof Error ? e.message : String(e)
         });
       });
 
-    return () => { cancelado = true; unmount?.(); };
+    return () => { cancelled = true; unmount?.(); };
   }, [manifest.id, manifest.version, manifest.kind, manifest.entry, manifest.exposedModule,
       manifest.budget.loadTimeoutMs, ctx, attempt]);
 
@@ -218,7 +218,7 @@ function JourneySurface({
 
   return (
     <>
-      {phase.s === 'carregando' && (
+      {phase.s === 'loading' && (
         <Card>
           <Stack gap={3}>
             <Skeleton h={22} w="42%" />
@@ -228,12 +228,12 @@ function JourneySurface({
         </Card>
       )}
 
-      {phase.s === 'erro' && (
+      {phase.s === 'error' && (
         <Card>
           <EmptyState
             mark={<Icon name="alert" size={30} />}
             title={
-              phase.fase === 'render'
+              phase.step === 'render'
                 ? 'Esta jornada parou de responder'
                 : 'Não foi possível abrir esta jornada'
             }
@@ -253,9 +253,9 @@ function JourneySurface({
       )}
 
       {/* O container fica sempre montado: e o "buraco" onde a squad desenha. */}
-      <div ref={containerRef} hidden={phase.s !== 'montada'} />
+      <div ref={containerRef} hidden={phase.s !== 'mounted'} />
 
-      {phase.s === 'montada' && (
+      {phase.s === 'mounted' && (
         <Text size="xs" tone="subtle" mono style={{ marginTop: 'var(--space-3)' }}>
           carregada via module federation de {manifest.entry} em {phase.ms}ms
         </Text>

@@ -19,39 +19,39 @@ const cache = new Map<string, Promise<JourneyModule>>();
  * Traducao de falha tecnica para frase de colaborador -- ver docs/adr/0001,
  * "Consequencias". A mensagem original vai inteira para a telemetria.
  */
-function mensagemParaColaborador(erro: unknown, jornada: string): string {
-  const bruta = erro instanceof Error ? erro.message : String(erro);
+function employeeFacingMessage(error: unknown, journeyName: string): string {
+  const raw = error instanceof Error ? error.message : String(error);
 
-  if (bruta.includes('RUNTIME-008') || bruta.includes('Failed to load script'))
-    return `A jornada "${jornada}" não respondeu. O time responsável já foi avisado.`;
-  if (bruta.includes('RUNTIME-002') || bruta.includes('does not contain'))
-    return `A jornada "${jornada}" foi publicada num formato que este portal não reconhece.`;
-  if (bruta.startsWith('Tempo esgotado'))
-    return `A jornada "${jornada}" demorou demais para abrir.`;
-  if (bruta.includes('não exporta mount'))
-    return bruta;
+  if (raw.includes('RUNTIME-008') || raw.includes('Failed to load script'))
+    return `A jornada "${journeyName}" não respondeu. O time responsável já foi avisado.`;
+  if (raw.includes('RUNTIME-002') || raw.includes('does not contain'))
+    return `A jornada "${journeyName}" foi publicada num formato que este portal não reconhece.`;
+  if (raw.startsWith('Tempo esgotado'))
+    return `A jornada "${journeyName}" demorou demais para abrir.`;
+  if (raw.includes('não exporta mount'))
+    return raw;
 
   // Falha desconhecida: nao inventamos diagnostico, so evitamos despejar stack.
-  return `Não foi possível abrir a jornada "${jornada}".`;
+  return `Não foi possível abrir a jornada "${journeyName}".`;
 }
 
-/** Erro de jornada: frase curta na tela, detalhe tecnico preservado em `causa`. */
+/** Erro de jornada: frase curta na tela, detalhe tecnico preservado em `cause`. */
 export class JourneyLoadError extends Error {
-  constructor(readonly causa: unknown, jornada: string) {
-    super(mensagemParaColaborador(causa, jornada));
+  constructor(readonly cause: unknown, journeyName: string) {
+    super(employeeFacingMessage(cause, journeyName));
     this.name = 'JourneyLoadError';
   }
 }
 
 function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise((resolve, reject) => {
-    const t = setTimeout(
+    const timer = setTimeout(
       () => reject(new Error(`Tempo esgotado ao carregar ${label} (${ms}ms)`)),
       ms
     );
     p.then(
-      (v) => { clearTimeout(t); resolve(v); },
-      (e) => { clearTimeout(t); reject(e); }
+      (value) => { clearTimeout(timer); resolve(value); },
+      (error) => { clearTimeout(timer); reject(error); }
     );
   });
 }
@@ -95,14 +95,14 @@ export function loadJourneyModule(opts: {
         throw new Error(`A jornada "${opts.id}" não exporta mount(). Contrato quebrado.`);
       }
       return journey;
-    })().catch((e) => {
-      throw new JourneyLoadError(e, opts.id);
+    })().catch((error) => {
+      throw new JourneyLoadError(error, opts.id);
     }),
     opts.timeoutMs,
     opts.id
-  ).catch((e) => {
+  ).catch((error) => {
     // O timeout dispara fora da promise interna, entao a traducao vem aqui.
-    throw e instanceof JourneyLoadError ? e : new JourneyLoadError(e, opts.id);
+    throw error instanceof JourneyLoadError ? error : new JourneyLoadError(error, opts.id);
   });
 
   cache.set(key, promise);

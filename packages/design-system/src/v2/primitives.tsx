@@ -23,7 +23,7 @@
  * sem que o portal fique com duas caras durante a transição.
  */
 import * as React from 'react';
-import { avisarDepreciado } from './deprecations';
+import { warnDeprecated } from './deprecations';
 
 /* -------------------------------------------------------------------------- */
 /* Button                                                                      */
@@ -35,7 +35,7 @@ export type ButtonTone = 'accent' | 'neutral' | 'critical';
 /** Valores da v1 que a v2 ainda aceita. Removidos na v3. */
 type ButtonVariantV1 = 'primary' | 'secondary';
 
-const VARIANTE_V1: Record<ButtonVariantV1, { variant: ButtonVariant; tone: ButtonTone }> = {
+const V1_VARIANT: Record<ButtonVariantV1, { variant: ButtonVariant; tone: ButtonTone }> = {
   primary: { variant: 'solid', tone: 'accent' },
   secondary: { variant: 'outline', tone: 'accent' }
 };
@@ -72,31 +72,31 @@ export function Button({
   children,
   ...rest
 }: ButtonProps) {
-  let enfase: ButtonVariant;
-  let intencao: ButtonTone;
+  let emphasis: ButtonVariant;
+  let intent: ButtonTone;
 
   if (variant === 'primary' || variant === 'secondary') {
-    const traduzido = VARIANTE_V1[variant];
-    enfase = traduzido.variant;
+    const translated = V1_VARIANT[variant];
+    emphasis = translated.variant;
     // `tone` explícito vence a tradução: quem já migrou metade da prop não
     // deve ser puxado de volta para o accent.
-    intencao = tone ?? traduzido.tone;
-    avisarDepreciado(
+    intent = tone ?? translated.tone;
+    warnDeprecated(
       `button.variant.${variant}`,
-      `<Button variant="${variant}"> é da v1. Use variant="${traduzido.variant}" tone="${traduzido.tone}". ` +
+      `<Button variant="${variant}"> é da v1. Use variant="${translated.variant}" tone="${translated.tone}". ` +
         'A ponte sai na v3 — ver packages/design-system/MIGRATION.md.'
     );
   } else {
-    enfase = variant;
+    emphasis = variant;
     // Ghost sem tom é secundário por definição (voltar, cancelar): na v1 ele
     // usava --c-fg-muted, e mudar isso agora repintaria toda tela migrada.
-    intencao = tone ?? (variant === 'ghost' ? 'neutral' : 'accent');
+    intent = tone ?? (variant === 'ghost' ? 'neutral' : 'accent');
   }
 
   const cls = [
     'ds2-btn',
-    `ds2-btn--${enfase}`,
-    `ds2-btn--tone-${intencao}`,
+    `ds2-btn--${emphasis}`,
+    `ds2-btn--tone-${intent}`,
     `ds2-btn--${size}`,
     fullWidth && 'ds2-btn--block',
     loading && 'is-loading',
@@ -131,7 +131,7 @@ export type BadgeTone = 'neutral' | 'accent' | 'info' | 'success' | 'warning' | 
 /** Tons da v1 que a v2 ainda aceita. Removidos na v3. */
 type BadgeToneV1 = 'warn' | 'danger';
 
-const TOM_V1: Record<BadgeToneV1, BadgeTone> = {
+const V1_TONE: Record<BadgeToneV1, BadgeTone> = {
   warn: 'warning',
   danger: 'critical'
 };
@@ -156,25 +156,25 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
  * tokens de feedback; até lá a v2 não oferece a variante. Ver MIGRATION.md.
  */
 export function Badge({ tone, className = '', children, ...rest }: BadgeProps) {
-  let intencao: BadgeTone;
+  let intent: BadgeTone;
 
   if (tone === 'warn' || tone === 'danger') {
-    intencao = TOM_V1[tone];
-    avisarDepreciado(
+    intent = V1_TONE[tone];
+    warnDeprecated(
       `badge.tone.${tone}`,
-      `<Badge tone="${tone}"> é da v1. Use tone="${TOM_V1[tone]}". ` +
+      `<Badge tone="${tone}"> é da v1. Use tone="${V1_TONE[tone]}". ` +
         'A ponte sai na v3 — ver packages/design-system/MIGRATION.md.'
     );
   } else if (tone === undefined) {
     // Na v1, ausência de tom desenhava um selo cinza. Continua desenhando --
     // o que muda é que agora existe um nome para isso.
-    intencao = 'neutral';
+    intent = 'neutral';
   } else {
-    intencao = tone;
+    intent = tone;
   }
 
   return (
-    <span className={`ds2-badge ds2-badge--${intencao} ${className}`.trim()} {...rest}>
+    <span className={`ds2-badge ds2-badge--${intent} ${className}`.trim()} {...rest}>
       {children}
     </span>
   );

@@ -107,7 +107,7 @@ desloca quando o ativo real entra.
 (`ds-` × `ds2-`) e ponte que aceita as props da v1 traduzindo-as com aviso de depreciação.
 Migrar é trocar **uma linha de import em um arquivo**, sem coordenar com as outras squads e
 sem rebuild de nenhuma jornada. `apps/journey-holerite` está parcialmente migrada e serve de
-exemplo vivo: `src/Detalhe.tsx` está na v2, `src/journey.tsx` segue na v1, as duas telas
+exemplo vivo: `src/Detail.tsx` está na v2, `src/journey.tsx` segue na v1, as duas telas
 renderizam na mesma árvore React e são indistinguíveis — porque as duas leem os mesmos
 tokens L0. Ver [MIGRATION.md](packages/design-system/MIGRATION.md) e
 [ADR 0011](docs/adr/0011-design-system-v2-conviver-com-a-v1.md).

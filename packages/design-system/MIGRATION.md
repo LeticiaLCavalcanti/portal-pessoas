@@ -171,11 +171,11 @@ Custo: alguns kB de CSS não usado enquanto a migração não termina.
 
 `apps/journey-holerite` está **parcialmente** migrada, de propósito:
 
-- `src/Detalhe.tsx` — v2, um único import de DS.
-- `src/journey.tsx` (`Tela`, `Informe`) — v1, intocado.
+- `src/Detail.tsx` — v2, um único import de DS.
+- `src/journey.tsx` (`Screen`, `IncomeStatement`) — v1, intocado.
 
 As duas telas renderizam na mesma árvore React, sob o mesmo `ErrorBoundary`,
-dentro do mesmo shell. `Detalhe.tsx` usa `Icon` (primitivo v1) dentro de `Button`
+dentro do mesmo shell. `Detail.tsx` usa `Icon` (primitivo v1) dentro de `Button`
 (primitivo v2) no mesmo nó, e a classe `ds-grid` da v1 continua valendo lá.
 
 ---

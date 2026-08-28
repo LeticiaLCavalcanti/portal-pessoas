@@ -23,7 +23,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import * as db from './data.js';
-import { casar } from './busca.js';
+import { match } from './search.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const app = Fastify({ logger: { transport: { target: 'pino-pretty' } } });
@@ -56,12 +56,12 @@ app.get('/v1/flags', async () => db.flags);
  * Enquanto isso era um filtro copiado, o catalogo podava por papel e a busca
  * nao.
  */
-const jornadasVisiveisPara = (roles) =>
+const journeysVisibleTo = (roles) =>
   loadRegistry().filter(
     (j) => j.requiredRoles.length === 0 || j.requiredRoles.some((r) => roles.has(r))
   );
 
-app.get('/v1/journeys', async () => jornadasVisiveisPara(new Set(db.user.roles)));
+app.get('/v1/journeys', async () => journeysVisibleTo(new Set(db.user.roles)));
 
 app.get('/v1/home', async () => ({
   greeting: `Bom te ver, ${db.user.firstName}`,
@@ -82,17 +82,17 @@ app.get('/v1/home', async () => ({
  * nao o registro cru.
  */
 app.get('/v1/search', async (req) => {
-  const consulta = String(req.query.q ?? '').trim();
+  const query = String(req.query.q ?? '').trim();
 
-  const participantes = new Set(
-    jornadasVisiveisPara(new Set(db.user.roles))
+  const participants = new Set(
+    journeysVisibleTo(new Set(db.user.roles))
       .filter((j) => j.capabilities.includes('search'))
       .map((j) => j.id)
   );
 
-  // O casamento ignora acento -- ver busca.js. Num portal em portugues, quem
+  // O casamento ignora acento -- ver search.js. Num portal em portugues, quem
   // digita rapido escreve "ferias", e a comparacao literal devolvia zero.
-  return { query: consulta, hits: casar(db.searchIndex, consulta, participantes) };
+  return { query, hits: match(db.searchIndex, query, participants) };
 });
 
 app.get('/v1/notifications', async () => db.notifications);
@@ -122,7 +122,7 @@ app.get('/v1/ponto', async () => db.ponto);
  * colaborador e em horario de Brasilia, entao e esse o unico fuso correto
  * aqui, independente de onde o BFF rode.
  */
-const horaDeBrasilia = new Intl.DateTimeFormat('pt-BR', {
+const brasiliaTime = new Intl.DateTimeFormat('pt-BR', {
   timeZone: 'America/Sao_Paulo',
   hour: '2-digit',
   minute: '2-digit',
@@ -130,18 +130,19 @@ const horaDeBrasilia = new Intl.DateTimeFormat('pt-BR', {
 });
 
 app.post('/v1/ponto/registros', async () => {
-  const hora = horaDeBrasilia.format(new Date());
-  const tipo = db.ponto.hoje.length % 2 === 0 ? 'entrada' : 'saída';
-  db.ponto.hoje.push({ hora, tipo });
-  return { hora, tipo };
+  const time = brasiliaTime.format(new Date());
+  const kind = db.ponto.hoje.length % 2 === 0 ? 'entrada' : 'saída';
+  const entry = { hora: time, tipo: kind };
+  db.ponto.hoje.push(entry);
+  return entry;
 });
 
 app.post('/v1/ponto/justificativas', async (req, reply) => {
   const { dia, motivo } = req.body ?? {};
   if (!dia || !motivo) return reply.code(400).send({ erro: 'dia e motivo são obrigatórios' });
-  const criada = { id: `j${db.ponto.justificativas.length + 1}`, dia, motivo, situacao: 'pendente' };
-  db.ponto.justificativas.unshift(criada);
-  return criada;
+  const created = { id: `j${db.ponto.justificativas.length + 1}`, dia, motivo, situacao: 'pendente' };
+  db.ponto.justificativas.unshift(created);
+  return created;
 });
 
 /* ------------------------------- beneficios ------------------------------ */
@@ -153,25 +154,25 @@ app.get('/v1/beneficios/reembolsos', async () => db.reembolsos);
 app.post('/v1/beneficios/reembolsos', async (req, reply) => {
   const { descricao, valor } = req.body ?? {};
   if (!descricao || !valor) return reply.code(400).send({ erro: 'descrição e valor são obrigatórios' });
-  const criado = {
+  const created = {
     id: `RB-${4822 + db.reembolsos.length}`,
     descricao,
     valor,
     situacao: 'em análise',
     enviadoEm: new Date().toLocaleDateString('pt-BR')
   };
-  db.reembolsos.unshift(criado);
-  return criado;
+  db.reembolsos.unshift(created);
+  return created;
 });
 
 app.post('/v1/beneficios/:id/solicitacoes', async (req, reply) => {
-  const beneficio = db.beneficios.find((b) => b.id === req.params.id);
-  if (!beneficio) return reply.code(404).send({ erro: 'benefício inexistente' });
-  const protocolo = `SB-${String(9100 + db.solicitacoesBeneficio.length)}`;
+  const benefit = db.beneficios.find((b) => b.id === req.params.id);
+  if (!benefit) return reply.code(404).send({ erro: 'benefício inexistente' });
+  const protocol = `SB-${String(9100 + db.solicitacoesBeneficio.length)}`;
   db.solicitacoesBeneficio.push({
-    protocolo, beneficioId: beneficio.id, tipo: req.body?.tipo ?? 'alteracao', cid: req.cid
+    protocolo: protocol, beneficioId: benefit.id, tipo: req.body?.tipo ?? 'alteracao', cid: req.cid
   });
-  return { protocolo, beneficioId: beneficio.id };
+  return { protocolo: protocol, beneficioId: benefit.id };
 });
 
 /* -------------------------------- holerite ------------------------------- */
@@ -189,7 +190,7 @@ app.get('/v1/holerite', async () => db.holerite);
 app.get('/v1/holerite/:competencia/documento', async (req, reply) => {
   const d = db.holerite.demonstrativos.find((x) => x.competencia === req.params.competencia);
   if (!d) return reply.code(404).send({ erro: 'competência inexistente' });
-  const texto = [
+  const text = [
     'DEMONSTRATIVO DE PAGAMENTO',
     `Colaborador: ${db.user.name} - matrícula ${db.user.registration}`,
     `Competência: ${d.referencia}`,
@@ -203,7 +204,7 @@ app.get('/v1/holerite/:competencia/documento', async (req, reply) => {
   return {
     nomeArquivo: `holerite-${d.competencia}.txt`,
     mimeType: 'text/plain;charset=utf-8',
-    conteudoBase64: Buffer.from(texto, 'utf8').toString('base64')
+    conteudoBase64: Buffer.from(text, 'utf8').toString('base64')
   };
 });
 
@@ -229,28 +230,28 @@ app.post('/v1/telemetry', async (req, reply) => {
  * O contrario tambem e ruido: jornada que declara `search` e nao publicou
  * nenhuma entrada aparece como participante e nunca devolve resultado.
  */
-function conferirIndiceDeBusca() {
-  const jornadas = loadRegistry();
-  const declaram = new Set(jornadas.filter((j) => j.capabilities.includes('search')).map((j) => j.id));
-  const indexam = new Set(db.searchIndex.map((h) => h.journeyId));
+function checkSearchIndex() {
+  const journeys = loadRegistry();
+  const declared = new Set(journeys.filter((j) => j.capabilities.includes('search')).map((j) => j.id));
+  const indexed = new Set(db.searchIndex.map((h) => h.journeyId));
 
-  const semDeclarar = [...indexam].filter((id) => !declaram.has(id));
-  const semIndice = [...declaram].filter((id) => !indexam.has(id));
+  const missingCapability = [...indexed].filter((id) => !declared.has(id));
+  const missingEntries = [...declared].filter((id) => !indexed.has(id));
 
-  if (semDeclarar.length) {
+  if (missingCapability.length) {
     app.log.warn(
-      { jornadas: semDeclarar },
+      { journeys: missingCapability },
       'Indice de busca: publicam entradas mas NAO declaram capabilities:["search"] -- os resultados delas nao vao aparecer'
     );
   }
-  if (semIndice.length) {
+  if (missingEntries.length) {
     app.log.warn(
-      { jornadas: semIndice },
+      { journeys: missingEntries },
       'Indice de busca: declaram capabilities:["search"] mas nao publicaram nenhuma entrada'
     );
   }
 }
 
-conferirIndiceDeBusca();
+checkSearchIndex();
 
 await app.listen({ port: 4000, host: '0.0.0.0' });

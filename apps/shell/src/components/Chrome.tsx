@@ -11,7 +11,7 @@ import { Badge, Brand, Button, Icon, Row, Stack, Text } from '@portal/design-sys
 import { usePortal } from '../platform/portal';
 import { GlobalSearch } from './GlobalSearch';
 
-interface Notificacao {
+interface Notification {
   id: string;
   journeyId: string;
   title: string;
@@ -22,12 +22,12 @@ interface Notificacao {
 export function TopBar() {
   const portal = usePortal();
   const [notifOpen, setNotifOpen] = React.useState(false);
-  const [notifs, setNotifs] = React.useState<Notificacao[]>([]);
+  const [notifs, setNotifs] = React.useState<Notification[]>([]);
   const navigate = useNavigate();
   const notifRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    portal.http.get<Notificacao[]>('/v1/notifications').then(setNotifs).catch(() => setNotifs([]));
+    portal.http.get<Notification[]>('/v1/notifications').then(setNotifs).catch(() => setNotifs([]));
   }, [portal.http]);
 
   React.useEffect(() => {
@@ -44,14 +44,14 @@ export function TopBar() {
     };
   }, [notifOpen]);
 
-  const naoLidas = notifs.filter((n) => !n.read).length;
+  const unread = notifs.filter((n) => !n.read).length;
 
   /** Marca como lida de forma otimista; o POST que falhar reverte o estado. */
-  const abrir = async (n: Notificacao) => {
+  const openNotification = async (n: Notification) => {
     setNotifOpen(false);
-    setNotifs((lista) => lista.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
+    setNotifs((list) => list.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
     portal.http.post(`/v1/notifications/${n.id}/read`, {}).catch(() => {
-      setNotifs((lista) => lista.map((x) => (x.id === n.id ? { ...x, read: false } : x)));
+      setNotifs((list) => list.map((x) => (x.id === n.id ? { ...x, read: false } : x)));
     });
 
     const j = portal.journeyById(n.journeyId);
@@ -72,12 +72,12 @@ export function TopBar() {
           <Button
             variant="ghost"
             onClick={() => setNotifOpen((v) => !v)}
-            aria-label={`Notificações${naoLidas > 0 ? `, ${naoLidas} não lidas` : ''}`}
+            aria-label={`Notificações${unread > 0 ? `, ${unread} não lidas` : ''}`}
             aria-expanded={notifOpen}
           >
             <Icon name="bell" size={18} />
             Avisos
-            {naoLidas > 0 && <Badge tone="accent">{naoLidas}</Badge>}
+            {unread > 0 && <Badge tone="accent">{unread}</Badge>}
           </Button>
           {notifOpen && (
             <div className="pp-notif__panel">
@@ -87,7 +87,7 @@ export function TopBar() {
                   <button
                     key={n.id}
                     className={`pp-notif__item ${n.read ? 'is-read' : ''}`}
-                    onClick={() => abrir(n)}
+                    onClick={() => openNotification(n)}
                   >
                     <Text size="sm">{n.title}</Text>
                     <Text size="xs" tone="subtle">
@@ -122,7 +122,7 @@ export function TopBar() {
 
 export function Sidebar() {
   const portal = usePortal();
-  const porDominio = portal.journeys
+  const byDomain = portal.journeys
     .filter((j) => j.showInCatalog)
     .reduce<Record<string, typeof portal.journeys>>((acc, j) => {
       (acc[j.domain] ??= []).push(j);
@@ -136,9 +136,9 @@ export function Sidebar() {
         <span>Início</span>
       </NavLink>
 
-      {Object.entries(porDominio).map(([dominio, js]) => (
-        <div key={dominio} className="pp-side__group">
-          <Text size="xs" tone="subtle" className="pp-side__title">{dominio}</Text>
+      {Object.entries(byDomain).map(([domain, js]) => (
+        <div key={domain} className="pp-side__group">
+          <Text size="xs" tone="subtle" className="pp-side__title">{domain}</Text>
           {js.map((j) => (
             <NavLink
               key={j.id}

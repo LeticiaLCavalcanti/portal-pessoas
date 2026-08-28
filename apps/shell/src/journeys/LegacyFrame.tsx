@@ -26,13 +26,13 @@ export function LegacyFrame({ manifest, ctx }: { manifest: JourneyManifest; ctx:
    * `ctx.theme` congela no valor da montagem. Depender dele deixava o legado
    * branco dentro de um portal escuro pelo resto da sessao.
    */
-  const [tema, setTema] = React.useState(ctx.theme);
-  React.useEffect(() => ctx.onThemeChange(setTema), [ctx]);
+  const [theme, setTheme] = React.useState(ctx.theme);
+  React.useEffect(() => ctx.onThemeChange(setTheme), [ctx]);
 
   // O handshake acontece dentro de um listener de longa duracao, que enxerga o
-  // `tema` do render em que foi criado -- por isso a leitura passa pelo ref.
-  const temaRef = React.useRef(tema);
-  temaRef.current = tema;
+  // `theme` do render em que foi criado -- por isso a leitura passa pelo ref.
+  const themeRef = React.useRef(theme);
+  themeRef.current = theme;
 
   React.useEffect(() => {
     const t0 = performance.now();
@@ -49,7 +49,7 @@ export function LegacyFrame({ manifest, ctx }: { manifest: JourneyManifest; ctx:
             {
               type: 'portal:host:init',
               user: { firstName: ctx.user.firstName, registration: ctx.user.registration },
-              theme: temaRef.current,
+              theme: themeRef.current,
               token: 'token-simulado'
             },
             origin
@@ -75,8 +75,8 @@ export function LegacyFrame({ manifest, ctx }: { manifest: JourneyManifest; ctx:
 
   // Tema propagado em runtime: sem isso o legado pisca branco no modo escuro.
   React.useEffect(() => {
-    if (ready) ref.current?.contentWindow?.postMessage({ type: 'portal:host:theme', theme: tema }, origin);
-  }, [tema, ready, origin]);
+    if (ready) ref.current?.contentWindow?.postMessage({ type: 'portal:host:theme', theme }, origin);
+  }, [theme, ready, origin]);
 
   return (
     <iframe

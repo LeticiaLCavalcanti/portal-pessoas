@@ -52,9 +52,9 @@ export function Icon({
   label?: string;
   className?: string;
 }) {
-  const desenho = paths[name];
+  const shape = paths[name];
 
-  if (!desenho) {
+  if (!shape) {
     // Nome desconhecido: mostra a marca crua do manifesto, para o item seguir
     // clicavel e o erro de registro ficar visivel.
     return (
@@ -80,7 +80,7 @@ export function Icon({
       role={label ? 'img' : undefined}
       aria-label={label}
     >
-      {desenho}
+      {shape}
     </svg>
   );
 }

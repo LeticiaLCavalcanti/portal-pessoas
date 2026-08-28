@@ -13,7 +13,7 @@
  */
 import { execFileSync } from 'node:child_process';
 
-const PORTAS = [
+const PORTS = [
   [4000, 'BFF'],
   [5001, 'jornada ponto'],
   [5002, 'jornada beneficios'],
@@ -23,19 +23,19 @@ const PORTAS = [
 ];
 
 /** `lsof` sai com codigo 1 quando nao ha nada escutando -- isso e sucesso aqui. */
-const quemEscuta = (porta) => {
+const listeningOn = (port) => {
   try {
-    const saida = execFileSync('lsof', ['-nP', `-iTCP:${porta}`, '-sTCP:LISTEN', '-t'], {
+    const out = execFileSync('lsof', ['-nP', `-iTCP:${port}`, '-sTCP:LISTEN', '-t'], {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore']
     });
-    return saida.trim().split('\n').filter(Boolean);
+    return out.trim().split('\n').filter(Boolean);
   } catch {
     return [];
   }
 };
 
-const comando = (pid) => {
+const commandOf = (pid) => {
   try {
     return execFileSync('ps', ['-o', 'command=', '-p', pid], { encoding: 'utf8' }).trim();
   } catch {
@@ -43,15 +43,15 @@ const comando = (pid) => {
   }
 };
 
-const ocupadas = PORTAS.map(([porta, nome]) => [porta, nome, quemEscuta(porta)])
+const busy = PORTS.map(([port, name]) => [port, name, listeningOn(port)])
   .filter(([, , pids]) => pids.length > 0);
 
-if (ocupadas.length === 0) process.exit(0);
+if (busy.length === 0) process.exit(0);
 
 console.error('\n  Nao da para subir o portal: porta em uso.\n');
-for (const [porta, nome, pids] of ocupadas) {
-  console.error(`  ${porta}  ${nome}`);
-  for (const pid of pids) console.error(`        pid ${pid}  ${comando(pid).slice(0, 90)}`);
+for (const [port, name, pids] of busy) {
+  console.error(`  ${port}  ${name}`);
+  for (const pid of pids) console.error(`        pid ${pid}  ${commandOf(pid).slice(0, 90)}`);
 }
 console.error(`
   Quase sempre e sobra da execucao anterior. Para encerrar:

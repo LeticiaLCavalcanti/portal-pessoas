@@ -18,7 +18,7 @@ export function GlobalSearch() {
   const [q, setQ] = React.useState('');
   const [hits, setHits] = React.useState<Hit[]>([]);
   const [open, setOpen] = React.useState(false);
-  const [ativo, setAtivo] = React.useState(0);
+  const [active, setActive] = React.useState(0);
   const boxRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -28,9 +28,9 @@ export function GlobalSearch() {
       try {
         const r = await portal.http.get<{ hits: Hit[] }>(`/v1/search?q=${encodeURIComponent(q)}`);
         setHits(r.hits);
-        setAtivo(0);
+        setActive(0);
         portal.telemetry.forJourney({ journeyId: 'shell', squad: 'plataforma', version: '1.0.0' })
-          .event('busca.consulta', { termo: q, resultados: r.hits.length });
+          .event('busca.consulta', { term: q, results: r.hits.length });
       } catch { setHits([]); }
     }, 220); // debounce: 10 squads no indice, 1 requisicao por pausa de digitacao
     return () => clearTimeout(t);
@@ -44,9 +44,9 @@ export function GlobalSearch() {
     return () => document.removeEventListener('mousedown', onDoc);
   }, []);
 
-  const escolher = (h: Hit) => {
+  const choose = (h: Hit) => {
     portal.telemetry.forJourney({ journeyId: 'shell', squad: 'plataforma', version: '1.0.0' })
-      .event('busca.resultado_aberto', { rota: h.route, jornada: h.journeyId });
+      .event('busca.resultado_aberto', { route: h.route, journey: h.journeyId });
     navigate(h.route);
     setOpen(false);
     setQ('');
@@ -61,16 +61,16 @@ export function GlobalSearch() {
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') { setOpen(false); return; }
     if (!open || hits.length === 0) return;
-    if (e.key === 'ArrowDown') { e.preventDefault(); setAtivo((i) => (i + 1) % hits.length); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setAtivo((i) => (i - 1 + hits.length) % hits.length); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive((i) => (i + 1) % hits.length); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive((i) => (i - 1 + hits.length) % hits.length); }
     else if (e.key === 'Enter') {
-      const h = hits[ativo];
-      if (h) { e.preventDefault(); escolher(h); }
+      const h = hits[active];
+      if (h) { e.preventDefault(); choose(h); }
     }
   };
 
   const listboxId = 'pp-busca-resultados';
-  const vazio = open && q.trim().length >= 2 && hits.length === 0;
+  const empty = open && q.trim().length >= 2 && hits.length === 0;
 
   return (
     <div className="pp-search" ref={boxRef}>
@@ -91,10 +91,10 @@ export function GlobalSearch() {
         onKeyDown={onKeyDown}
         aria-label="Buscar em todo o portal"
         role="combobox"
-        aria-expanded={open && (hits.length > 0 || vazio)}
+        aria-expanded={open && (hits.length > 0 || empty)}
         aria-controls={listboxId}
         aria-autocomplete="list"
-        aria-activedescendant={open && hits[ativo] ? `pp-hit-${ativo}` : undefined}
+        aria-activedescendant={open && hits[active] ? `pp-hit-${active}` : undefined}
       />
       {open && hits.length > 0 && (
         <div className="pp-search__results" id={listboxId} role="listbox" aria-label="Resultados da busca">
@@ -103,10 +103,10 @@ export function GlobalSearch() {
               key={h.route}
               id={`pp-hit-${i}`}
               role="option"
-              aria-selected={i === ativo}
-              className={`pp-search__hit ${i === ativo ? 'is-active' : ''}`}
-              onMouseEnter={() => setAtivo(i)}
-              onClick={() => escolher(h)}
+              aria-selected={i === active}
+              className={`pp-search__hit ${i === active ? 'is-active' : ''}`}
+              onMouseEnter={() => setActive(i)}
+              onClick={() => choose(h)}
             >
               <Text size="sm">{h.title}</Text>
               <Text size="xs" tone="subtle">{h.subtitle}</Text>
@@ -114,7 +114,7 @@ export function GlobalSearch() {
           ))}
         </div>
       )}
-      {vazio && (
+      {empty && (
         <div className="pp-search__results" id={listboxId}>
           <Text size="sm" tone="muted" style={{ padding: 'var(--space-3)' }}>
             Nada encontrado para "{q}".

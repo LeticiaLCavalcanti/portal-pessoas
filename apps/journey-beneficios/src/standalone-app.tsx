@@ -23,12 +23,12 @@ const http = {
       .then((r) => r.json() as Promise<T>)
 };
 
-const ouvintes = new Set<(p: string) => void>();
-const rotaRelativa = () => location.pathname.startsWith(BASE)
+const listeners = new Set<(p: string) => void>();
+const relativeRoute = () => location.pathname.startsWith(BASE)
   ? location.pathname.slice(BASE.length) || '/'
   : '/';
 
-const raiz = document.getElementById('root')!;
+const root = document.getElementById('root')!;
 
 const ctx: JourneyContext = {
   user: { id: 'u-dev', name: 'Dev Local', firstName: 'Dev', registration: '000000', roles: ['colaborador'], area: 'Tecnologia' },
@@ -39,12 +39,12 @@ const ctx: JourneyContext = {
     timing: (n, ms) => console.info('[timing]', n, ms)
   },
   navigate: (to) => {
-    const destino = to.startsWith('/') ? to : `${BASE}/${to}`;
-    history.pushState(null, '', destino);
-    ouvintes.forEach((cb) => cb(rotaRelativa()));
+    const target = to.startsWith('/') ? to : `${BASE}/${to}`;
+    history.pushState(null, '', target);
+    listeners.forEach((cb) => cb(relativeRoute()));
   },
-  path: rotaRelativa(),
-  onPathChange: (cb) => { ouvintes.add(cb); return () => ouvintes.delete(cb); },
+  path: relativeRoute(),
+  onPathChange: (cb) => { listeners.add(cb); return () => listeners.delete(cb); },
   theme: 'light',
   onThemeChange: () => () => undefined,
   flags: { 'beneficios.reembolso-v2': true },
@@ -52,15 +52,15 @@ const ctx: JourneyContext = {
   /** No portal isto vira a superficie degradada do shell. Aqui, uma mensagem. */
   fail: (e) => {
     console.error('[fail]', e);
-    raiz.innerHTML =
+    root.innerHTML =
       '<p style="font-family:monospace">A jornada reportou falha irrecuperável: ' +
       (e instanceof Error ? e.message : String(e)) +
       '<br />No portal, o shell mostraria aqui a tela degradada com rastreio e retry.</p>';
   }
 };
 
-window.addEventListener('popstate', () => ouvintes.forEach((cb) => cb(rotaRelativa())));
+window.addEventListener('popstate', () => listeners.forEach((cb) => cb(relativeRoute())));
 
 document.body.style.padding = '24px';
 document.body.style.background = 'var(--c-bg-canvas)';
-journey.mount(raiz, ctx);
+journey.mount(root, ctx);

@@ -25,12 +25,12 @@ import { dirname, join } from 'node:path';
 import { containerNameOf } from '@portal/build-preset/container-name';
 
 const raizDoRepo = join(dirname(fileURLToPath(import.meta.url)), '../../..');
-const registro = JSON.parse(
+const registry = JSON.parse(
   readFileSync(join(raizDoRepo, 'apps/bff/src/registry.json'), 'utf8')
 ) as { journeys: { id: string }[] };
 
 /** Identificador válido de JavaScript — o que o Module Federation exige. */
-const IDENTIFICADOR_VALIDO = /^[A-Za-z_$][\w$]*$/;
+const VALID_IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
 
 describe('containerNameOf', () => {
   it('troca kebab-case por snake_case', () => {
@@ -59,13 +59,13 @@ describe('containerNameOf', () => {
    * `[a-z0-9-]+`, então esta é a outra metade da garantia.
    */
   it('produz identificador JS válido para todo id do registro', () => {
-    const invalidos = registro.journeys
-      .map((j) => ({ id: j.id, nome: containerNameOf(j.id) }))
-      .filter(({ nome }) => !IDENTIFICADOR_VALIDO.test(nome));
+    const invalid = registry.journeys
+      .map((j) => ({ id: j.id, name: containerNameOf(j.id) }))
+      .filter(({ name }) => !VALID_IDENTIFIER.test(name));
 
     expect(
-      invalidos,
-      `Ids que não viram nome de container válido: ${JSON.stringify(invalidos)}`
+      invalid,
+      `Ids que não viram name de container válido: ${JSON.stringify(invalid)}`
     ).toEqual([]);
   });
 
@@ -75,7 +75,7 @@ describe('containerNameOf', () => {
    * jornada errada montando na rota certa.
    */
   it('não colide entre os ids do registro', () => {
-    const nomes = registro.journeys.map((j) => containerNameOf(j.id));
-    expect(new Set(nomes).size).toBe(nomes.length);
+    const names = registry.journeys.map((j) => containerNameOf(j.id));
+    expect(new Set(names).size).toBe(names.length);
   });
 });

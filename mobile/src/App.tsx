@@ -7,17 +7,17 @@ import { nativeTheme } from '@portal/tokens/native';
 import { JourneyWebView } from './JourneyWebView';
 
 export default function App() {
-  const sessao = useSessaoBiometrica();       // keychain + biometria
-  const tema = useTemaDoSistema();            // claro/escuro do SO
-  const rotaInicial = useDeepLinkOuPush('/'); // push e deep link entram por aqui
-  const t = nativeTheme(tema);                // MESMOS tokens do web
+  const session = useBiometricSession();       // keychain + biometria
+  const theme = useSystemTheme();            // claro/escuro do SO
+  const initialRoute = useDeepLinkOrPush('/'); // push e deep link entram por aqui
+  const t = nativeTheme(theme);                // MESMOS tokens do web
 
-  if (!sessao) return <TelaDeLogin tokens={t} />;
+  if (!session) return <LoginScreen tokens={t} />;
 
-  return <JourneyWebView rota={rotaInicial} sessao={sessao} tema={tema} />;
+  return <JourneyWebView route={initialRoute} session={session} theme={theme} />;
 }
 
-declare const useSessaoBiometrica: () => any;
-declare const useTemaDoSistema: () => 'light' | 'dark';
-declare const useDeepLinkOuPush: (fallback: string) => string;
-declare const TelaDeLogin: any;
+declare const useBiometricSession: () => any;
+declare const useSystemTheme: () => 'light' | 'dark';
+declare const useDeepLinkOrPush: (fallback: string) => string;
+declare const LoginScreen: any;

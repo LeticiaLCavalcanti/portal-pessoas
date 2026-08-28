@@ -11,7 +11,7 @@
  * legada (docs/adr/0010).
  *
  * DUAS VERSOES DO DESIGN SYSTEM CONVIVEM AQUI, de proposito.
- * Este arquivo (`Tela` e `Informe`) segue na v1. `./Detalhe.tsx` ja esta na v2.
+ * Este arquivo (`Screen` e `IncomeStatement`) segue na v1. `./Detail.tsx` ja esta na v2.
  * As duas telas renderizam na mesma arvore React e sao indistinguiveis, porque
  * as duas versoes leem os mesmos tokens L0 do IDS. E a migracao gradual da
  * ADR 0011 acontecendo em um diretorio de verdade -- nao um plano no papel.
@@ -22,41 +22,41 @@ import type { JourneyContext, JourneyModule } from '@portal/journey-contract';
 import {
   Badge, Button, Card, DataList, EmptyState, ErrorBoundary, Row, Skeleton, Stack, Text
 } from '@portal/design-system';
-import { Detalhe } from './Detalhe';
-import type { Holerite } from './tipos';
+import { Detail } from './Detail';
+import type { Payroll } from './types';
 
-function Tela({ ctx }: { ctx: JourneyContext }) {
-  const [dados, setDados] = React.useState<Holerite | null>(null);
+function Screen({ ctx }: { ctx: JourneyContext }) {
+  const [data, setData] = React.useState<Payroll | null>(null);
   const [path, setPath] = React.useState(ctx.path);
 
   React.useEffect(() => ctx.onPathChange(setPath), [ctx]);
 
   React.useEffect(() => {
     ctx.telemetry.event('holerite.tela_aberta');
-    ctx.http.get<Holerite>('/v1/holerite').then(setDados).catch((e) => ctx.telemetry.error(e));
+    ctx.http.get<Payroll>('/v1/holerite').then(setData).catch((e) => ctx.telemetry.error(e));
   }, [ctx]);
 
-  if (!dados) return <Stack gap={3}><Skeleton h={110} /><Skeleton h={140} /></Stack>;
+  if (!data) return <Stack gap={3}><Skeleton h={110} /><Skeleton h={140} /></Stack>;
 
-  const secao = path.replace(/^\//, '').replace(/\/+$/, '');
+  const section = path.replace(/^\//, '').replace(/\/+$/, '');
 
-  if (secao === 'informe') return <Informe ctx={ctx} anos={dados.informeRendimentos} />;
+  if (section === 'informe') return <IncomeStatement ctx={ctx} years={data.informeRendimentos} />;
 
-  if (secao) {
-    const d = dados.demonstrativos.find((x) => x.competencia === secao);
+  if (section) {
+    const d = data.demonstrativos.find((x) => x.competencia === section);
     if (!d) {
       return (
         <Card>
           <EmptyState
             mark="[ ? ]"
             title="Demonstrativo não encontrado"
-            description={`Não há demonstrativo para a competência "${secao}".`}
+            description={`Não há demonstrativo para a competência "${section}".`}
             action={<Button onClick={() => ctx.navigate('/holerite')}>Voltar para a lista</Button>}
           />
         </Card>
       );
     }
-    return <Detalhe ctx={ctx} d={d} />;
+    return <Detail ctx={ctx} d={d} />;
   }
 
   return (
@@ -68,7 +68,7 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
       </Row>
 
       <div className="ds-grid">
-        {dados.demonstrativos.map((d) => (
+        {data.demonstrativos.map((d) => (
           <Card
             key={d.competencia}
             title={d.referencia}
@@ -76,7 +76,7 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
             actions={<Badge tone={d.situacao === 'pago' ? 'success' : 'accent'}>{d.situacao}</Badge>}
             footer={
               <Button onClick={() => {
-                ctx.telemetry.event('holerite.detalhe_aberto', { competencia: d.competencia });
+                ctx.telemetry.event('holerite.detalhe_aberto', { competence: d.competencia });
                 ctx.navigate(`/holerite/${d.competencia}`);
               }}>
                 Ver demonstrativo
@@ -94,13 +94,13 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
   );
 }
 
-function Informe({ ctx, anos }: { ctx: JourneyContext; anos: { ano: string; situacao: string }[] }) {
+function IncomeStatement({ ctx, years }: { ctx: JourneyContext; years: { ano: string; situacao: string }[] }) {
   return (
     <Stack gap={4}>
       <Button variant="ghost" onClick={() => ctx.navigate('/holerite')}>← Todos os demonstrativos</Button>
       <Card title="Informe de rendimentos" hint="Documento anual para a declaração de imposto de renda.">
         <DataList
-          items={anos.map((a) => ({
+          items={years.map((a) => ({
             label: `Ano-calendário ${a.ano}`,
             value: (
               <Row gap={2} style={{ alignItems: 'center' }}>
@@ -109,7 +109,7 @@ function Informe({ ctx, anos }: { ctx: JourneyContext; anos: { ano: string; situ
                   <Button
                     variant="ghost"
                     onClick={() => {
-                      ctx.telemetry.event('holerite.informe_solicitado', { ano: a.ano });
+                      ctx.telemetry.event('holerite.informe_solicitado', { year: a.ano });
                       ctx.notify(`Informe de ${a.ano} enviado para o seu e-mail corporativo.`, 'success');
                     }}
                   >
@@ -131,7 +131,7 @@ const journey: JourneyModule = {
     let root: Root | null = createRoot(container);
     root.render(
       <ErrorBoundary onError={(e) => ctx.fail(e)}>
-        <Tela ctx={ctx} />
+        <Screen ctx={ctx} />
       </ErrorBoundary>
     );
 
@@ -143,9 +143,9 @@ const journey: JourneyModule = {
      * rendering", com risco de race. Ver docs/adr/0007, "Nota relacionada".
      */
     return () => {
-      const atual = root;
+      const current = root;
       root = null;
-      queueMicrotask(() => atual?.unmount());
+      queueMicrotask(() => current?.unmount());
     };
   }
 };

@@ -32,35 +32,35 @@ export function Tabs({
 }) {
   const refs = React.useRef<(HTMLButtonElement | null)[]>([]);
 
-  const aoTeclar = (e: React.KeyboardEvent, i: number) => {
-    const passo = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-    if (!passo) return;
+  const handleKeyDown = (e: React.KeyboardEvent, i: number) => {
+    const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!step) return;
     e.preventDefault();
-    const proximo = (i + passo + items.length) % items.length;
+    const next = (i + step + items.length) % items.length;
     // Move o foco E seleciona: e o comportamento de "automatic activation" do
     // padrao ARIA, adequado quando trocar de aba e barato (nao ha formulario
     // pela metade para perder).
-    refs.current[proximo]?.focus();
-    onSelect(items[proximo]!.id);
+    refs.current[next]?.focus();
+    onSelect(items[next]!.id);
   };
 
   return (
     <div className="ds-tabs" role="tablist" aria-label={label}>
       {items.map((t, i) => {
-        const ativa = t.id === current;
+        const isActive = t.id === current;
         return (
           <button
             key={t.id}
             ref={(el) => { refs.current[i] = el; }}
             type="button"
             role="tab"
-            aria-selected={ativa}
+            aria-selected={isActive}
             /* So a aba ativa fica na ordem de tabulacao -- o resto se alcanca
                pelas setas. E o que o padrao ARIA chama de roving tabindex. */
-            tabIndex={ativa ? 0 : -1}
-            className={`ds-tab ${ativa ? 'is-active' : ''}`}
+            tabIndex={isActive ? 0 : -1}
+            className={`ds-tab ${isActive ? 'is-active' : ''}`}
             onClick={() => onSelect(t.id)}
-            onKeyDown={(e) => aoTeclar(e, i)}
+            onKeyDown={(e) => handleKeyDown(e, i)}
           >
             {t.label}
           </button>

@@ -49,15 +49,15 @@ describe('ErrorBoundary', () => {
   });
 
   it('avisa onError com o erro original', () => {
-    const aoFalhar = vi.fn();
+    const onError = vi.fn();
     render(
-      <ErrorBoundary onError={aoFalhar}>
+      <ErrorBoundary onError={onError}>
         <Explode deve />
       </ErrorBoundary>
     );
 
-    expect(aoFalhar).toHaveBeenCalledTimes(1);
-    expect((aoFalhar.mock.calls[0]![0] as Error).message).toBe('falha da jornada');
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect((onError.mock.calls[0]![0] as Error).message).toBe('falha da jornada');
   });
 
   it('desenha o fallback com o erro e uma função de retry', () => {

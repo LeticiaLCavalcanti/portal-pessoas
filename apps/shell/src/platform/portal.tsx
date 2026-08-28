@@ -19,7 +19,7 @@ export type Theme = 'light' | 'dark';
 export interface Toast { id: number; message: string; kind: 'info' | 'success' | 'danger' }
 
 interface PortalState {
-  status: 'carregando' | 'pronto' | 'erro';
+  status: 'loading' | 'ready' | 'error';
   user: JourneyUser | null;
   journeys: JourneyManifest[];
   /** Manifestos invalidos: nao sobem, mas sao reportados. Governanca visivel. */
@@ -49,7 +49,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
   const correlationId = React.useMemo(newCorrelationId, []);
   const sessionId = React.useMemo(() => `s-${Math.random().toString(36).slice(2, 10)}`, []);
 
-  const [status, setStatus] = React.useState<PortalState['status']>('carregando');
+  const [status, setStatus] = React.useState<PortalState['status']>('loading');
   const [user, setUser] = React.useState<JourneyUser | null>(null);
   const [journeys, setJourneys] = React.useState<JourneyManifest[]>([]);
   const [rejected, setRejected] = React.useState<{ id: string; problem: string }[]>([]);
@@ -118,13 +118,13 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
           });
         }
 
-        setUser(me); setJourneys(ok); setRejected(bad); setFlags(fl); setStatus('pronto');
+        setUser(me); setJourneys(ok); setRejected(bad); setFlags(fl); setStatus('ready');
         const shellTelemetry = telemetry.forJourney({ journeyId: 'shell', squad: 'plataforma', version: '1.0.0' });
         shellTelemetry.timing('shell.boot', Math.round(performance.now() - t0));
-        shellTelemetry.event('shell.catalogo.carregado', { validos: ok.length, rejeitados: bad.length });
+        shellTelemetry.event('shell.catalogo.carregado', { valid: ok.length, rejected: bad.length });
         bad.forEach((b) => shellTelemetry.error(new Error(`manifesto invalido: ${b.id}`), b));
       } catch (e) {
-        setStatus('erro');
+        setStatus('error');
       }
     })();
   }, [http, telemetry]);

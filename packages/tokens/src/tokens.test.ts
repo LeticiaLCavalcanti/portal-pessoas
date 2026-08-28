@@ -39,16 +39,16 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { space, token, alias, type SpaceStep } from './index';
 
-const aqui = dirname(fileURLToPath(import.meta.url));
-const css = readFileSync(join(aqui, 'tokens.css'), 'utf8');
-const fonte = JSON.parse(readFileSync(join(aqui, 'tokens.json'), 'utf8'));
+const here = dirname(fileURLToPath(import.meta.url));
+const css = readFileSync(join(here, 'tokens.css'), 'utf8');
+const source = JSON.parse(readFileSync(join(here, 'tokens.json'), 'utf8'));
 
 /** Nomes de custom property DECLARADOS no CSS gerado (o lado esquerdo do `:`). */
-const declaradas = new Set(
+const declared = new Set(
   [...css.matchAll(/^\s*(--[\w-]+)\s*:/gm)].map((m) => m[1]!)
 );
 
-const semDoc = (obj: Record<string, unknown>) =>
+const withoutDoc = (obj: Record<string, unknown>) =>
   Object.keys(obj).filter((k) => !k.startsWith('_'));
 
 describe('tokens.css é derivado de tokens.json, não editado à mão', () => {
@@ -58,22 +58,22 @@ describe('tokens.css é derivado de tokens.json, não editado à mão', () => {
     ['radius', 'radius-'],
     ['textStyle', 'ts-'],
     ['motion', 'motion-']
-  ] as const)('declara todo token de %s', (bloco, prefixo) => {
-    const faltando = semDoc(fonte[bloco]).filter((k) => !declaradas.has(`--${prefixo}${k}`));
-    expect(faltando, `Faltam no CSS: ${faltando.join(', ')}. Rode \`npm run tokens\`.`).toEqual([]);
+  ] as const)('declara todo token de %s', (block, prefix) => {
+    const missing = withoutDoc(source[block]).filter((k) => !declared.has(`--${prefix}${k}`));
+    expect(missing, `Faltam no CSS: ${missing.join(', ')}. Rode \`npm run tokens\`.`).toEqual([]);
   });
 
   it('declara os extras (os únicos com valor literal, por serem exceção ao IDS)', () => {
-    const faltando = semDoc(fonte.extras).filter((k) => !declaradas.has(`--${k}`));
-    expect(faltando).toEqual([]);
+    const missing = withoutDoc(source.extras).filter((k) => !declared.has(`--${k}`));
+    expect(missing).toEqual([]);
   });
 
   it('declara todo override de tema escuro', () => {
-    const faltando = semDoc(fonte.darkOverrides).filter((k) => {
-      const nome = k.startsWith('shadow') ? `--${k}` : `--c-${k}`;
-      return !declaradas.has(nome);
+    const missing = withoutDoc(source.darkOverrides).filter((k) => {
+      const name = k.startsWith('shadow') ? `--${k}` : `--c-${k}`;
+      return !declared.has(name);
     });
-    expect(faltando).toEqual([]);
+    expect(missing).toEqual([]);
   });
 
   /**
@@ -83,19 +83,19 @@ describe('tokens.css é derivado de tokens.json, não editado à mão', () => {
    * testes acima, porque eles só olham do JSON para o CSS.
    */
   it('não tem nenhum --c-* no CSS que não venha do mapa de alias', () => {
-    const conhecidos = new Set([
-      ...semDoc(fonte.alias),
-      ...semDoc(fonte.darkOverrides).filter((k) => !k.startsWith('shadow'))
+    const known = new Set([
+      ...withoutDoc(source.alias),
+      ...withoutDoc(source.darkOverrides).filter((k) => !k.startsWith('shadow'))
     ]);
 
-    const orfaos = [...declaradas]
+    const orphans = [...declared]
       .filter((v) => v.startsWith('--c-'))
       .map((v) => v.slice('--c-'.length))
-      .filter((nome) => !conhecidos.has(nome));
+      .filter((name) => !known.has(name));
 
     expect(
-      orfaos,
-      `Estes --c-* estão no CSS e não no tokens.json: ${orfaos.join(', ')}. ` +
+      orphans,
+      `Estes --c-* estão no CSS e não no tokens.json: ${orphans.join(', ')}. ` +
         'O CSS é gerado — a mudança tem de entrar no JSON.'
     ).toEqual([]);
   });
@@ -109,17 +109,17 @@ describe('tokens.css é derivado de tokens.json, não editado à mão', () => {
    * não cobre) e o `darkOverrides` (aproximação até o tema escuro oficial).
    */
   it('não tem valor de cor cru no tema claro — só repasse do IDS', () => {
-    const temaClaro = css.slice(
+    const lightTheme = css.slice(
       css.indexOf("[data-theme='light']"),
       css.indexOf("[data-theme='dark']")
     );
 
-    const hexCrus = [...temaClaro.matchAll(/^\s*(--[\w-]+):\s*(#[0-9a-f]{3,8}|rgba?\()/gim)]
+    const rawHex = [...lightTheme.matchAll(/^\s*(--[\w-]+):\s*(#[0-9a-f]{3,8}|rgba?\()/gim)]
       .map((m) => m[1]!);
 
     expect(
-      hexCrus,
-      `Cor literal no tema claro: ${hexCrus.join(', ')}. ` +
+      rawHex,
+      `Cor literal no tema claro: ${rawHex.join(', ')}. ` +
         'Toda cor tem de ser var(--ids_*) — ver ADR 0005.'
     ).toEqual([]);
   });
@@ -132,15 +132,15 @@ describe('as funções emitem nomes que existem de verdade', () => {
    * `gap` do portal virar zero em silêncio.
    */
   it.each([1, 2, 3, 4, 5, 6, 7, 8] as SpaceStep[])('space(%i) aponta para uma variável declarada', (n) => {
-    const emitido = space(n);
-    expect(emitido).toBe(`var(--space-${n})`);
-    expect(declaradas.has(`--space-${n}`)).toBe(true);
+    const emitted = space(n);
+    expect(emitted).toBe(`var(--space-${n})`);
+    expect(declared.has(`--space-${n}`)).toBe(true);
   });
 
   it('token() aponta para uma variável declarada, para todo alias do mapa', () => {
-    const quebrados = Object.keys(alias)
-      .filter((nome) => !declaradas.has(`--c-${nome}`));
-    expect(quebrados).toEqual([]);
+    const broken = Object.keys(alias)
+      .filter((name) => !declared.has(`--c-${name}`));
+    expect(broken).toEqual([]);
   });
 
   it('token() monta o nome com o prefixo --c-', () => {

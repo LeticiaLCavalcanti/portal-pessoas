@@ -19,9 +19,9 @@ import {
   Skeleton, Stack, Tabs, Text
 } from '@portal/design-system';
 
-interface Registro { hora: string; tipo: string }
-interface Ponto {
-  hoje: Registro[];
+interface TimeEntry { hora: string; tipo: string }
+interface TimeTracking {
+  hoje: TimeEntry[];
   saldoBancoHoras: string;
   jornadaPrevista: string;
   espelho: { dia: string; entrada: string; saida: string; saldo: string; situacao: string }[];
@@ -30,7 +30,7 @@ interface Ponto {
 }
 
 /** Rotas internas da jornada. O shell nao conhece nenhuma delas. */
-const ABAS = [
+const TABS = [
   { path: '/', label: 'Hoje' },
   { path: '/espelho', label: 'Espelho de ponto' },
   { path: '/banco', label: 'Banco de horas' },
@@ -53,21 +53,21 @@ const ABAS = [
  * daria para adiantar o ponto mexendo no relogio do computador. A diferenca e
  * que agora os dois nao divergem por fuso -- so por desvio de relogio.
  */
-const FUSO_BRASILIA = 'America/Sao_Paulo';
+const BRASILIA_TIME_ZONE = 'America/Sao_Paulo';
 
-function Relogio() {
-  const [agora, setAgora] = React.useState(() => new Date());
+function Clock() {
+  const [now, setNow] = React.useState(() => new Date());
 
   React.useEffect(() => {
-    const t = setInterval(() => setAgora(new Date()), 1000);
+    const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
 
-  const hora = agora.toLocaleTimeString('pt-BR', {
-    hour12: false, timeZone: FUSO_BRASILIA
+  const time = now.toLocaleTimeString('pt-BR', {
+    hour12: false, timeZone: BRASILIA_TIME_ZONE
   });
-  const data = agora.toLocaleDateString('pt-BR', {
-    weekday: 'long', day: '2-digit', month: 'long', timeZone: FUSO_BRASILIA
+  const date = now.toLocaleDateString('pt-BR', {
+    weekday: 'long', day: '2-digit', month: 'long', timeZone: BRASILIA_TIME_ZONE
   });
 
   return (
@@ -79,63 +79,63 @@ function Relogio() {
           tela anunciando o relogio a cada segundo tornaria a tela inutilizavel.
           Quem precisa do horario exato tem o <time dateTime> abaixo.
         */}
-        <time className="ponto-relogio__hora" dateTime={agora.toISOString()} aria-hidden>
-          {hora}
+        <time className="ponto-relogio__hora" dateTime={now.toISOString()} aria-hidden>
+          {time}
         </time>
         <Text size="xs" tone="subtle" className="ponto-relogio__data">
-          {data} · horário de Brasília
+          {date} · horário de Brasília
         </Text>
       </div>
     </div>
   );
 }
 
-function normalizar(p: string) {
-  const limpo = p.replace(/\/+$/, '') || '/';
-  return ABAS.some((a) => a.path === limpo) ? limpo : '/';
+function normalizePath(p: string) {
+  const clean = p.replace(/\/+$/, '') || '/';
+  return TABS.some((t) => t.path === clean) ? clean : '/';
 }
 
-function Tela({ ctx }: { ctx: JourneyContext }) {
-  const [dados, setDados] = React.useState<Ponto | null>(null);
-  const [enviando, setEnviando] = React.useState(false);
-  const [quebrar, setQuebrar] = React.useState(false);
-  const [path, setPath] = React.useState(() => normalizar(ctx.path));
+function Screen({ ctx }: { ctx: JourneyContext }) {
+  const [data, setData] = React.useState<TimeTracking | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [crash, setCrash] = React.useState(false);
+  const [path, setPath] = React.useState(() => normalizePath(ctx.path));
 
   // Deep link e "voltar" do navegador entram por aqui.
-  React.useEffect(() => ctx.onPathChange((p) => setPath(normalizar(p))), [ctx]);
+  React.useEffect(() => ctx.onPathChange((p) => setPath(normalizePath(p))), [ctx]);
 
   React.useEffect(() => {
     ctx.telemetry.event('ponto.tela_aberta');
-    ctx.http.get<Ponto>('/v1/ponto').then(setDados).catch((e) => ctx.telemetry.error(e));
+    ctx.http.get<TimeTracking>('/v1/ponto').then(setData).catch((e) => ctx.telemetry.error(e));
   }, [ctx]);
 
   // Demonstracao proposital de isolamento de falha: o portal continua de pe.
-  if (quebrar) throw new Error('Falha simulada dentro da jornada de ponto');
+  if (crash) throw new Error('Falha simulada dentro da jornada de ponto');
 
-  const registrar = async () => {
-    setEnviando(true);
+  const register = async () => {
+    setSubmitting(true);
     try {
-      const r = await ctx.http.post<Registro>('/v1/ponto/registros', {});
-      setDados((d) => (d ? { ...d, hoje: [...d.hoje, r] } : d));
-      ctx.notify(`Ponto de ${r.tipo} registrado às ${r.hora}.`, 'success');
-      ctx.telemetry.event('ponto.registrado', { tipo: r.tipo });
+      const entry = await ctx.http.post<TimeEntry>('/v1/ponto/registros', {});
+      setData((d) => (d ? { ...d, hoje: [...d.hoje, entry] } : d));
+      ctx.notify(`Ponto de ${entry.tipo} registrado às ${entry.hora}.`, 'success');
+      ctx.telemetry.event('ponto.registrado', { type: entry.tipo });
     } catch (e) {
-      ctx.telemetry.error(e, { acao: 'registrar' });
+      ctx.telemetry.error(e, { action: 'register' });
       ctx.notify('Não foi possível registrar o ponto agora.', 'danger');
     } finally {
-      setEnviando(false);
+      setSubmitting(false);
     }
   };
 
-  if (!dados) return <Stack gap={3}><Skeleton h={90} /><Skeleton h={140} /></Stack>;
+  if (!data) return <Stack gap={3}><Skeleton h={90} /><Skeleton h={140} /></Stack>;
 
-  const abas = (
+  const tabs = (
     <Tabs
       label="Seções de registro de ponto"
       current={path}
-      items={ABAS.map((a) => ({ id: a.path, label: a.label }))}
+      items={TABS.map((t) => ({ id: t.path, label: t.label }))}
       onSelect={(id) => {
-        ctx.telemetry.event('ponto.aba_aberta', { aba: id });
+        ctx.telemetry.event('ponto.aba_aberta', { tab: id });
         ctx.navigate(id === '/' ? '/ponto' : `/ponto${id}`);
       }}
     />
@@ -143,27 +143,27 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
 
   return (
     <Stack gap={4}>
-      {abas}
+      {tabs}
 
       {path === '/' && (
         <>
           <Card
             title="Hoje"
-            hint={`Jornada prevista de ${dados.jornadaPrevista}`}
-            actions={<Badge tone={dados.saldoBancoHoras.startsWith('+') ? 'success' : 'warn'}>
-              banco {dados.saldoBancoHoras}
+            hint={`Jornada prevista de ${data.jornadaPrevista}`}
+            actions={<Badge tone={data.saldoBancoHoras.startsWith('+') ? 'success' : 'warn'}>
+              banco {data.saldoBancoHoras}
             </Badge>}
           >
             <Stack gap={4}>
-              <Relogio />
+              <Clock />
               <Row gap={2} style={{ flexWrap: 'wrap' }}>
-                {dados.hoje.map((r, i) => (
-                  <span key={`${r.hora}-${i}`} className="ds-badge">{r.hora} · {r.tipo}</span>
+                {data.hoje.map((entry, i) => (
+                  <span key={`${entry.hora}-${i}`} className="ds-badge">{entry.hora} · {entry.tipo}</span>
                 ))}
               </Row>
               <Row gap={3} style={{ flexWrap: 'wrap' }}>
-                <Button onClick={registrar} disabled={enviando}>
-                  {enviando ? 'Registrando…' : 'Registrar ponto'}
+                <Button onClick={register} disabled={submitting}>
+                  {submitting ? 'Registrando…' : 'Registrar ponto'}
                 </Button>
                 {ctx.flags['ponto.registro-por-geolocalizacao'] && (
                   <Text size="xs" tone="subtle">Localização será conferida no registro.</Text>
@@ -181,7 +181,7 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
                   label: 'Ajustes pendentes',
                   value: (
                     <Badge tone="warn">
-                      {dados.justificativas.filter((j) => j.situacao === 'pendente').length}
+                      {data.justificativas.filter((j) => j.situacao === 'pendente').length}
                     </Badge>
                   )
                 }
@@ -199,7 +199,7 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
               <tr><th>Dia</th><th>Entrada</th><th>Saída</th><th>Saldo</th><th>Situação</th></tr>
             </thead>
             <tbody>
-              {dados.espelho.map((d) => (
+              {data.espelho.map((d) => (
                 <tr key={d.dia}>
                   <td>{d.dia}</td><td>{d.entrada}</td><td>{d.saida}</td><td>{d.saldo}</td>
                   <td>
@@ -214,9 +214,9 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
       )}
 
       {path === '/banco' && (
-        <Card title="Banco de horas" hint={`Saldo atual ${dados.saldoBancoHoras}.`}>
+        <Card title="Banco de horas" hint={`Saldo atual ${data.saldoBancoHoras}.`}>
           <DataList
-            items={dados.banco.map((m) => ({
+            items={data.banco.map((m) => ({
               label: m.mes,
               value: `+${m.credito} / -${m.debito} · saldo ${m.saldo}`
             }))}
@@ -225,14 +225,14 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
       )}
 
       {path === '/justificativas' && (
-        <Justificativas ctx={ctx} dados={dados} onCriada={(j) =>
-          setDados((d) => (d ? { ...d, justificativas: [j, ...d.justificativas] } : d))
+        <Justifications ctx={ctx} data={data} onCreated={(j) =>
+          setData((d) => (d ? { ...d, justificativas: [j, ...d.justificativas] } : d))
         } />
       )}
 
       <Card title="Modo demonstração" hint="Recursos usados para provar a arquitetura no case.">
         <Row gap={3} style={{ flexWrap: 'wrap' }}>
-          <Button variant="secondary" onClick={() => setQuebrar(true)}>
+          <Button variant="secondary" onClick={() => setCrash(true)}>
             Quebrar esta jornada
           </Button>
           <Button variant="secondary" onClick={() => ctx.navigate('/beneficios')}>
@@ -247,56 +247,56 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
   );
 }
 
-function Justificativas({
-  ctx, dados, onCriada
+function Justifications({
+  ctx, data, onCreated
 }: {
   ctx: JourneyContext;
-  dados: Ponto;
-  onCriada: (j: Ponto['justificativas'][number]) => void;
+  data: TimeTracking;
+  onCreated: (j: TimeTracking['justificativas'][number]) => void;
 }) {
-  const [dia, setDia] = React.useState('');
-  const [motivo, setMotivo] = React.useState('');
-  const [enviando, setEnviando] = React.useState(false);
+  const [day, setDay] = React.useState('');
+  const [reason, setReason] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
 
-  const enviar = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!dia.trim() || !motivo.trim()) {
+    if (!day.trim() || !reason.trim()) {
       ctx.notify('Informe o dia e o motivo da ausência.', 'danger');
       return;
     }
-    setEnviando(true);
+    setSubmitting(true);
     try {
-      const criada = await ctx.http.post<Ponto['justificativas'][number]>(
-        '/v1/ponto/justificativas', { dia, motivo }
+      const created = await ctx.http.post<TimeTracking['justificativas'][number]>(
+        '/v1/ponto/justificativas', { dia: day, motivo: reason }
       );
-      onCriada(criada);
-      setDia(''); setMotivo('');
+      onCreated(created);
+      setDay(''); setReason('');
       ctx.notify('Justificativa enviada para o gestor.', 'success');
-      ctx.telemetry.event('ponto.justificativa_enviada', { dia });
+      ctx.telemetry.event('ponto.justificativa_enviada', { day });
     } catch (err) {
-      ctx.telemetry.error(err, { acao: 'justificar' });
+      ctx.telemetry.error(err, { action: 'justify' });
       ctx.notify('Não foi possível enviar a justificativa.', 'danger');
     } finally {
-      setEnviando(false);
+      setSubmitting(false);
     }
   };
 
   return (
     <Stack gap={4}>
       <Card title="Justificar ausência">
-        <form onSubmit={enviar}>
+        <form onSubmit={submit}>
           <Stack gap={4}>
             <Field
               label="Dia" placeholder="12/08/2026"
-              value={dia} onChange={(e) => setDia(e.target.value)}
+              value={day} onChange={(e) => setDay(e.target.value)}
             />
             <Field
               label="Motivo" placeholder="Consulta médica"
-              value={motivo} onChange={(e) => setMotivo(e.target.value)}
+              value={reason} onChange={(e) => setReason(e.target.value)}
             />
             <Row>
-              <Button type="submit" disabled={enviando}>
-                {enviando ? 'Enviando…' : 'Enviar justificativa'}
+              <Button type="submit" disabled={submitting}>
+                {submitting ? 'Enviando…' : 'Enviar justificativa'}
               </Button>
             </Row>
           </Stack>
@@ -304,11 +304,11 @@ function Justificativas({
       </Card>
 
       <Card title="Justificativas enviadas">
-        {dados.justificativas.length === 0 ? (
+        {data.justificativas.length === 0 ? (
           <EmptyState mark="[ - ]" title="Nenhuma justificativa" description="Nada pendente por aqui." />
         ) : (
           <DataList
-            items={dados.justificativas.map((j) => ({
+            items={data.justificativas.map((j) => ({
               label: `${j.dia} · ${j.motivo}`,
               value: <Badge tone={j.situacao === 'aprovada' ? 'success' : 'warn'}>{j.situacao}</Badge>
             }))}
@@ -334,7 +334,7 @@ const journey: JourneyModule = {
     let root: Root | null = createRoot(container);
     root.render(
       <ErrorBoundary onError={(e) => ctx.fail(e)}>
-        <Tela ctx={ctx} />
+        <Screen ctx={ctx} />
       </ErrorBoundary>
     );
 
@@ -346,9 +346,9 @@ const journey: JourneyModule = {
      * rendering", com risco de race. Ver docs/adr/0007, "Nota relacionada".
      */
     return () => {
-      const atual = root;
+      const current = root;
       root = null;
-      queueMicrotask(() => atual?.unmount());
+      queueMicrotask(() => current?.unmount());
     };
   }
 };

@@ -25,16 +25,16 @@
  *     depreciação, é remoção.
  */
 
-const jaAvisado = new Set<string>();
+const alreadyWarned = new Set<string>();
 
-export function avisarDepreciado(chave: string, mensagem: string) {
+export function warnDeprecated(key: string, message: string) {
   if (process.env.NODE_ENV === 'production') return;
-  if (jaAvisado.has(chave)) return;
-  jaAvisado.add(chave);
-  console.warn(`[@portal/design-system v2] ${mensagem}`);
+  if (alreadyWarned.has(key)) return;
+  alreadyWarned.add(key);
+  console.warn(`[@portal/design-system v2] ${message}`);
 }
 
 /** Só para teste: permite reexercitar o aviso. Não use em código de produto. */
-export function _limparAvisos() {
-  jaAvisado.clear();
+export function _clearWarnings() {
+  alreadyWarned.clear();
 }

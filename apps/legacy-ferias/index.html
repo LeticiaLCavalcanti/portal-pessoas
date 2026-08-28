@@ -95,15 +95,15 @@
 /* ========================= portal-bridge (novo) ========================= */
 (function () {
   var PORTAL_ORIGIN = '*'; // em producao: origem exata do shell, nunca '*'
-  var jornada = new URLSearchParams(location.search).get('jornada') || 'ferias';
+  var journeyId = new URLSearchParams(location.search).get('jornada') || 'ferias';
 
   function send(msg) { parent.postMessage(msg, PORTAL_ORIGIN); }
 
   /* 1. Altura: o iframe nao sabe seu proprio tamanho. Reportamos a cada mudanca. */
-  function reportarAltura() {
+  function reportHeight() {
     send({ type: 'portal:legacy:resize', height: document.body.scrollHeight + 24 });
   }
-  new ResizeObserver(reportarAltura).observe(document.body);
+  new ResizeObserver(reportHeight).observe(document.body);
 
   /* 2. Handshake: pedimos identidade e tema ao portal. */
   window.addEventListener('message', function (ev) {
@@ -112,7 +112,7 @@
       document.getElementById('saudacao').textContent =
         'Colaborador ' + m.user.firstName + ' - matrícula ' + m.user.registration;
       document.body.dataset.hostTheme = m.theme;
-      reportarAltura();
+      reportHeight();
     }
     if (m.type === 'portal:host:theme') document.body.dataset.hostTheme = m.theme;
   });
@@ -120,32 +120,32 @@
   /* 3. Telemetria: os eventos do legado sobem pelo MESMO coletor do portal.
         Sem isso nao da para comparar conversao entre legado e moderno, e a
         metrica de avanco da migracao vira achismo. */
-  function track(nome, props) { send({ type: 'portal:legacy:telemetry', name: nome, props: props }); }
+  function track(name, props) { send({ type: 'portal:legacy:telemetry', name: name, props: props }); }
 
   /* 4. Navegacao: link interno do legado vira rota do portal. */
   document.getElementById('btn-moderno').onclick = function () {
-    track('legado.saiu_para_moderno', { destino: '/ponto' });
+    track('legado.saiu_para_moderno', { target: '/ponto' });
     send({ type: 'portal:legacy:navigate', route: '/ponto' });
   };
 
   document.getElementById('btn-solicitar').onclick = function () {
-    track('legado.solicitacao_iniciada', { jornada: jornada });
+    track('legado.solicitacao_iniciada', { journeyId: journeyId });
     send({ type: 'portal:legacy:notify', message: 'Solicitação registrada.', kind: 'success' });
   };
 
   /* Conteudo depende de qual jornada legada foi montada. */
-  var linhas = jornada === 'holerite'
+  var rows = journeyId === 'holerite'
     ? [['08/2026', 'R$ 15.387,81', 'Disponível'], ['07/2026', 'R$ 16.069,31', 'Disponível'], ['13º - 2025', 'R$ 4.749,81', 'Pago']]
     : [['2024/2025', '18 dias', 'Disponível'], ['2023/2024', '0 dias', 'Usufruído'], ['2025/2026', '12 dias', 'Em aquisição']];
 
-  if (jornada === 'holerite') {
+  if (journeyId === 'holerite') {
     document.getElementById('modulo').textContent = 'Módulo de holerite';
     document.querySelector('thead').innerHTML =
       '<tr><th>Competência</th><th>Líquido</th><th>Situação</th><th></th></tr>';
     document.getElementById('btn-solicitar').textContent = 'Baixar demonstrativo';
   }
 
-  document.querySelector('#tabela tbody').innerHTML = linhas
+  document.querySelector('#tabela tbody').innerHTML = rows
     .map(function (l, i) {
       return '<tr><td>' + l[0] + '</td><td>' + l[1] + '</td><td>' + l[2] +
              '</td><td><a href="#" class="legacy-detalhar" data-linha="' + i + '">detalhar</a></td></tr>';
@@ -160,68 +160,68 @@
         de telemetria do portal, entao o clique passa a ser MEDIDO -- que e o
         que permite decidir a ordem da migracao por uso real, e nao por palpite. */
   document.querySelector('#tabela tbody').addEventListener('click', function (ev) {
-    var alvo = ev.target.closest('.legacy-detalhar');
-    if (!alvo) return;
+    var target = ev.target.closest('.legacy-detalhar');
+    if (!target) return;
     ev.preventDefault();
-    var l = linhas[Number(alvo.dataset.linha)];
-    var texto = jornada === 'holerite'
+    var l = rows[Number(target.dataset.linha)];
+    var text = journeyId === 'holerite'
       ? 'Competência ' + l[0] + ' - líquido ' + l[1] + ' (' + l[2] + ').'
       : 'Período ' + l[0] + ' - ' + l[1] + ' (' + l[2] + ').';
-    document.getElementById('detalhe').textContent = texto;
+    document.getElementById('detalhe').textContent = text;
     document.getElementById('detalhe').hidden = false;
-    track('legado.linha_detalhada', { jornada: jornada, linha: l[0] });
-    reportarAltura();
+    track('legado.linha_detalhada', { journeyId: journeyId, row: l[0] });
+    reportHeight();
   });
 
   /* 6. Calendario de ferias programadas.
         So no modulo de ferias: no de holerite ele nao faz sentido nenhum. */
-  function montarCalendario() {
-    if (jornada !== 'ferias') return;
+  function buildCalendar() {
+    if (journeyId !== 'ferias') return;
 
     /* Período já aprovado pelo gestor. Em produção viria do mesmo endpoint que
        preenche a tabela acima; aqui e fixo para o case. */
     /* 12 a 29 = 18 dias, que e exatamente o saldo do periodo 2024/2025 na
        tabela acima. Numero solto que nao fecha com a tabela ao lado e o tipo
        de detalhe que faz quem avalia desconfiar do resto. */
-    var periodo = { ano: 2027, mes: 0, primeiroDia: 12, ultimoDia: 29 }; // janeiro/2027
-    var MESES = ['janeiro','fevereiro','março','abril','maio','junho',
-                 'julho','agosto','setembro','outubro','novembro','dezembro'];
+    var period = { year: 2027, month: 0, firstDay: 12, lastDay: 29 }; // janeiro/2027
+    var MONTHS = ['janeiro','fevereiro','março','abril','maio','junho',
+                  'julho','agosto','setembro','outubro','novembro','dezembro'];
 
-    var primeiroDaSemana = new Date(periodo.ano, periodo.mes, 1).getDay();
-    var diasNoMes = new Date(periodo.ano, periodo.mes + 1, 0).getDate();
-    var hoje = new Date();
-    var ehMesAtual = hoje.getFullYear() === periodo.ano && hoje.getMonth() === periodo.mes;
+    var firstWeekday = new Date(period.year, period.month, 1).getDay();
+    var daysInMonth = new Date(period.year, period.month + 1, 0).getDate();
+    var today = new Date();
+    var isCurrentMonth = today.getFullYear() === period.year && today.getMonth() === period.month;
 
-    var celulas = [];
-    for (var v = 0; v < primeiroDaSemana; v++) celulas.push('<td class="vazio"></td>');
-    for (var d = 1; d <= diasNoMes; d++) {
+    var cells = [];
+    for (var v = 0; v < firstWeekday; v++) cells.push('<td class="vazio"></td>');
+    for (var d = 1; d <= daysInMonth; d++) {
       var classes = [];
-      if (d >= periodo.primeiroDia && d <= periodo.ultimoDia) classes.push('ferias');
-      if (ehMesAtual && d === hoje.getDate()) classes.push('hoje');
-      celulas.push('<td class="' + classes.join(' ') + '">' + d + '</td>');
+      if (d >= period.firstDay && d <= period.lastDay) classes.push('ferias');
+      if (isCurrentMonth && d === today.getDate()) classes.push('hoje');
+      cells.push('<td class="' + classes.join(' ') + '">' + d + '</td>');
     }
-    while (celulas.length % 7 !== 0) celulas.push('<td class="vazio"></td>');
+    while (cells.length % 7 !== 0) cells.push('<td class="vazio"></td>');
 
-    var linhas = '';
-    for (var i = 0; i < celulas.length; i += 7) {
-      linhas += '<tr>' + celulas.slice(i, i + 7).join('') + '</tr>';
+    var weeks = '';
+    for (var i = 0; i < cells.length; i += 7) {
+      weeks += '<tr>' + cells.slice(i, i + 7).join('') + '</tr>';
     }
 
-    document.getElementById('calendario-corpo').innerHTML = linhas;
+    document.getElementById('calendario-corpo').innerHTML = weeks;
     document.getElementById('calendario-titulo').textContent =
-      'Férias programadas — ' + MESES[periodo.mes] + ' de ' + periodo.ano;
+      'Férias programadas — ' + MONTHS[period.month] + ' de ' + period.year;
     document.getElementById('calendario-legenda').textContent =
-      'Período de ' + periodo.primeiroDia + ' a ' + periodo.ultimoDia + ' de ' +
-      MESES[periodo.mes] + ' (' + (periodo.ultimoDia - periodo.primeiroDia + 1) + ' dias)';
+      'Período de ' + period.firstDay + ' a ' + period.lastDay + ' de ' +
+      MONTHS[period.month] + ' (' + (period.lastDay - period.firstDay + 1) + ' dias)';
     document.getElementById('calendario').hidden = false;
-    track('legado.calendario_exibido', { jornada: jornada });
+    track('legado.calendario_exibido', { journeyId: journeyId });
   }
-  montarCalendario();
+  buildCalendar();
 
   /* 5. Avisa o portal que esta pronto. So depois disso recebemos o token. */
-  send({ type: 'portal:legacy:ready', journeyId: jornada });
-  track('legado.tela_aberta', { jornada: jornada });
-  reportarAltura();
+  send({ type: 'portal:legacy:ready', journeyId: journeyId });
+  track('legado.tela_aberta', { journeyId: journeyId });
+  reportHeight();
 })();
 </script>
 </body>

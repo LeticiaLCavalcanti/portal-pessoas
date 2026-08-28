@@ -17,44 +17,44 @@ import {
   Badge, Button, Card, DataList, EmptyState, ErrorBoundary, Field, Row, Skeleton, Stack, Text
 } from '@portal/design-system';
 
-interface Beneficio { id: string; nome: string; valor: string; detalhe: string; status: string }
-interface Reembolso { id: string; descricao: string; valor: string; situacao: string; enviadoEm: string }
+interface Benefit { id: string; nome: string; valor: string; detalhe: string; status: string }
+interface Refund { id: string; descricao: string; valor: string; situacao: string; enviadoEm: string }
 
-function Tela({ ctx }: { ctx: JourneyContext }) {
-  const [itens, setItens] = React.useState<Beneficio[] | null>(null);
+function Screen({ ctx }: { ctx: JourneyContext }) {
+  const [items, setItems] = React.useState<Benefit[] | null>(null);
   const [path, setPath] = React.useState(ctx.path);
 
   React.useEffect(() => ctx.onPathChange(setPath), [ctx]);
 
   React.useEffect(() => {
     ctx.telemetry.event('beneficios.tela_aberta');
-    ctx.http.get<Beneficio[]>('/v1/beneficios').then(setItens).catch((e) => ctx.telemetry.error(e));
+    ctx.http.get<Benefit[]>('/v1/beneficios').then(setItems).catch((e) => ctx.telemetry.error(e));
   }, [ctx]);
 
-  if (!itens) return <Stack gap={3}><Skeleton h={120} /><Skeleton h={120} /></Stack>;
+  if (!items) return <Stack gap={3}><Skeleton h={120} /><Skeleton h={120} /></Stack>;
 
-  const secao = path.replace(/^\//, '').replace(/\/+$/, '');
+  const section = path.replace(/^\//, '').replace(/\/+$/, '');
 
   // Rota propria da jornada, e nao um id de beneficio. Vem da busca global do
   // portal ("Solicitar reembolso") e do card de detalhe.
-  if (secao === 'reembolso') return <Reembolsos ctx={ctx} />;
+  if (section === 'reembolso') return <Refunds ctx={ctx} />;
 
-  const selecionado = itens.find((b) => b.id === secao);
+  const selected = items.find((b) => b.id === section);
 
-  if (secao && !selecionado) {
+  if (section && !selected) {
     return (
       <Card>
         <EmptyState
           mark="[ ? ]"
           title="Benefício não encontrado"
-          description={`Não existe um benefício com o identificador "${secao}".`}
+          description={`Não existe um benefício com o identificador "${section}".`}
           action={<Button onClick={() => ctx.navigate('/beneficios')}>Voltar para a lista</Button>}
         />
       </Card>
     );
   }
 
-  if (selecionado) return <Detalhe ctx={ctx} beneficio={selecionado} />;
+  if (selected) return <Detail ctx={ctx} benefit={selected} />;
 
   return (
     <Stack gap={4}>
@@ -64,7 +64,7 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
         </Button>
       </Row>
       <div className="ds-grid">
-        {itens.map((b) => (
+        {items.map((b) => (
           /*
             A acao do card e `primary` e vai no `footer`, igual a da home. Antes
             ela era `secondary` e ficava dentro do Stack -- entao esticava pela
@@ -94,46 +94,46 @@ function Tela({ ctx }: { ctx: JourneyContext }) {
   );
 }
 
-function Detalhe({
-  ctx, beneficio
-}: { ctx: JourneyContext; beneficio: Beneficio }) {
-  const [enviando, setEnviando] = React.useState(false);
-  const [protocolo, setProtocolo] = React.useState<string | null>(null);
+function Detail({
+  ctx, benefit
+}: { ctx: JourneyContext; benefit: Benefit }) {
+  const [submitting, setSubmitting] = React.useState(false);
+  const [protocol, setProtocol] = React.useState<string | null>(null);
 
-  const solicitar = async () => {
-    setEnviando(true);
+  const request = async () => {
+    setSubmitting(true);
     try {
       // O botao chama o BFF de verdade e devolve protocolo. Um botao que so
       // dispara um toast otimista e indistinguivel de um botao quebrado no dia
       // em que o backend cai.
       const r = await ctx.http.post<{ protocolo: string }>(
-        `/v1/beneficios/${beneficio.id}/solicitacoes`, { tipo: 'alteracao' }
+        `/v1/beneficios/${benefit.id}/solicitacoes`, { tipo: 'alteracao' }
       );
-      setProtocolo(r.protocolo);
+      setProtocol(r.protocolo);
       ctx.notify(`Solicitação ${r.protocolo} enviada para análise.`, 'success');
-      ctx.telemetry.event('beneficios.solicitacao_enviada', { beneficio: beneficio.id });
+      ctx.telemetry.event('beneficios.solicitacao_enviada', { benefit: benefit.id });
     } catch (e) {
-      ctx.telemetry.error(e, { acao: 'solicitar', beneficio: beneficio.id });
+      ctx.telemetry.error(e, { action: 'request', benefit: benefit.id });
       ctx.notify('Não foi possível enviar a solicitação agora.', 'danger');
     } finally {
-      setEnviando(false);
+      setSubmitting(false);
     }
   };
 
   return (
     <Stack gap={4}>
       <Button variant="ghost" onClick={() => ctx.navigate('/beneficios')}>← Todos os benefícios</Button>
-      <Card title={beneficio.nome} hint={beneficio.detalhe}>
+      <Card title={benefit.nome} hint={benefit.detalhe}>
         <DataList
           items={[
-            { label: 'Situação', value: <Badge tone="success">{beneficio.status}</Badge> },
-            { label: 'Valor ou plano', value: beneficio.valor },
-            ...(protocolo ? [{ label: 'Protocolo', value: protocolo }] : [])
+            { label: 'Situação', value: <Badge tone="success">{benefit.status}</Badge> },
+            { label: 'Valor ou plano', value: benefit.valor },
+            ...(protocol ? [{ label: 'Protocolo', value: protocol }] : [])
           ]}
         />
         <Row gap={3} style={{ marginTop: 'var(--space-5)', flexWrap: 'wrap' }}>
-          <Button onClick={solicitar} disabled={enviando}>
-            {enviando ? 'Enviando…' : 'Solicitar alteração'}
+          <Button onClick={request} disabled={submitting}>
+            {submitting ? 'Enviando…' : 'Solicitar alteração'}
           </Button>
           <Button variant="secondary" onClick={() => ctx.navigate('/beneficios/reembolso')}>
             Pedir reembolso
@@ -144,11 +144,11 @@ function Detalhe({
   );
 }
 
-function Reembolsos({ ctx }: { ctx: JourneyContext }) {
-  const [lista, setLista] = React.useState<Reembolso[] | null>(null);
-  const [descricao, setDescricao] = React.useState('');
-  const [valor, setValor] = React.useState('');
-  const [enviando, setEnviando] = React.useState(false);
+function Refunds({ ctx }: { ctx: JourneyContext }) {
+  const [list, setList] = React.useState<Refund[] | null>(null);
+  const [description, setDescription] = React.useState('');
+  const [amount, setAmount] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
 
   /**
    * A flag nao esconde a tela -- ela troca o FLUXO. Com v2 desligada, o
@@ -158,31 +158,31 @@ function Reembolsos({ ctx }: { ctx: JourneyContext }) {
   const v2 = ctx.flags['beneficios.reembolso-v2'] === true;
 
   React.useEffect(() => {
-    ctx.telemetry.event('beneficios.reembolso_aberto', { versao: v2 ? 'v2' : 'v1' });
-    ctx.http.get<Reembolso[]>('/v1/beneficios/reembolsos').then(setLista).catch((e) => {
+    ctx.telemetry.event('beneficios.reembolso_aberto', { version: v2 ? 'v2' : 'v1' });
+    ctx.http.get<Refund[]>('/v1/beneficios/reembolsos').then(setList).catch((e) => {
       ctx.telemetry.error(e);
-      setLista([]);
+      setList([]);
     });
   }, [ctx, v2]);
 
-  const enviar = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!descricao.trim() || !valor.trim()) {
+    if (!description.trim() || !amount.trim()) {
       ctx.notify('Preencha a descrição e o valor do reembolso.', 'danger');
       return;
     }
-    setEnviando(true);
+    setSubmitting(true);
     try {
-      const criado = await ctx.http.post<Reembolso>('/v1/beneficios/reembolsos', { descricao, valor });
-      setLista((l) => [criado, ...(l ?? [])]);
-      setDescricao(''); setValor('');
-      ctx.notify(`Reembolso ${criado.id} enviado para análise.`, 'success');
-      ctx.telemetry.event('beneficios.reembolso_enviado', { valor });
+      const created = await ctx.http.post<Refund>('/v1/beneficios/reembolsos', { descricao: description, valor: amount });
+      setList((l) => [created, ...(l ?? [])]);
+      setDescription(''); setAmount('');
+      ctx.notify(`Reembolso ${created.id} enviado para análise.`, 'success');
+      ctx.telemetry.event('beneficios.reembolso_enviado', { amount });
     } catch (err) {
-      ctx.telemetry.error(err, { acao: 'reembolso' });
+      ctx.telemetry.error(err, { action: 'refund' });
       ctx.notify('Não foi possível enviar o reembolso agora.', 'danger');
     } finally {
-      setEnviando(false);
+      setSubmitting(false);
     }
   };
 
@@ -197,19 +197,19 @@ function Reembolsos({ ctx }: { ctx: JourneyContext }) {
           : 'Fluxo anterior: análise manual pelo RH em até 5 dias úteis.'}
         actions={<Badge tone={v2 ? 'accent' : undefined}>{v2 ? 'v2' : 'v1'}</Badge>}
       >
-        <form onSubmit={enviar}>
+        <form onSubmit={submit}>
           <Stack gap={4}>
             <Field
               label="Descrição" placeholder="Consulta odontológica"
-              value={descricao} onChange={(ev) => setDescricao(ev.target.value)}
+              value={description} onChange={(ev) => setDescription(ev.target.value)}
             />
             <Field
               label="Valor" placeholder="R$ 214,90" inputMode="decimal"
-              value={valor} onChange={(ev) => setValor(ev.target.value)}
+              value={amount} onChange={(ev) => setAmount(ev.target.value)}
             />
             <Row>
-              <Button type="submit" disabled={enviando}>
-                {enviando ? 'Enviando…' : 'Enviar reembolso'}
+              <Button type="submit" disabled={submitting}>
+                {submitting ? 'Enviando…' : 'Enviar reembolso'}
               </Button>
             </Row>
           </Stack>
@@ -217,13 +217,13 @@ function Reembolsos({ ctx }: { ctx: JourneyContext }) {
       </Card>
 
       <Card title="Reembolsos recentes">
-        {lista === null ? (
+        {list === null ? (
           <Skeleton h={80} />
-        ) : lista.length === 0 ? (
+        ) : list.length === 0 ? (
           <EmptyState mark="[ - ]" title="Nenhum reembolso" description="Você ainda não pediu reembolso este ano." />
         ) : (
           <DataList
-            items={lista.map((r) => ({
+            items={list.map((r) => ({
               label: `${r.enviadoEm} · ${r.descricao}`,
               value: (
                 <>
@@ -245,7 +245,7 @@ const journey: JourneyModule = {
     let root: Root | null = createRoot(container);
     root.render(
       <ErrorBoundary onError={(e) => ctx.fail(e)}>
-        <Tela ctx={ctx} />
+        <Screen ctx={ctx} />
       </ErrorBoundary>
     );
 
@@ -257,9 +257,9 @@ const journey: JourneyModule = {
      * rendering", com risco de race. Ver docs/adr/0007, "Nota relacionada".
      */
     return () => {
-      const atual = root;
+      const current = root;
       root = null;
-      queueMicrotask(() => atual?.unmount());
+      queueMicrotask(() => current?.unmount());
     };
   }
 };

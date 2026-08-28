@@ -23,18 +23,18 @@ import * as v1 from '../index';
 import * as v2 from './index';
 
 /** `v1` é a escotilha de saída da própria v2; não é um componente faltando. */
-const NAO_SAO_COMPONENTES = new Set(['v1', 'DS_SURFACE']);
+const NOT_COMPONENTS = new Set(['v1', 'DS_SURFACE']);
 
 describe('superfície pública da v2', () => {
   it('expõe tudo o que a v1 expõe', () => {
-    const naV1 = Object.keys(v1);
-    const naV2 = new Set(Object.keys(v2));
+    const inV1 = Object.keys(v1);
+    const inV2 = new Set(Object.keys(v2));
 
-    const faltando = naV1.filter((nome) => !naV2.has(nome));
+    const missing = inV1.filter((name) => !inV2.has(name));
 
     expect(
-      faltando,
-      `Estes nomes existem em @portal/design-system mas não em /v2: ${faltando.join(', ')}. ` +
+      missing,
+      `Estes nomes existem em @portal/design-system mas não em /v2: ${missing.join(', ')}. ` +
         'Se o componente ganhou v2, exporte a versão nova; se ainda não tem, ' +
         'acrescente ao bloco de reexports da v1 em src/v2/index.ts.'
     ).toEqual([]);
@@ -47,13 +47,13 @@ describe('superfície pública da v2', () => {
    * consciente, então o teste lista o que apareceu.
    */
   it('só acrescenta nomes que são componentes v2 de fato', () => {
-    const naV1 = new Set(Object.keys(v1));
-    const exclusivosDaV2 = Object.keys(v2).filter(
-      (nome) => !naV1.has(nome) && !NAO_SAO_COMPONENTES.has(nome)
+    const inV1 = new Set(Object.keys(v1));
+    const onlyInV2 = Object.keys(v2).filter(
+      (name) => !inV1.has(name) && !NOT_COMPONENTS.has(name)
     );
 
     // Hoje: nenhum. Todo componente da v2 substitui um da v1.
-    expect(exclusivosDaV2).toEqual([]);
+    expect(onlyInV2).toEqual([]);
   });
 
   it('mantém a escotilha de saída para a v1', () => {
@@ -69,16 +69,16 @@ describe('superfície pública da v2', () => {
    */
   it.each(['Button', 'Badge', 'Card', 'DataList'] as const)(
     '%s da v2 não é o mesmo componente da v1',
-    (nome) => {
-      expect(v2[nome]).not.toBe(v1[nome]);
+    (name) => {
+      expect(v2[name]).not.toBe(v1[name]);
     }
   );
 
   /** O contrário: o que ainda não tem v2 deve ser a MESMA referência. */
   it.each(['Stack', 'Row', 'Text', 'Skeleton', 'Field', 'EmptyState', 'ErrorBoundary', 'Icon', 'Brand', 'Tabs'] as const)(
     '%s é reexportado da v1 sem alteração',
-    (nome) => {
-      expect(v2[nome]).toBe(v1[nome]);
+    (name) => {
+      expect(v2[name]).toBe(v1[name]);
     }
   );
 });

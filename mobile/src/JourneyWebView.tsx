@@ -10,35 +10,35 @@
  */
 import React, { useRef } from 'react';
 import { WebView } from 'react-native-webview';
-import type { ParaNativo, ParaWeb } from './bridge';
+import type { ToNative, ToWeb } from './bridge';
 
 const PORTAL_URL = 'https://portal-pessoas.empresa.com';
 
-export function JourneyWebView({ rota, sessao, tema }: any) {
+export function JourneyWebView({ route, session, theme }: any) {
   const ref = useRef<WebView>(null);
 
-  const enviar = (msg: ParaWeb) =>
+  const send = (msg: ToWeb) =>
     ref.current?.postMessage(JSON.stringify(msg));
 
-  const aoReceber = async (raw: string) => {
-    const msg: ParaNativo = JSON.parse(raw);
+  const handleMessage = async (raw: string) => {
+    const msg: ToNative = JSON.parse(raw);
     switch (msg.type) {
       case 'web:pronto':
-        enviar({ type: 'native:session', token: sessao.token, user: sessao.user });
-        enviar({ type: 'native:theme', theme: tema });
+        send({ type: 'native:session', token: session.token, user: session.user });
+        send({ type: 'native:theme', theme: theme });
         break;
       case 'web:pedir-geo': {
-        const pos = await obterLocalizacao();
-        enviar({ type: 'native:geo', lat: pos.lat, lng: pos.lng });
+        const pos = await getLocation();
+        send({ type: 'native:geo', lat: pos.lat, lng: pos.lng });
         break;
       }
       case 'web:pedir-biometria': {
-        const ok = await autenticarBiometria(msg.motivo);
-        enviar({ type: 'native:biometria', ok, requestId: msg.requestId });
+        const ok = await authenticateBiometrics(msg.motivo);
+        send({ type: 'native:biometria', ok, requestId: msg.requestId });
         break;
       }
       case 'web:telemetria':
-        coletorNativo.event(msg.name, msg.props);
+        nativeCollector.event(msg.name, msg.props);
         break;
       case 'web:navegou':
         // mantém o título da tela nativa em sincronia com a jornada aberta
@@ -52,8 +52,8 @@ export function JourneyWebView({ rota, sessao, tema }: any) {
   return (
     <WebView
       ref={ref}
-      source={{ uri: `${PORTAL_URL}${rota}` }}
-      onMessage={(e) => aoReceber(e.nativeEvent.data)}
+      source={{ uri: `${PORTAL_URL}${route}` }}
+      onMessage={(e) => handleMessage(e.nativeEvent.data)}
       allowsBackForwardNavigationGestures
       // sem isso o portal recarrega inteiro a cada volta de background
       cacheEnabled
@@ -61,6 +61,6 @@ export function JourneyWebView({ rota, sessao, tema }: any) {
   );
 }
 
-declare const obterLocalizacao: () => Promise<{ lat: number; lng: number }>;
-declare const autenticarBiometria: (motivo: string) => Promise<boolean>;
-declare const coletorNativo: { event(n: string, p?: unknown): void };
+declare const getLocation: () => Promise<{ lat: number; lng: number }>;
+declare const authenticateBiometrics: (reason: string) => Promise<boolean>;
+declare const nativeCollector: { event(n: string, p?: unknown): void };

@@ -1,11 +1,11 @@
 /**
  * Formatos que a jornada recebe do BFF.
  *
- * Extraidos de `journey.tsx` quando `Detalhe` virou arquivo proprio na
+ * Extraidos de `journey.tsx` quando `Detail` virou arquivo proprio na
  * migracao para o DS v2: dois arquivos precisam do mesmo tipo, e duplicar a
  * interface e o caminho mais curto para as duas copias divergirem.
  */
-export interface Demonstrativo {
+export interface Payslip {
   competencia: string;
   referencia: string;
   bruto: string;
@@ -16,7 +16,7 @@ export interface Demonstrativo {
   linhas: { descricao: string; tipo: 'provento' | 'desconto'; valor: string }[];
 }
 
-export interface Holerite {
-  demonstrativos: Demonstrativo[];
+export interface Payroll {
+  demonstrativos: Payslip[];
   informeRendimentos: { ano: string; situacao: string }[];
 }

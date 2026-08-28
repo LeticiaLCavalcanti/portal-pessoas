@@ -11,7 +11,7 @@
  *     componentes da v1 -- a superficie `/v2` os reexporta sem alteracao,
  *     entao a squad nao precisa saber de cor o que ja migrou e o que nao.
  *
- *   - `journey.tsx`, ao lado, segue 100% na v1, e `Tela` e `Informe` nao foram
+ *   - `journey.tsx`, ao lado, segue 100% na v1, e `Screen` e `IncomeStatement` nao foram
  *     tocadas. As duas versoes do DS renderizam na mesma arvore React, sob o
  *     mesmo ErrorBoundary, dentro do mesmo shell -- e nenhuma das duas telas
  *     mudou de aparencia, porque as duas leem os mesmos tokens L0.
@@ -38,10 +38,10 @@
 import * as React from 'react';
 import type { JourneyContext } from '@portal/journey-contract';
 import { Badge, Button, Card, DataList, Icon, Row, Stack } from '@portal/design-system/v2';
-import type { Demonstrativo } from './tipos';
+import type { Payslip } from './types';
 
-export function Detalhe({ ctx, d }: { ctx: JourneyContext; d: Demonstrativo }) {
-  const [baixando, setBaixando] = React.useState(false);
+export function Detail({ ctx, d }: { ctx: JourneyContext; d: Payslip }) {
+  const [downloading, setDownloading] = React.useState(false);
 
   /**
    * O "baixar" real: o BFF devolve o PDF ja assinado pelo sistema de folha, o
@@ -50,8 +50,8 @@ export function Detalhe({ ctx, d }: { ctx: JourneyContext; d: Demonstrativo }) {
    * de endereco -- o mesmo motivo pelo qual o legado recebe token por
    * postMessage e nao por querystring.
    */
-  const baixar = async () => {
-    setBaixando(true);
+  const download = async () => {
+    setDownloading(true);
     try {
       const r = await ctx.http.get<{ nomeArquivo: string; conteudoBase64: string; mimeType: string }>(
         `/v1/holerite/${d.competencia}/documento`
@@ -64,17 +64,17 @@ export function Detalhe({ ctx, d }: { ctx: JourneyContext; d: Demonstrativo }) {
       a.click();
       URL.revokeObjectURL(url);
       ctx.notify(`Demonstrativo de ${d.referencia} baixado.`, 'success');
-      ctx.telemetry.event('holerite.documento_baixado', { competencia: d.competencia });
+      ctx.telemetry.event('holerite.documento_baixado', { competence: d.competencia });
     } catch (e) {
-      ctx.telemetry.error(e, { acao: 'baixar', competencia: d.competencia });
+      ctx.telemetry.error(e, { action: 'download', competence: d.competencia });
       ctx.notify('Não foi possível baixar o demonstrativo agora.', 'danger');
     } finally {
-      setBaixando(false);
+      setDownloading(false);
     }
   };
 
-  const proventos = d.linhas.filter((l) => l.tipo === 'provento');
-  const descontos = d.linhas.filter((l) => l.tipo === 'desconto');
+  const earnings = d.linhas.filter((l) => l.tipo === 'provento');
+  const deductions = d.linhas.filter((l) => l.tipo === 'desconto');
 
   return (
     <Stack gap={4}>
@@ -105,7 +105,7 @@ export function Detalhe({ ctx, d }: { ctx: JourneyContext; d: Demonstrativo }) {
               reexportado pela superficie /v2 -- primitivo v1 dentro de
               primitivo v2, no mesmo no, sem adaptador.
             */}
-            <Button loading={baixando} onClick={baixar} iconStart={<Icon name="receipt" size={18} />}>
+            <Button loading={downloading} onClick={download} iconStart={<Icon name="receipt" size={18} />}>
               Baixar demonstrativo
             </Button>
           </Row>
@@ -119,10 +119,10 @@ export function Detalhe({ ctx, d }: { ctx: JourneyContext; d: Demonstrativo }) {
           licenca para churn -- ver patterns.tsx.
         */}
         <Card title="Proventos">
-          <DataList items={proventos.map((l) => ({ label: l.descricao, value: l.valor }))} />
+          <DataList items={earnings.map((l) => ({ label: l.descricao, value: l.valor }))} />
         </Card>
         <Card title="Descontos">
-          <DataList items={descontos.map((l) => ({ label: l.descricao, value: l.valor }))} />
+          <DataList items={deductions.map((l) => ({ label: l.descricao, value: l.valor }))} />
         </Card>
       </div>
     </Stack>

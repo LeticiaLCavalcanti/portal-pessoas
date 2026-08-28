@@ -36,26 +36,26 @@
  * Nao usamos `localeCompare` com `sensitivity: 'base'` porque ele compara
  * cadeias INTEIRAS, e a busca precisa de `includes` -- casar pedaco de titulo.
  */
-export const semAcento = (texto) =>
-  texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+export const stripAccents = (text) =>
+  text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 /**
  * Abaixo disto a busca nao dispara: com uma letra so, praticamente todo item do
  * indice casa, e a lista de sugestoes vira ruido em vez de atalho.
  */
-export const TAMANHO_MINIMO = 2;
+export const MIN_QUERY_LENGTH = 2;
 
 /**
- * @param indice        entradas publicadas pelas squads
- * @param consulta      o que a pessoa digitou, cru
- * @param participantes ids que declaram `capabilities: ['search']` E estao
+ * @param index         entradas publicadas pelas squads
+ * @param query         o que a pessoa digitou, cru
+ * @param participants  ids que declaram `capabilities: ['search']` E estao
  *                      visiveis para este colaborador (ver ADR 0009)
  */
-export function casar(indice, consulta, participantes) {
-  const termo = semAcento(String(consulta ?? '').trim());
-  if (termo.length < TAMANHO_MINIMO) return [];
+export function match(index, query, participants) {
+  const term = stripAccents(String(query ?? '').trim());
+  if (term.length < MIN_QUERY_LENGTH) return [];
 
-  return indice.filter(
-    (item) => participantes.has(item.journeyId) && semAcento(item.title).includes(termo)
+  return index.filter(
+    (item) => participants.has(item.journeyId) && stripAccents(item.title).includes(term)
   );
 }

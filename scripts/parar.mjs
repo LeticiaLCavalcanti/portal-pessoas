@@ -6,13 +6,13 @@
  * escala para SIGKILL no que resistir.
  */
 import { execFileSync } from 'node:child_process';
-import { setTimeout as esperar } from 'node:timers/promises';
+import { setTimeout as wait } from 'node:timers/promises';
 
-const PORTAS = [4000, 5001, 5002, 5003, 5004, 5173];
+const PORTS = [4000, 5001, 5002, 5003, 5004, 5173];
 
-const escutando = (porta) => {
+const listeningOn = (port) => {
   try {
-    return execFileSync('lsof', ['-nP', `-iTCP:${porta}`, '-sTCP:LISTEN', '-t'], {
+    return execFileSync('lsof', ['-nP', `-iTCP:${port}`, '-sTCP:LISTEN', '-t'], {
       encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']
     }).trim().split('\n').filter(Boolean);
   } catch {
@@ -20,27 +20,27 @@ const escutando = (porta) => {
   }
 };
 
-const alvos = [...new Set(PORTAS.flatMap(escutando))];
+const targets = [...new Set(PORTS.flatMap(listeningOn))];
 
-if (alvos.length === 0) {
+if (targets.length === 0) {
   console.log('  Nenhuma porta do portal esta ocupada. Nada a fazer.');
   process.exit(0);
 }
 
-for (const pid of alvos) {
+for (const pid of targets) {
   try { process.kill(Number(pid), 'SIGTERM'); } catch { /* ja saiu */ }
 }
-await esperar(2500);
+await wait(2500);
 
-const teimosos = [...new Set(PORTAS.flatMap(escutando))];
-for (const pid of teimosos) {
+const stubborn = [...new Set(PORTS.flatMap(listeningOn))];
+for (const pid of stubborn) {
   try { process.kill(Number(pid), 'SIGKILL'); } catch { /* ja saiu */ }
 }
-await esperar(500);
+await wait(500);
 
-const restantes = PORTAS.filter((p) => escutando(p).length > 0);
-if (restantes.length) {
-  console.error(`  Ainda ocupadas: ${restantes.join(', ')}. Verifique com: lsof -nP -iTCP -sTCP:LISTEN`);
+const remaining = PORTS.filter((p) => listeningOn(p).length > 0);
+if (remaining.length) {
+  console.error(`  Ainda ocupadas: ${remaining.join(', ')}. Verifique com: lsof -nP -iTCP -sTCP:LISTEN`);
   process.exit(1);
 }
-console.log(`  ${alvos.length} processo(s) encerrado(s). Portas livres: ${PORTAS.join(', ')}.`);
+console.log(`  ${targets.length} processo(s) encerrado(s). Portas livres: ${PORTS.join(', ')}.`);
