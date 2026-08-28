@@ -44,12 +44,17 @@ const ABAS = [
  * antes de clicar, o colaborador quer conferir QUE HORAS vao ser gravadas.
  * Sem ele, so se descobre depois, no toast.
  *
- * Ressalva honesta, e por isso o texto abaixo diz "horario do seu
- * dispositivo": este e o relogio do BROWSER. A marcacao que vale e a que o BFF
- * carimba, com o relogio do servidor -- e e assim que tem de ser, senao daria
- * para adiantar o ponto mexendo no relogio do computador. Os dois normalmente
- * batem; quando divergirem, quem manda e o servidor.
+ * O fuso e fixado em Brasilia, nao no do dispositivo: a jornada contratual do
+ * colaborador e em horario de Brasilia, entao um colaborador viajando (ou com
+ * o relogio do sistema em outro fuso) precisa ver a MESMA hora que vai ser
+ * gravada. O BFF carimba no mesmo fuso, pelo mesmo motivo.
+ *
+ * Continua valendo que a marcacao oficial e a do servidor, e nao esta: senao
+ * daria para adiantar o ponto mexendo no relogio do computador. A diferenca e
+ * que agora os dois nao divergem por fuso -- so por desvio de relogio.
  */
+const FUSO_BRASILIA = 'America/Sao_Paulo';
+
 function Relogio() {
   const [agora, setAgora] = React.useState(() => new Date());
 
@@ -58,9 +63,11 @@ function Relogio() {
     return () => clearInterval(t);
   }, []);
 
-  const hora = agora.toLocaleTimeString('pt-BR', { hour12: false });
+  const hora = agora.toLocaleTimeString('pt-BR', {
+    hour12: false, timeZone: FUSO_BRASILIA
+  });
   const data = agora.toLocaleDateString('pt-BR', {
-    weekday: 'long', day: '2-digit', month: 'long'
+    weekday: 'long', day: '2-digit', month: 'long', timeZone: FUSO_BRASILIA
   });
 
   return (
@@ -76,7 +83,7 @@ function Relogio() {
           {hora}
         </time>
         <Text size="xs" tone="subtle" className="ponto-relogio__data">
-          {data} · horário do seu dispositivo
+          {data} · horário de Brasília
         </Text>
       </div>
     </div>

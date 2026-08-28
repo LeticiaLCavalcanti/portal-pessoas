@@ -9,7 +9,7 @@ import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isContractCompatible, type JourneyContext, type JourneyManifest } from '@portal/journey-contract';
 import { resolveRollout, createHttpClient } from '@portal/platform-core';
-import { Button, Card, EmptyState, Row, Skeleton, Stack, Text, Badge } from '@portal/design-system';
+import { Badge, Button, Card, EmptyState, Icon, Row, Skeleton, Stack, Text } from '@portal/design-system';
 import { usePortal } from '../platform/portal';
 import { loadJourneyModule } from '../platform/loadRemote';
 import { LegacyFrame } from './LegacyFrame';
@@ -56,7 +56,7 @@ export function JourneyHost({ manifest, path }: { manifest: JourneyManifest; pat
         fallback={(retry) => (
           <Card>
             <EmptyState
-              mark="[ ! ]"
+              mark={<Icon name="alert" size={30} />}
               title="Esta jornada parou de responder"
               description={`O restante do portal continua funcionando. Código de rastreio ${portal.correlationId}.`}
               action={<Button onClick={retry}>Tentar de novo</Button>}
@@ -231,7 +231,7 @@ function JourneySurface({
       {phase.s === 'erro' && (
         <Card>
           <EmptyState
-            mark="[ x ]"
+            mark={<Icon name="alert" size={30} />}
             title={
               phase.fase === 'render'
                 ? 'Esta jornada parou de responder'

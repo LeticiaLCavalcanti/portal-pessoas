@@ -34,7 +34,10 @@ const paths: Record<string, React.ReactNode> = {
   gift: <><rect x="3" y="7.8" width="18" height="4.2" rx="1" /><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" /><path d="M12 7.8V21" /><path d="M12 7.8H8.6a2.4 2.4 0 1 1 0-4.8C10.8 3 12 7.8 12 7.8Z" /><path d="M12 7.8h3.4a2.4 2.4 0 1 0 0-4.8C13.2 3 12 7.8 12 7.8Z" /></>,
   calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10.5h18" /></>,
   receipt: <><path d="M5.5 3h13v18l-2.6-1.6L13.3 21l-2.6-1.6L8.1 21l-2.6-1.6Z" /><path d="M9 8h6M9 11.8h6M9 15.6h3.6" /></>,
-  archive: <><rect x="3" y="4" width="18" height="4.4" rx="1" /><path d="M5 8.4V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.4" /><path d="M10 12.2h4" /></>
+  archive: <><rect x="3" y="4" width="18" height="4.4" rx="1" /><path d="M5 8.4V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.4" /><path d="M10 12.2h4" /></>,
+
+  /* Estado do portal */
+  alert: <><path d="M10.3 3.9 2.4 17.6a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" /><path d="M12 9.4v4.4" /><path d="M12 17.2h.01" /></>
 };
 
 export type IconName = keyof typeof paths;

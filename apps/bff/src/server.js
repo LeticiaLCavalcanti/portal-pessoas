@@ -115,9 +115,22 @@ app.post('/v1/notifications/:id/read', async (req, reply) => {
 
 app.get('/v1/ponto', async () => db.ponto);
 
+/**
+ * O carimbo do ponto e SEMPRE em horario de Brasilia, nunca no fuso do
+ * processo. `getHours()` le o fuso do servidor -- que em container e UTC, e
+ * gravaria 17:32 num ponto batido as 14:32. A jornada contratual do
+ * colaborador e em horario de Brasilia, entao e esse o unico fuso correto
+ * aqui, independente de onde o BFF rode.
+ */
+const horaDeBrasilia = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: 'America/Sao_Paulo',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false
+});
+
 app.post('/v1/ponto/registros', async () => {
-  const agora = new Date();
-  const hora = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+  const hora = horaDeBrasilia.format(new Date());
   const tipo = db.ponto.hoje.length % 2 === 0 ? 'entrada' : 'saída';
   db.ponto.hoje.push({ hora, tipo });
   return { hora, tipo };

@@ -171,6 +171,9 @@
 
 .ds-empty { text-align: center; padding: var(--space-7) var(--space-4); }
 .ds-empty__mark { font-family: var(--font-mono); color: var(--c-fg-subtle); font-size: 1.5rem; }
+/* Quando a marca e um icone, e nao a marca tipografica: centraliza e mata o
+   vao de baseline que um <svg> inline herda da linha de texto. */
+.ds-empty__mark > svg { display: block; margin: 0 auto; }
 
 .ds-list { list-style: none; margin: 0; padding: 0; }
 .ds-list__item {

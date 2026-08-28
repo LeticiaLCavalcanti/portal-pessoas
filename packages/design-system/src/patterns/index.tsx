@@ -41,7 +41,18 @@ export function Card({
 
 export function EmptyState({
   mark = '( )', title, description, action
-}: { mark?: string; title: string; description?: string; action?: React.ReactNode }) {
+}: {
+  /**
+   * Marca acima do titulo. `ReactNode` e nao `string` porque estado de falha
+   * pede icone e estado vazio pede a marca tipografica (`[ - ]`, `[ ? ]`) --
+   * restringir a string obrigaria o ponto de uso a desenhar o SVG na mao.
+   * Aditivo: todo `mark="[ x ]"` que ja existia continua valendo.
+   */
+  mark?: React.ReactNode;
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+}) {
   return (
     <div className="ds-empty">
       <div className="ds-empty__mark">{mark}</div>
