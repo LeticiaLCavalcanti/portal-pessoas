@@ -19,12 +19,12 @@ Case técnico — proposta de arquitetura (Parte 1) + implementação reduzida e
 
 ## Por onde começar
 
-| | Documento | O que responde |
-| --- | --- | --- |
-| 📐 | **[Parte 1 — Proposta de arquitetura](docs/01-proposta-tecnica.md)** | Arquitetura, web+mobile, squads, microfrontends, DS, migração, observabilidade |
-| 🧾 | **[Decisões registradas (11 ADRs)](docs/adr/)** | Por que cada escolha foi feita, o que ela custa e o que foi descartado |
-| ▶️ | **Parte 2 — esta aplicação** | [Como rodar](#como-rodar) e o [roteiro de demonstração](#roteiro-de-demonstração) abaixo |
-| 📱 | **[Casca móvel](mobile/README.md)** | Onde fica a linha entre nativo e web, e o protocolo da ponte |
+| Documento | O que responde |
+| --- | --- |
+| **[Parte 1 — Proposta de arquitetura](docs/01-proposta-tecnica.md)** | Arquitetura, web+mobile, squads, microfrontends, DS, migração, observabilidade |
+| **[Decisões registradas (11 ADRs)](docs/adr/)** | Por que cada escolha foi feita, o que ela custa e o que foi descartado |
+| **Parte 2 — esta aplicação** | [Como rodar](#como-rodar) e o [roteiro de demonstração](#roteiro-de-demonstração) abaixo |
+| **[Casca móvel](mobile/README.md)** | Onde fica a linha entre nativo e web, e o protocolo da ponte |
 
 ---
 
