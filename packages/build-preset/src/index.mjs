@@ -309,7 +309,17 @@ export function angularJourneyConfig({
   id,
   port,
   dev = process.env.NODE_ENV !== 'production',
-  publicPath = process.env.JOURNEY_PUBLIC_PATH ?? `http://localhost:${port}/`
+  /**
+   * `'auto'` em vez da URL absoluta que `journeyConfig` usa: o Rspack resolve o
+   * endereço dos chunks em runtime, a partir do `src` do próprio remoteEntry.
+   *
+   * É o que torna o artefato PORTÁVEL -- os mesmos bytes servem de
+   * `localhost:5005`, do preview de um PR e do CDN de produção, sem rebuild.
+   * Foi requisito prático aqui: esta jornada é publicada em produção num
+   * endereço que só se conhece DEPOIS do deploy, então não havia como embutir a
+   * URL no bundle. Ver docs/02-build-e-deploy.md.
+   */
+  publicPath = process.env.JOURNEY_PUBLIC_PATH ?? 'auto'
 }) {
   const cfg = baseConfig({
     dev,

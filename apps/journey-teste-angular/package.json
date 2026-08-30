@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "rspack serve",
-    "build": "rspack build"
+    "build": "rspack build",
+    "predeploy": "npm run build",
+    "deploy": "mkdir -p .deploy/portal-teste-angular && rsync -a --delete --exclude .vercel dist/ .deploy/portal-teste-angular/ && cp vercel.json .deploy/portal-teste-angular/ && npx vercel deploy .deploy/portal-teste-angular --prod --yes",
+    "deploy:temporario": "mkdir -p .deploy/portal-teste-angular && rsync -a --delete --exclude .vercel dist/ .deploy/portal-teste-angular/ && cp vercel.json .deploy/portal-teste-angular/ && npx vercel deploy .deploy/portal-teste-angular --temporary --yes"
   },
   "dependencies": {
     "@angular/common": "^21.2.22",

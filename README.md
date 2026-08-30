@@ -50,7 +50,7 @@ Um `npm start` sobe sete processos — cada um representando um time diferente:
 | Jornada `ponto` | `5001` | squad Jornada de Trabalho | Microfrontend (Module Federation) |
 | Jornada `beneficios` | `5002` | squad Benefícios | Microfrontend (Module Federation) |
 | Jornada `holerite` | `5004` | squad Remuneração | Microfrontend (Module Federation) |
-| Jornada `teste-angular` | `5005` | plataforma | Microfrontend **em Angular** — teste de implementação |
+| Jornada `teste-angular` | `5005` | plataforma | Microfrontend **em Angular** — teste de implementação. **Em produção:** o registro aponta para a Vercel, então o portal carrega esta jornada de fora, e a porta 5005 só é usada por quem for desenvolvê-la |
 | Sistema legado | `5003` | squad Legado RH | Plataforma de RH legada simulada (iframe) |
 
 Cada jornada também roda sozinha, sem shell — é assim que a squad desenvolve no dia a dia:
@@ -158,7 +158,7 @@ eventos em tempo real, carimbados com squad, versão e `correlation-id`.
 | 8 | Abrir **Avisos** e clicar numa notificação | Contador zera, painel fecha e a navegação vai para a jornada dona |
 | 9 | Em `registry.json`, apontar `holerite.entry` para uma porta morta (ex.: `5099`) e abrir `/holerite` | Degradação: mensagem em português com código de rastreio, *retry* e **Abrir versão anterior** levando ao holerite legado em iframe. O detalhe técnico (`#RUNTIME-008`) vai para a telemetria, não para a tela |
 | 10 | Editar `apps/bff/src/registry.json` e recarregar | **Jornada nova sem tocar no core** — nenhum arquivo do shell muda |
-| 11 | Abrir **Teste em Angular**, na seção *Plataforma* | **Outro framework, mesma fronteira**: um microfrontend Angular montado pelo mesmo `JourneyHost`, com o contrato v1.1 exercitado item por item na própria tela. Dentro dele, **Dependências de deploy** responde o que muda no pipeline — com os números medidos ([ADR 0012](docs/adr/0012-admitir-um-segundo-framework.md)) |
+| 11 | Abrir **Teste em Angular**, na seção *Plataforma*, e ler o rodapé da tela | **Outro framework, mesma fronteira**: um microfrontend Angular montado pelo mesmo `JourneyHost`, com o contrato v1.1 exercitado item por item na própria tela. Dentro dele, **Dependências de deploy** responde o que muda no pipeline — com os números medidos ([ADR 0012](docs/adr/0012-admitir-um-segundo-framework.md)). O rodapé mostra que este bundle veio de **outro provedor, em outro domínio** — o shell não foi reconstruído para isso |
 
 ---
 

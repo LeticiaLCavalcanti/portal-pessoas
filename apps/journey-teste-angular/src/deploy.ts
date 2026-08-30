@@ -17,6 +17,15 @@ import { Shell } from './shell';
       font-variant-numeric: tabular-nums;
     }
     ol.steps { margin: 0; padding-left: var(--space-5); }
+    .origem {
+      font-family: var(--font-mono); font-size: 0.9em; word-break: break-all;
+      background: var(--c-bg-sunken); border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4); color: var(--c-fg-default);
+    }
+    ol.passos { margin: 0; padding-left: var(--space-5); }
+    ol.passos > li { margin-bottom: var(--space-4); }
+    ol.passos > li:last-child { margin-bottom: 0; }
+    ol.passos strong { display: block; margin-bottom: var(--space-1); }
     ol.steps li { font: var(--ts-body-sm); color: var(--c-fg-default); margin-bottom: var(--space-2); }
     ol.steps li:last-child { margin-bottom: 0; }
     code {
@@ -30,6 +39,68 @@ import { Shell } from './shell';
               (click)="shell.ctx.navigate('/teste-angular')">
         ← Voltar para a prova
       </button>
+
+      <!-- 0. Como esta página chegou até aqui -------------------------------- -->
+      <section class="ds-card">
+        <h2 class="ds-card__title">Esta página foi publicada assim</h2>
+        <p class="ds-card__hint">
+          O que você está lendo é o artefato desta jornada, publicado sozinho — sem o shell,
+          sem o BFF e sem as outras jornadas. Neste momento ele está sendo servido de:
+        </p>
+        <p class="origem" style="margin-top: var(--space-3)">{{ origem }}</p>
+        <p class="ds-text ds-text--xs ds-text--subtle" style="margin-top: var(--space-2)">
+          Esse endereço não está escrito em lugar nenhum do código: é o
+          <code>__webpack_public_path__</code>, que o bundler resolve em runtime a partir do
+          <code>src</code> do próprio script. Se este bundle for movido para outro CDN, a
+          linha acima muda sozinha.
+        </p>
+
+        <ol class="passos" style="margin-top: var(--space-5)">
+          @for (p of passos; track p.titulo) {
+            <li>
+              <strong class="ds-text ds-text--sm">{{ p.titulo }}</strong>
+              <span class="ds-text ds-text--sm ds-text--muted" [innerHTML]="p.texto"></span>
+            </li>
+          }
+        </ol>
+      </section>
+
+      <!-- 0b. O que foi verificado ------------------------------------------- -->
+      <section class="ds-card">
+        <h2 class="ds-card__title">O que foi verificado, e não presumido</h2>
+        <p class="ds-card__hint">
+          Publicar não é o mesmo que funcionar. Cada linha abaixo foi conferida contra a URL
+          pública, não contra o build local.
+        </p>
+        <div class="ds-table-wrap" style="margin-top: var(--space-4)">
+          <table class="ds-table">
+            <thead><tr><th>Verificação</th><th>Resultado</th></tr></thead>
+            <tbody>
+              @for (v of verificacoes; track v.o) {
+                <tr><td>{{ v.o }}</td><td>{{ v.r }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <p class="ds-text ds-text--sm ds-text--muted" style="margin-top: var(--space-4)">
+          <strong>Uma tentativa que não deu certo, e por que ficou de fora.</strong>
+          Abrir uma rota interna desta jornada direto pela URL (fora do portal) devolve 404.
+          A correção óbvia seria uma <em>rewrite</em> de SPA no provedor, mandando tudo para o
+          index. Testado: fica pior. Como o publicPath é portátil, o HTML do harness referencia
+          os assets de forma relativa, então a rewrite faz o browser pedir o script no caminho
+          errado e a página abre <strong>em branco</strong> — sem erro visível. Um 404 honesto
+          é melhor que uma tela branca, então o 404 ficou.
+        </p>
+
+        <p class="ds-text ds-text--sm ds-text--muted" style="margin-top: var(--space-4)">
+          <strong>O que este exercício não cobre.</strong>
+          Um deployment anônimo em provedor gratuito não tem prefixo por versão, autorização
+          por squad no registro, log de auditoria nem promoção entre ambientes — tudo o que a
+          seção seguinte descreve como necessário. Ele prova a mecânica: artefato portátil,
+          CORS, federação cross-origin e troca de origem sem tocar no shell. Nada além disso.
+        </p>
+      </section>
 
       <!-- 1. O que NÃO muda ------------------------------------------------ -->
       <section class="ds-card">
@@ -141,6 +212,58 @@ import { Shell } from './shell';
 })
 export class DeployScreen {
   readonly shell = inject(Shell);
+
+  /**
+   * A origem real deste bundle, resolvida pelo bundler em runtime. Roda igual
+   * servida de localhost, de um preview de PR ou de um CDN de produção.
+   */
+  readonly origem = __webpack_public_path__ || '(origem não resolvida)';
+
+  readonly passos = [
+    {
+      titulo: 'Build com endereço portátil',
+      texto:
+        'O <code>publicPath</code> desta jornada é <code>auto</code>, e não uma URL fixa como ' +
+        'nas jornadas React: o bundler resolve o endereço dos chunks em runtime. Foi ' +
+        'necessário, não elegante — o endereço de publicação só é conhecido DEPOIS do deploy, ' +
+        'e não dá para embutir no bundle algo que ainda não existe. O efeito colateral é bom: ' +
+        'os mesmos bytes servem de qualquer origem, sem rebuild por ambiente.'
+    },
+    {
+      titulo: 'Cabeçalhos que a federação exige',
+      texto:
+        'Um <code>vercel.json</code> ao lado do bundle declara <code>Access-Control-Allow-Origin: *</code>, ' +
+        'porque o portal baixa este script de outra origem, e cache imutável nos chunks com ' +
+        'revalidação no <code>remoteEntry.js</code> — o artefato nunca muda para uma mesma URL, ' +
+        'mas o ponto de entrada precisa poder ser trocado.'
+    },
+    {
+      titulo: 'Publicação, num comando',
+      texto:
+        '<code>npm run deploy</code> builda, copia os artefatos para um diretório de deploy e ' +
+        'envia. O diretório é separado do <code>dist</code> de propósito: o vínculo com o ' +
+        'provedor mora nele, e o <code>dist</code> é apagado a cada build — sem essa separação, ' +
+        'todo redeploy geraria uma URL nova e o rollback deixaria de existir.'
+    },
+    {
+      titulo: 'Ativação: uma linha no registro',
+      texto:
+        'O campo <code>entry</code> desta jornada no registro do BFF passou a apontar para a ' +
+        'URL publicada. O shell não foi reconstruído, não foi reiniciado e não teve uma linha ' +
+        'alterada; o BFF relê o registro a cada requisição, e a jornada trocou de origem na ' +
+        'carga de página seguinte. <strong>Publicar e ativar são dois atos separados</strong> — ' +
+        'é isso que faz "deploy independente" ser literal em vez de retórico.'
+    }
+  ];
+
+  readonly verificacoes = [
+    { o: 'remoteEntry.js público, sem parede de autenticação', r: 'HTTP 200' },
+    { o: 'Cabeçalho de CORS na resposta', r: 'Access-Control-Allow-Origin: *' },
+    { o: 'Nome do container anunciado pelo bundle', r: 'teste_angular, derivado do id do manifesto' },
+    { o: 'Smoke de federação contra a URL pública', r: 'contrato v1.1, montou e desmontou limpo' },
+    { o: 'Portal carregando esta jornada', r: 'com o dev server da porta 5005 parado' },
+    { o: 'Redeploy', r: 'mesma URL, artefato novo' }
+  ];
 
   readonly iguais = [
     { etapa: 'Build', react: 'rspack build', angular: 'rspack build — mesmo preset' },

@@ -25,3 +25,13 @@ declare module '*.png' {
  * somem no minificador.
  */
 declare const process: { env: { NODE_ENV?: string } };
+
+/**
+ * Public path resolvido pelo bundler em RUNTIME.
+ *
+ * Com `publicPath: 'auto'` (o padrão da jornada em Angular) ele guarda a origem
+ * real de onde o bundle foi servido, calculada a partir do `src` do próprio
+ * script. É a única forma de um artefato portátil saber de onde veio -- e a
+ * jornada usa isso para se autodocumentar na tela.
+ */
+declare const __webpack_public_path__: string;

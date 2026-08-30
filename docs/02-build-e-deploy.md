@@ -75,16 +75,30 @@ build e no runtime do shell, a partir do
 [mesmo arquivo](../packages/build-preset/src/container-name.mjs). A classe de erro "o shell
 registrou `ponto` e o bundle se anunciou como `app`" não existe.
 
-**O `publicPath` é absoluto e vem do ambiente.** `JOURNEY_PUBLIC_PATH` é injetado pelo CI da
-squad:
+**O `publicPath` decide de onde os chunks são baixados.** Sem ele, seriam resolvidos a partir
+da origem **do shell**, e a jornada quebraria só em produção. Há duas formas de resolver, e a
+diferença importa mais do que parece:
 
 ```bash
+# absoluto: o endereço entra no bundle
 JOURNEY_PUBLIC_PATH=https://cdn.portal.itau/jornadas/ponto/2.4.1/ npm run build
+
+# 'auto': o Rspack resolve em runtime, a partir do src do próprio remoteEntry
+JOURNEY_PUBLIC_PATH=auto npm run build
 ```
 
-Sem isso, os chunks seriam resolvidos a partir da origem **do shell**, e a jornada quebraria
-só em produção. É o único parâmetro de deploy que o bundle carrega dentro de si — e é por isso
-que o artefato é imutável por versão: o endereço faz parte do conteúdo.
+As jornadas React usam o absoluto; a jornada em Angular usa `'auto'`, e virou o padrão dela
+no `angularJourneyConfig`. A razão não foi teórica: **ela é publicada num endereço que só se
+conhece depois do deploy** (ver §12), então não havia como embutir a URL no bundle.
+
+Com `'auto'` o artefato fica **portátil**: os mesmos bytes servem de `localhost:5005`, do
+preview de um PR e do CDN de produção. Isso reforça o que a §5 defende — promover artefato em
+vez de reconstruir — e remove a única razão legítima que aquela seção admitia para rebuildar
+por ambiente. O preço é que o bundle deixa de declarar de onde veio; quem quiser essa
+amarração explícita continua com o `JOURNEY_PUBLIC_PATH` absoluto.
+
+Em qualquer um dos dois casos a **URL de publicação continua imutável por versão** — isso é
+propriedade do CDN e do processo, não do bundle.
 
 **A lista `shared` mora em um lugar só.** É o único ponto onde dez squads precisam concordar
 em tempo de build, e ele tem dono (plataforma). Uma squad que suba React 19 sozinha colocaria
@@ -387,3 +401,46 @@ Métrica de plataforma é o que impede a arquitetura de virar teatro:
   medida honesta de "o shell não é gargalo";
 - **peso do bundle por jornada**, com orçamento declarado no manifesto e verificado no CI —
   hoje o manifesto declara só `budget.loadTimeoutMs`; orçamento de bytes é o item que falta.
+
+---
+
+## 12. Isto foi feito de verdade
+
+A jornada em Angular foi publicada em produção, num provedor externo, para que este documento
+não fosse só desenho. O que o exercício produziu:
+
+**Publicação.** `npm run deploy -w @portal/journey-teste-angular` — build com `publicPath`
+portátil, cópia dos artefatos para um diretório de deploy e envio para a Vercel. O
+[`vercel.json`](../apps/journey-teste-angular/vercel.json) da jornada carrega exatamente as
+duas políticas da §2: `Access-Control-Allow-Origin: *` para a federação cross-origin
+funcionar, e cache imutável nos chunks com revalidação no `remoteEntry.js`.
+
+**O que foi verificado, e não presumido:**
+
+| Verificação | Resultado |
+| --- | --- |
+| `remoteEntry.js` público, sem parede de autenticação | `HTTP/2 200` |
+| `access-control-allow-origin` na resposta | `*` |
+| Container anunciado no bundle publicado | `teste_angular` — derivado do `id` do manifesto |
+| Smoke de federação contra a URL pública | contrato v1.1, montou e desmontou limpo |
+| Portal local carregando a jornada de produção | com o dev server da porta 5005 **parado** |
+| Redeploy | mesma URL, artefato novo |
+
+**A prova do deploy independente.** O `entry` da jornada no
+[registro](../apps/bff/src/registry.json) passou a apontar para a URL de produção. O shell
+não foi reconstruído, não foi reiniciado e não teve uma linha alterada — o BFF relê o registro
+a cada requisição, e a jornada passou a vir de outro provedor, em outro domínio, na carga de
+página seguinte. O rodapé da tela mostra a origem real:
+
+```
+carregada via module federation de https://…vercel.app/remoteEntry.js em 546ms
+```
+
+Esse rodapé é a diferença entre afirmar e demonstrar: o shell não sabe, e não precisa saber,
+que aquele endereço mudou de `localhost` para um CDN externo.
+
+**O que este exercício NÃO cobre.** Um provedor gratuito com deployment anônimo não tem
+prefixo por versão, autorização por squad no registro, log de auditoria nem promoção entre
+ambientes — tudo o que as §2, §4 e §5 descrevem. Ele prova a mecânica (artefato portátil,
+CORS, federação cross-origin, troca de origem sem tocar no shell) e nada além disso.
+

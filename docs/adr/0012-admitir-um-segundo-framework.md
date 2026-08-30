@@ -47,6 +47,17 @@ mais honesto para registrar o resultado.
 
 **`apps/shell/` não foi tocado.** Nem uma linha. É o resultado que o spike foi buscar.
 
+### Publicada em produção, fora da máquina
+
+A jornada foi publicada num provedor externo (Vercel) e o `entry` do registro passou a apontar
+para lá. O portal carrega o bundle Angular de outro domínio, sem rebuild e sem restart do
+shell — o que fecha as duas perguntas de uma vez: a compatibilidade (o contrato atravessa o
+framework) e o deploy independente (a origem do artefato é configuração, não código).
+
+Isso exigiu uma mudança no build: o `publicPath` da jornada passou a ser `'auto'`, porque o
+endereço de publicação só é conhecido **depois** do deploy. O detalhe, e o que foi verificado,
+estão em [Build e deploy de um módulo apartado, §12](../02-build-e-deploy.md).
+
 ### O que atravessou a fronteira de framework
 
 Todo o contrato v1.1, item por item — `user`, `http`, `telemetry`, `navigate`, `path`,
