@@ -36,6 +36,8 @@ const paths: Record<string, React.ReactNode> = {
   receipt: <><path d="M5.5 3h13v18l-2.6-1.6L13.3 21l-2.6-1.6L8.1 21l-2.6-1.6Z" /><path d="M9 8h6M9 11.8h6M9 15.6h3.6" /></>,
   archive: <><rect x="3" y="4" width="18" height="4.4" rx="1" /><path d="M5 8.4V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.4" /><path d="M10 12.2h4" /></>,
 
+  beaker: <><path d="M9.5 3v6.2L4.2 18a2 2 0 0 0 1.7 3h12.2a2 2 0 0 0 1.7-3l-5.3-8.8V3" /><path d="M8 3h8" /><path d="M6.9 14.2h10.2" /></>,
+
   /* Estado do portal */
   alert: <><path d="M10.3 3.9 2.4 17.6a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" /><path d="M12 9.4v4.4" /><path d="M12 17.2h.01" /></>
 };

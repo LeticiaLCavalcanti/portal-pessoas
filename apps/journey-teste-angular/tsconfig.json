@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    /* Angular usa a semântica LEGADA de decorator -- a mesma que o
+       `legacyDecorator` do swc aplica no build. Sem isto o `tsc --noEmit` do
+       `npm run typecheck` reprova código que o Rspack compila sem reclamar. */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false
+  },
+  "include": ["src"]
+}

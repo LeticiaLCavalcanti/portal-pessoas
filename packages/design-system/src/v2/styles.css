@@ -32,9 +32,10 @@
  * Button — L1
  *
  * A geometria é IDÊNTICA à do .ds-btn da v1 (mesmo padding, mesmo raio, mesma
- * fonte). Isso é requisito de migração, não preguiça: durante a transição os
- * dois convivem na mesma fileira, e um botão 2px mais alto que o vizinho
- * denuncia a obra para o colaborador.
+ * fonte -- 30px de altura nas duas). Isso é requisito de migração, não
+ * preguiça: durante a transição os dois convivem na mesma fileira, e um botão
+ * 2px mais alto que o vizinho denuncia a obra para o colaborador. Quando a
+ * altura padrão mudar de novo, as duas versões mudam no mesmo commit.
  *
  * O que muda é a fatoração: ênfase (solid/outline/ghost) decide ONDE a cor
  * entra; tom (accent/neutral/critical) decide QUAL cor é. Na v1 as duas coisas
@@ -46,10 +47,10 @@
   --ds2-btn-border: transparent;
   --ds2-btn-bg-hover: transparent;
   --ds2-btn-fg-hover: var(--ds2-btn-fg);
-  --ds2-btn-pad-y: var(--space-2);
-  --ds2-btn-pad-x: var(--space-4);
+  --ds2-btn-pad-y: var(--space-1);
+  --ds2-btn-pad-x: var(--space-3);
 
-  font: var(--ts-label-bold);
+  font: var(--ts-body-sm-bold);
   /* Mesmo motivo da v1: rótulo partido em duas linhas parece defeito e torna o
      alvo de toque imprevisível. Quem se ajusta é o layout em volta. */
   white-space: nowrap;
@@ -119,7 +120,7 @@
   --ds2-btn-fg-hover: var(--c-fg-default);
 }
 
-.ds2-btn--sm { --ds2-btn-pad-y: var(--space-1); --ds2-btn-pad-x: var(--space-3); font: var(--ts-body-sm-bold); }
+.ds2-btn--sm { --ds2-btn-pad-y: 0; --ds2-btn-pad-x: var(--space-2); font: var(--ts-caption-bold); }
 .ds2-btn--block { display: flex; width: 100%; }
 
 /* Estado de carregando. O rótulo FICA: sumir com ele muda a largura do botão no

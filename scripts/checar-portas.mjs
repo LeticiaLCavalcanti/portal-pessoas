@@ -1,7 +1,7 @@
 /**
  * Pre-voo do `npm run dev`.
  *
- * Por que existe: quando uma das seis portas já está ocupada, cada processo
+ * Por que existe: quando uma das sete portas já está ocupada, cada processo
  * morre com o seu próprio stack trace de `EADDRINUSE` e o terminal vira um
  * muro de ruído em que a causa real -- "sobrou um servidor da execução
  * anterior" -- fica enterrada. Isso é especialmente fácil de acontecer aqui
@@ -9,7 +9,7 @@
  * uma jornada não pode derrubar o portal), então um start que falha no meio
  * deixa sobreviventes.
  *
- * Este script troca seis stack traces por uma frase e um comando.
+ * Este script troca sete stack traces por uma frase e um comando.
  */
 import { execFileSync } from 'node:child_process';
 
@@ -19,6 +19,7 @@ const PORTS = [
   [5002, 'jornada beneficios'],
   [5003, 'plataforma legada'],
   [5004, 'jornada holerite'],
+  [5005, 'jornada teste-angular'],
   [5173, 'shell']
 ];
 

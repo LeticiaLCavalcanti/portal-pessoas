@@ -73,7 +73,7 @@ export { containerNameOf } from './container-name.mjs';
 /* Blocos comuns                                                               */
 /* -------------------------------------------------------------------------- */
 
-const swcLoader = (dev) => ({
+const swcLoaderReact = (dev) => ({
   test: /\.[cm]?[jt]sx?$/,
   exclude: /[\\/]node_modules[\\/]/,
   loader: 'builtin:swc-loader',
@@ -87,7 +87,47 @@ const swcLoader = (dev) => ({
   }
 });
 
-const baseConfig = ({ dev, dir, entry, port, publicPath, htmlTemplate, htmlChunks }) => ({
+/**
+ * Loader do Angular -- ver docs/adr/0012.
+ *
+ * Duas diferenças, e as duas importam:
+ *
+ *  1. `decorators: true` + `legacyDecorator: true`. Angular usa a semântica
+ *     LEGADA de decorator (a do TypeScript pré-padrão), não a do estágio 3 que
+ *     o swc aplica por padrão. Sem essas duas flags o bundle compila, sobe, e
+ *     só falha em runtime -- com um `NG0906: is not a standalone component`
+ *     que não tem nenhuma relação aparente com configuração de build.
+ *
+ *  2. `decoratorMetadata: true` emite os tipos dos parâmetros de construtor,
+ *     que é o que a injeção de dependência do Angular lê. A jornada usa
+ *     `inject()` e não depende disso, mas qualquer biblioteca Angular de
+ *     terceiro que use `constructor(private x: Y)` depende -- e o custo de
+ *     deixar ligado é alguns bytes de metadata.
+ *
+ * Não há `react-refresh` aqui: o HMR do Angular é outro mecanismo. Nesta
+ * jornada o dev server recarrega a página inteira, que é o comportamento
+ * padrão do Rspack sem plugin de refresh.
+ */
+const swcLoaderAngular = () => ({
+  test: /\.[cm]?ts$/,
+  exclude: /[\\/]node_modules[\\/]/,
+  loader: 'builtin:swc-loader',
+  options: {
+    jsc: {
+      parser: { syntax: 'typescript', decorators: true },
+      transform: { legacyDecorator: true, decoratorMetadata: true },
+      target: 'es2022'
+    }
+  }
+});
+
+const baseConfig = ({
+  dev, dir, entry, port, publicPath, htmlTemplate, htmlChunks,
+  // O bloco que muda por framework. O resto desta função é idêntico para
+  // React e Angular -- é isso que faz "outro framework" caber no caminho
+  // pavimentado em vez de virar um segundo pipeline.
+  loader = swcLoaderReact(dev), refresh = dev
+}) => ({
   context: dir,
   mode: dev ? 'development' : 'production',
   devtool: dev ? 'cheap-module-source-map' : 'source-map',
@@ -109,7 +149,7 @@ const baseConfig = ({ dev, dir, entry, port, publicPath, htmlTemplate, htmlChunk
   },
   module: {
     rules: [
-      swcLoader(dev),
+      loader,
       /**
        * CSS nativo do Rspack -- sem css-loader nem style-loader.
        *
@@ -126,7 +166,7 @@ const baseConfig = ({ dev, dir, entry, port, publicPath, htmlTemplate, htmlChunk
   plugins: [
     htmlTemplate &&
       new rspack.HtmlRspackPlugin({ template: htmlTemplate, chunks: htmlChunks, inject: 'body' }),
-    dev && new ReactRefreshRspackPlugin()
+    refresh && new ReactRefreshRspackPlugin()
   ].filter(Boolean),
   optimization: {
     // Module Federation exige runtime único: nada de runtimeChunk separado.
@@ -228,6 +268,85 @@ export function journeyConfig({
       // O manifesto do MF não substitui o registro do BFF: ele é o artefato de
       // build (o que ESTE bundle expõe e compartilha). O registro é o artefato
       // de operação (qual versão está no ar para quem). Papéis diferentes.
+      dts: false
+    })
+  );
+
+  return cfg;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 3. Jornada em Angular (remote) — teste de implementação                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Mesma fronteira, outro framework. Ver docs/adr/0012.
+ *
+ * O que esta função PRECISA fazer diferente de `journeyConfig` cabe em três
+ * linhas — loader, `shared` e `ngDevMode`. Todo o resto (nome do container
+ * derivado do id, `publicPath` absoluto, CORS no dev server, `remoteEntry.js`,
+ * chunk de vendor) é o mesmo, porque a fronteira do portal é o CONTRATO, não o
+ * framework.
+ *
+ * `shared: {}` é a decisão mais consequente daqui, e é deliberada:
+ *
+ *  - React, react-dom e o DS não entram: esta jornada não os importa. Declarar
+ *    um singleton que o grafo não contém não "reserva" nada — só coloca uma
+ *    entrada morta no manifesto do container.
+ *  - Angular também NÃO é compartilhado. Compartilhar exige que dois ou mais
+ *    bundles concordem numa faixa de versão, e hoje só existe UM consumidor de
+ *    Angular no portal. Compartilhar agora seria pagar o custo de coordenação
+ *    (a squad não sobe de major sozinha) por um benefício de zero byte.
+ *    A regra: um pacote entra em `SHARED_SINGLETONS` quando tem o SEGUNDO
+ *    consumidor, não quando tem o primeiro.
+ *
+ * O preço está medido e assumido: o Angular inteiro — incluindo o compilador
+ * JIT — viaja no bundle desta jornada. O número real está na própria tela da
+ * jornada e na ADR 0012.
+ */
+export function angularJourneyConfig({
+  dir,
+  id,
+  port,
+  dev = process.env.NODE_ENV !== 'production',
+  publicPath = process.env.JOURNEY_PUBLIC_PATH ?? `http://localhost:${port}/`
+}) {
+  const cfg = baseConfig({
+    dev,
+    dir,
+    entry: { standalone: './src/standalone.ts' },
+    port,
+    publicPath,
+    htmlTemplate: `${dir}/index.html`,
+    htmlChunks: ['standalone'],
+    loader: swcLoaderAngular(),
+    refresh: false
+  });
+
+  const name = containerNameOf(id);
+  cfg.output.uniqueName = name;
+  cfg.plugins.push(
+    /**
+     * `ngJitMode: true` é explícito de propósito. O padrão do Angular já é
+     * ligado, mas esta jornada DEPENDE de JIT (compila os templates no
+     * browser, com `@angular/compiler` dentro do bundle). Deixar implícito é
+     * deixar uma dependência crítica invisível para quem mexer no build depois.
+     *
+     * `ngDevMode: false` só em produção, e só lá: ele remove as asserções e as
+     * mensagens de erro longas do Angular. Não é micro-otimização -- é a
+     * diferença entre enviar ou não o modo de desenvolvimento do framework
+     * para o colaborador. Em `dev` a constante NÃO é definida, para o Angular
+     * seguir instalando o próprio `ngDevMode` e as mensagens continuarem
+     * legíveis para a squad.
+     */
+    new rspack.DefinePlugin(
+      dev ? { ngJitMode: 'true' } : { ngJitMode: 'true', ngDevMode: 'false' }
+    ),
+    new ModuleFederationPlugin({
+      name,
+      filename: 'remoteEntry.js',
+      exposes: { './journey': './src/journey.ts' },
+      shared: {},
       dts: false
     })
   );

@@ -11,7 +11,8 @@ Case técnico — proposta de arquitetura (Parte 1) + implementação reduzida e
 ![Rspack](https://img.shields.io/badge/Rspack-2.2-f93920?logo=rspack&logoColor=white)
 ![Module Federation](https://img.shields.io/badge/Module%20Federation-runtime-ec7000)
 ![Vitest](https://img.shields.io/badge/Vitest-113%20testes-6da13f?logo=vitest&logoColor=white)
-![ADRs](https://img.shields.io/badge/ADRs-11-555555)
+![Angular](https://img.shields.io/badge/Angular-21%20(teste)-dd0031?logo=angular&logoColor=white)
+![ADRs](https://img.shields.io/badge/ADRs-12-555555)
 
 </div>
 
@@ -22,7 +23,8 @@ Case técnico — proposta de arquitetura (Parte 1) + implementação reduzida e
 | Documento | O que responde |
 | --- | --- |
 | **[Parte 1 — Proposta de arquitetura](docs/01-proposta-tecnica.md)** | Arquitetura, web+mobile, squads, microfrontends, DS, migração, observabilidade |
-| **[Decisões registradas (11 ADRs)](docs/adr/)** | Por que cada escolha foi feita, o que ela custa e o que foi descartado |
+| **[Decisões registradas (12 ADRs)](docs/adr/)** | Por que cada escolha foi feita, o que ela custa e o que foi descartado |
+| **[Build e deploy de um módulo apartado](docs/02-build-e-deploy.md)** | Como uma squad publica e ativa sozinha: artefato, CDN, registro, rollback, preview por PR — e onde a independência acaba |
 | **Parte 2 — esta aplicação** | [Como rodar](#como-rodar) e o [roteiro de demonstração](#roteiro-de-demonstração) abaixo |
 | **[Casca móvel](mobile/README.md)** | Onde fica a linha entre nativo e web, e o protocolo da ponte |
 
@@ -39,7 +41,7 @@ npm start
 
 Abra **<http://localhost:5173>**.
 
-Um `npm start` sobe seis processos — cada um representando um time diferente:
+Um `npm start` sobe sete processos — cada um representando um time diferente:
 
 | Serviço | Porta | Dono | O que é |
 | --- | :---: | --- | --- |
@@ -48,12 +50,14 @@ Um `npm start` sobe seis processos — cada um representando um time diferente:
 | Jornada `ponto` | `5001` | squad Jornada de Trabalho | Microfrontend (Module Federation) |
 | Jornada `beneficios` | `5002` | squad Benefícios | Microfrontend (Module Federation) |
 | Jornada `holerite` | `5004` | squad Remuneração | Microfrontend (Module Federation) |
+| Jornada `teste-angular` | `5005` | plataforma | Microfrontend **em Angular** — teste de implementação |
 | Sistema legado | `5003` | squad Legado RH | Plataforma de RH legada simulada (iframe) |
 
 Cada jornada também roda sozinha, sem shell — é assim que a squad desenvolve no dia a dia:
 
 ```bash
-npm run dev -w @portal/journey-ponto     # http://localhost:5001
+npm run dev -w @portal/journey-ponto             # http://localhost:5001
+npm run dev -w @portal/journey-teste-angular   # http://localhost:5005
 ```
 
 ### Outros comandos
@@ -62,10 +66,10 @@ npm run dev -w @portal/journey-ponto     # http://localhost:5001
 | --- | --- |
 | `npm test` | 113 testes unitários (Vitest) em ~1,3 s |
 | `npm run test:watch` | idem, em watch |
-| `npm run typecheck` | tipos dos 4 apps + dos testes |
+| `npm run typecheck` | tipos dos 5 apps + dos testes |
 | `npm run build` | build de produção de todos os bundles |
 | `npm run preview` | build + sobe tudo servindo os artefatos estáticos |
-| `npm run stop` | encerra o que sobrou de uma execução anterior (libera as 6 portas) |
+| `npm run stop` | encerra o que sobrou de uma execução anterior (libera as 7 portas) |
 
 > [!NOTE]
 > **`concurrently` roda sem `--kill-others`, de propósito.** Derrubar o processo de uma jornada
@@ -103,6 +107,7 @@ flowchart TB
         p["ponto (5001)<br/>Module Federation"]
         b["beneficios (5002)<br/>Module Federation"]
         h["holerite (5004)<br/>Module Federation"]
+        a["teste-angular (5005)<br/><b>Angular</b> · Module Federation"]
         l["legado RH (5003)<br/>iframe + ponte"]
     end
 
@@ -113,11 +118,13 @@ flowchart TB
     jh -->|"2. carrega o bundle publicado"| p
     jh --> b
     jh --> h
+    jh -->|"2. mesmo caminho, outro framework"| a
     jh -->|"2'. abre com postMessage"| l
     contract -.->|"assinado pelos dois lados"| jh
     contract -.-> p
     contract -.-> b
     contract -.-> h
+    contract -.-> a
     jh -->|"3. eventos com squad, versão e correlation-id"| tel
 
     classDef plat fill:#fff4e8,stroke:#ec7000,color:#3a2a17
@@ -151,6 +158,7 @@ eventos em tempo real, carimbados com squad, versão e `correlation-id`.
 | 8 | Abrir **Avisos** e clicar numa notificação | Contador zera, painel fecha e a navegação vai para a jornada dona |
 | 9 | Em `registry.json`, apontar `holerite.entry` para uma porta morta (ex.: `5099`) e abrir `/holerite` | Degradação: mensagem em português com código de rastreio, *retry* e **Abrir versão anterior** levando ao holerite legado em iframe. O detalhe técnico (`#RUNTIME-008`) vai para a telemetria, não para a tela |
 | 10 | Editar `apps/bff/src/registry.json` e recarregar | **Jornada nova sem tocar no core** — nenhum arquivo do shell muda |
+| 11 | Abrir **Teste em Angular**, na seção *Plataforma* | **Outro framework, mesma fronteira**: um microfrontend Angular montado pelo mesmo `JourneyHost`, com o contrato v1.1 exercitado item por item na própria tela. Dentro dele, **Dependências de deploy** responde o que muda no pipeline — com os números medidos ([ADR 0012](docs/adr/0012-admitir-um-segundo-framework.md)) |
 
 ---
 
@@ -160,13 +168,63 @@ eventos em tempo real, carimbados com squad, versão e `correlation-id`.
 | --- | --- | --- | --- |
 | Novas jornadas **sem alterar o core** | [ADR 0001](docs/adr/0001-module-federation-com-remotes-em-runtime.md) · [0004](docs/adr/0004-registro-de-jornadas-no-bff.md) | [`apps/bff/src/registry.json`](apps/bff/src/registry.json) | passos 2 e 10 |
 | **Múltiplas squads** com deploy independente | [Proposta §3](docs/01-proposta-tecnica.md) | [`packages/build-preset`](packages/build-preset/) | passo 2 |
-| **Substituição futura de tecnologia** | [ADR 0002](docs/adr/0002-contrato-agnostico-de-framework.md) | [`packages/journey-contract`](packages/journey-contract/src/index.ts) | — |
+| **Substituição futura de tecnologia** | [ADR 0002](docs/adr/0002-contrato-agnostico-de-framework.md) · [0012](docs/adr/0012-admitir-um-segundo-framework.md) | [`packages/journey-contract`](packages/journey-contract/src/index.ts) · [`apps/journey-teste-angular`](apps/journey-teste-angular/) | passo 11 |
 | **Convivência com o legado** | [ADR 0003](docs/adr/0003-iframe-para-o-legado.md) | [`LegacyFrame.tsx`](apps/shell/src/journeys/LegacyFrame.tsx) | passos 3 e 9 |
 | **Isolamento de falha** | [ADR 0007](docs/adr/0007-falha-de-render-atravessa-fronteira-de-raiz.md) | [`JourneyHost.tsx`](apps/shell/src/journeys/JourneyHost.tsx) | passo 5 |
 | **Design System** e identidade da marca | [ADR 0005](docs/adr/0005-adotar-o-itau-design-system-como-l0.md) · [0011](docs/adr/0011-design-system-v2-conviver-com-a-v1.md) | [`packages/design-system`](packages/design-system/) · [`packages/tokens`](packages/tokens/) | passo 4 |
 | **Migração incremental** (*strangler fig*) e rollout | [Proposta §6](docs/01-proposta-tecnica.md) · [ADR 0010](docs/adr/0010-rollout-resolvido-tambem-no-cliente.md) | [`packages/platform-core/src/rollout.ts`](packages/platform-core/src/rollout.ts) | passo 9 |
 | **Observabilidade** | [Proposta §7](docs/01-proposta-tecnica.md) | [`packages/platform-core/src/telemetry.ts`](packages/platform-core/src/telemetry.ts) | painel Telemetria |
 | **Web + mobile** | [Proposta §2](docs/01-proposta-tecnica.md) | [`mobile/`](mobile/README.md) | documentado, não executável |
+
+---
+
+## O contrato é agnóstico de framework — e isso foi executado, não afirmado
+
+A [ADR 0002](docs/adr/0002-contrato-agnostico-de-framework.md) diz que a fronteira entre o portal
+e as squads é `mount(container, ctx) => unmount`, e que nenhum tipo do React a atravessa. Isso
+sustenta a promessa mais cara do case — *substituir a tecnologia de uma jornada sem tocar no
+portal* — e, até aqui, era só uma frase: todas as jornadas eram React.
+
+A jornada **[`teste-angular`](apps/journey-teste-angular/)** existe para transformar a frase em
+fato. Ela é um microfrontend **Angular 21, standalone e zoneless**, carregado pelo mesmo Module
+Federation, descoberto pelo mesmo registro e implementando o mesmo contrato v1.1.
+
+**O shell não mudou.** Nem uma linha em `apps/shell/`. O que foi preciso tocar:
+
+| Arquivo | Mudança |
+| --- | --- |
+| [`apps/bff/src/registry.json`](apps/bff/src/registry.json) | uma entrada — como para qualquer jornada |
+| [`packages/build-preset/src/index.mjs`](packages/build-preset/src/index.mjs) | `angularJourneyConfig()`, ao lado de `journeyConfig()` |
+| [`Icon.tsx`](packages/design-system/src/primitives/Icon.tsx) | o ícone `beaker` — PR no DS, nunca no shell |
+| `package.json`, `scripts/*.mjs` | o workspace e a porta 5005 |
+
+O resultado mais útil não é o que funcionou, e sim **onde está a linha**:
+
+- **Atravessa a fronteira:** todo o contrato v1.1, os tokens do IDS e as classes `ds-*`. É por
+  isso que a jornada é indistinguível das outras, inclusive no tema escuro. A camada CSS do DS já
+  era publicada sem hash exatamente para este caso.
+- **Não atravessa:** os componentes React do DS. Aqui eles viraram marcação Angular sobre as
+  mesmas classes — uma **segunda implementação para manter em sincronia**. Esse, e não bundle
+  size, é o custo estrutural de admitir outro framework. A saída seria promover a camada L1 do DS
+  a Web Components, com React e Angular como invólucros finos.
+
+E o preço, medido no build de produção (`remoteEntry` + chunks do módulo exposto):
+
+| | gzip | bruto |
+| --- | ---: | ---: |
+| `teste-angular` (Angular, com o compilador JIT no bundle) | ~294 KB | ~1004 KB |
+| `holerite` (React, recebendo os singletons do shell) | ~37 KB | ~130 KB |
+
+A tela **Dependências de deploy** da própria jornada detalha o que muda no pipeline (spoiler:
+build, publicação, ativação, rollout, rollback e telemetria não mudam), os critérios que eu
+exigiria antes de aprovar em produção — o primeiro deles, *não patchear globais*, é o motivo de a
+jornada ser zoneless — e quando eu diria não. A decisão inteira, com o que foi descartado, está na
+[ADR 0012](docs/adr/0012-admitir-um-segundo-framework.md).
+
+> [!NOTE]
+> **É um teste, e a tela diz isso na primeira linha.** Ele fica no catálogo porque experimento que
+> não é exercitado apodrece, e porque a arquitetura *suportar* N frameworks não é razão para *ter*
+> N frameworks. O valor está em ter o custo medido antes de a conversa acontecer.
 
 ---
 
@@ -311,6 +369,10 @@ Trocar de bundler de novo significa reescrever esses dois: **nada** em `journeys
 `pages/` ou no contrato muda. Foi para preservar essa propriedade que a troca de Vite para Rspack
 não encostou em nenhuma tela.
 
+A mesma propriedade vale para o *framework* das jornadas, e agora com evidência: acrescentar um
+microfrontend em Angular custou uma função nova em `build-preset` e uma entrada no registro —
+`loadRemote.ts` e o `JourneyHost` não souberam da diferença.
+
 ---
 
 ## Estrutura
@@ -320,15 +382,16 @@ apps/
   bff/                registro de jornadas, agregação, coletor de telemetria
   journey-beneficios/ microfrontend — squad Benefícios
   journey-holerite/   microfrontend — squad Remuneração
+  journey-teste-angular/    microfrontend em ANGULAR — teste de implementação
   journey-ponto/      microfrontend — squad Jornada de Trabalho
   legacy-ferias/      plataforma legada simulada + portal-bridge
   shell/              host: navegação, catálogo, busca, notificações, tema
     journeys/         JourneyHost (montagem), LegacyFrame (ponte), JourneyBoundary
     platform/         sessão, flags, telemetria, correlation-id, loadRemote
-docs/                 proposta técnica (Parte 1) e 11 ADRs
+docs/                 proposta técnica (Parte 1) e 12 ADRs
 mobile/               casca nativa: desenho e protocolo da ponte (documentado)
 packages/
-  build-preset/       config de Rspack + a lista `shared` do Module Federation
+  build-preset/       config de Rspack (React e Angular) + a lista `shared` do MF
   design-system/      L1 primitivos + L2 composições (v1 na raiz, v2 em src/v2)
   journey-contract/   manifesto (Zod) + JourneyContext + JourneyModule
   platform-core/      http com correlation-id, telemetria, rollout

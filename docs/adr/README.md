@@ -21,6 +21,7 @@ colateral não óbvio, o motivo de uma linha parecer estranha.
 | [0009](0009-busca-global-agregada-no-bff.md) | Busca global agregada no BFF | Por que não há `registerSearchProvider` |
 | [0010](0010-rollout-resolvido-tambem-no-cliente.md) | Rollout resolvido também no cliente | Kill switch local na falha do remote |
 | [0011](0011-design-system-v2-conviver-com-a-v1.md) | DS v2 convivendo com a v1 no mesmo pacote | Major sem big bang em 10 squads |
+| [0012](0012-admitir-um-segundo-framework.md) | Admitir um segundo framework, medido | Spike Angular: o que custa no deploy |
 
 ## Leitura sugerida
 
@@ -29,4 +30,6 @@ chega) → **0004** (como o shell descobre a jornada) → **0007** (o que aconte
 quebra). As demais são decisões de apoio.
 
 **0006** e **0007** são as duas que nasceram de problema encontrado em uso real, e não de
-projeto no papel — são as mais úteis para julgar o rigor do resto.
+projeto no papel — são as mais úteis para julgar o rigor do resto. **0012** é a que põe a
+**0002** à prova: ela executa a afirmação "o contrato é agnóstico de framework" e mede o
+que ela custa.

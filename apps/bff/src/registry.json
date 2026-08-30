@@ -136,6 +136,31 @@
       "budget": {
         "loadTimeoutMs": 12000
       }
+    },
+    {
+      "id": "teste-angular",
+      "name": "Teste em Angular",
+      "description": "Teste de implementação de um microfrontend em Angular, sob o mesmo contrato do portal.",
+      "icon": "beaker",
+      "domain": "Plataforma",
+      "squad": "squad-plataforma",
+      "kind": "remote",
+      "version": "0.1.0",
+      "route": "/teste-angular",
+      "entry": "http://localhost:5005/remoteEntry.js",
+      "exposedModule": "./journey",
+      "requiredRoles": [],
+      "capabilities": [],
+      "rollout": {
+        "enabled": true,
+        "percentage": 100,
+        "allowlist": [
+          "piloto"
+        ]
+      },
+      "budget": {
+        "loadTimeoutMs": 12000
+      }
     }
   ]
 }

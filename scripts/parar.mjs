@@ -8,7 +8,7 @@
 import { execFileSync } from 'node:child_process';
 import { setTimeout as wait } from 'node:timers/promises';
 
-const PORTS = [4000, 5001, 5002, 5003, 5004, 5173];
+const PORTS = [4000, 5001, 5002, 5003, 5004, 5005, 5173];
 
 const listeningOn = (port) => {
   try {

@@ -139,6 +139,11 @@ Publicar uma jornada nova = adicionar um registro. Sem commit no shell, sem buil
 
 Reverter é mudar um número no registro. Não é rebuild, não é redeploy, não é chamar o time de plataforma às 2h da manhã.
 
+> O detalhe operacional destas cinco linhas — o que exatamente a squad publica, como o CDN é
+> organizado, quem tem permissão de ativar, como funciona o preview por PR dentro do portal
+> real e onde a independência entre squads acaba — está em
+> **[Build e deploy de um módulo apartado](02-build-e-deploy.md)**.
+
 ### Como evitamos conflito entre squads
 
 | Risco | Mecanismo |

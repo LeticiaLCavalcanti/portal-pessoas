@@ -31,14 +31,14 @@
 @import './v2/styles.css';
 
 .ds-btn {
-  font: var(--ts-label-bold);
+  font: var(--ts-body-sm-bold);
   /* Rótulo de botão não quebra linha: "Registrar ponto" partido em duas
      linhas parece defeito, e o botão vira um alvo de toque de formato
      imprevisível. Quem se ajusta é o layout em volta. */
   white-space: nowrap;
   border-radius: var(--radius-button);
   border: var(--ids_size_border_small) solid transparent;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-1) var(--space-3);
   cursor: pointer;
   display: inline-flex; align-items: center; gap: var(--space-2);
   transition: background-color var(--motion-fast) var(--motion-ease),
@@ -150,12 +150,15 @@
 
 .ds-field { display: flex; flex-direction: column; gap: var(--space-1); }
 .ds-field__label { font: var(--ts-body-sm); color: var(--c-fg-muted); }
+/* Mesma altura de 30px do `.ds-btn`, e pelo mesmo motivo de sempre: nos
+   formulários das jornadas (ponto, benefícios) o campo e o botão de enviar
+   ficam na mesma fileira. Encolher só o botão deixaria o par desalinhado. */
 .ds-input {
-  font: var(--ts-body); color: var(--c-fg-default);
+  font: var(--ts-body-sm); color: var(--c-fg-default);
   background: var(--c-bg-surface);
   border: var(--ids_size_border_small) solid var(--c-border-default);
   border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-3); width: 100%;
+  padding: var(--space-1) var(--space-3); width: 100%;
 }
 .ds-input::placeholder { color: var(--c-fg-subtle); }
 .ds-input:focus-visible { outline: var(--ids_size_border_medium) solid var(--c-accent-bg); outline-offset: 1px; border-color: transparent; }
